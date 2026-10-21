@@ -23,7 +23,7 @@ function deps(
     allowedOrigins: () => ['https://app.example.com'],
     authenticate: async (token) =>
       token === 'good' ? { user: { id: 'u1' } as User, db: {} as SupabaseClient } : null,
-    useCasesFor: () => ({ getCityTips: { execute } }),
+    useCasesFor: () => ({ getCityTips: { execute }, searchPlaces: { execute: async () => [] } }),
   };
 }
 
@@ -70,5 +70,19 @@ describe('HTTP app', () => {
     const res = await post(createApp(deps()), validBody, 'good');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ cached: true, tips: emptyTips });
+  });
+
+  it('searches places for signed-in users and validates the query', async () => {
+    const app = createApp(deps());
+    const get = (q: string, token?: string) =>
+      app.request(
+        `/geo/search?${q}`,
+        token ? { headers: { authorization: `Bearer ${token}` } } : {},
+      );
+    expect((await get('q=Lisboa&locale=pt-BR')).status).toBe(401);
+    expect((await get('q=L&locale=pt-BR', 'good')).status).toBe(400);
+    const res = await get('q=Lisboa&locale=pt-BR', 'good');
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ places: [] });
   });
 });

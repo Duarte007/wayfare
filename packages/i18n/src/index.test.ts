@@ -29,6 +29,7 @@ describe('translations', () => {
             to: 'B',
             email: 'e',
             name: 'n',
+            date: 'd',
             max: 120,
             leg: 'L',
             stay: 'S',

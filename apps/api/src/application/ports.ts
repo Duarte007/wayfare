@@ -1,4 +1,9 @@
-import type { CityTips, CityTipsRequest } from '@wayfare/shared';
+import type {
+  CityTips,
+  CityTipsRequest,
+  PlaceSearchRequest,
+  PlaceSuggestion,
+} from '@wayfare/shared';
 
 /**
  * Ports: what the use cases need from the outside world. Infrastructure implements them;
@@ -47,3 +52,8 @@ export interface BuyLinkBuilder {
 
 export type TipWithLink = CityTips['events'][number] & { buy_url: string };
 export type CityTipsWithLinks = { [K in keyof CityTips]: TipWithLink[] };
+
+export interface PlaceSearch {
+  /** Cities and towns matching the query, names in the requested language when known. */
+  search(request: PlaceSearchRequest): Promise<PlaceSuggestion[]>;
+}

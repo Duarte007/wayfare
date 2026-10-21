@@ -60,6 +60,18 @@ export class WayfareDB extends Dexie {
   }
 }
 
+let lastQueuedAt = 0;
+
+/**
+ * Strictly increasing timestamps for outbox entries, so sync replays changes in the order they
+ * were made even when several land in the same millisecond (a place must reach the server
+ * before the city that points at it).
+ */
+export function nextQueuedAt(): number {
+  lastQueuedAt = Math.max(Date.now(), lastQueuedAt + 1);
+  return lastQueuedAt;
+}
+
 /** Writes locally and queues the change for sync in one transaction. */
 export async function saveLocal<T extends { id: string }>(
   db: WayfareDB,
@@ -73,7 +85,7 @@ export async function saveLocal<T extends { id: string }>(
       table,
       op: 'upsert',
       row,
-      createdAt: Date.now(),
+      createdAt: nextQueuedAt(),
     });
   });
 }
@@ -87,8 +99,40 @@ export async function deleteLocal(db: WayfareDB, table: SyncedTable, id: string)
       table,
       op: 'delete',
       row: { id },
-      createdAt: Date.now(),
+      createdAt: nextQueuedAt(),
     });
+  });
+}
+
+export interface LocalChange {
+  upserts: { table: SyncedTable; row: { id: string } }[];
+  deletes: { table: SyncedTable; id: string }[];
+}
+
+/** Several writes and deletes, plus their outbox entries, all or nothing. */
+export async function applyLocal(db: WayfareDB, change: LocalChange): Promise<void> {
+  const tables = [...new Set([...change.upserts, ...change.deletes].map((c) => c.table))];
+  await db.transaction('rw', [...tables.map((t) => db.table(t)), db.outbox], async () => {
+    for (const { table, row } of change.upserts) {
+      await db.table(table).put(row);
+      await db.outbox.put({
+        id: crypto.randomUUID(),
+        table,
+        op: 'upsert',
+        row,
+        createdAt: nextQueuedAt(),
+      });
+    }
+    for (const { table, id } of change.deletes) {
+      await db.table(table).delete(id);
+      await db.outbox.put({
+        id: crypto.randomUUID(),
+        table,
+        op: 'delete',
+        row: { id },
+        createdAt: nextQueuedAt(),
+      });
+    }
   });
 }
 

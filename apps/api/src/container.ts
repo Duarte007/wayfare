@@ -2,10 +2,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { GetCityTips } from './application/get-city-tips.js';
+import { SearchPlaces } from './application/search-places.js';
 import type { TipsGenerator } from './application/ports.js';
 import { env } from './config/env.js';
 import { ClaudeTipsGenerator } from './infrastructure/ai/claude-tips-generator.js';
 import { FallbackTipsGenerator } from './infrastructure/ai/fallback-tips-generator.js';
+import { CachedPlaceSearch } from './infrastructure/geo/cached-place-search.js';
+import { NominatimPlaceSearch } from './infrastructure/geo/nominatim-place-search.js';
 import { QwenTipsGenerator } from './infrastructure/ai/qwen-tips-generator.js';
 import { TemplateBuyLinks } from './infrastructure/ai/template-buy-links.js';
 import { SupabaseAiQuota } from './infrastructure/supabase/supabase-ai-quota.js';
@@ -17,6 +20,13 @@ import type { AppDependencies } from './interface/http/app.js';
 /** Composition root: the only place that knows which concrete adapters back each port. */
 
 let tipsGenerator: TipsGenerator | undefined;
+
+// One cache per warm function instance.
+const placeSearch = new SearchPlaces(
+  new CachedPlaceSearch(
+    new NominatimPlaceSearch('Wayfare/1.0 (https://github.com/Duarte007/wayfare)'),
+  ),
+);
 
 function buildTipsGenerator(): TipsGenerator {
   const config = env();
@@ -48,5 +58,6 @@ export const dependencies: AppDependencies = {
       links: new TemplateBuyLinks(),
       modelKey: env().AI_MODEL,
     }),
+    searchPlaces: placeSearch,
   }),
 };

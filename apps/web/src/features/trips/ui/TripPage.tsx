@@ -25,6 +25,7 @@ import {
   Trash2,
   TrainFront,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatDateRange, localToday } from '@/shared/lib/dates';
 import {
@@ -40,8 +41,10 @@ import {
 } from '@/shared/ui/alert-dialog';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
+import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
+import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useRemoveTrip, useTripDetails } from '../application/useTripDetails';
 import {
@@ -138,18 +141,35 @@ function TripOverview({ details }: { details: TripDetails }) {
           <CardTitle>
             <h2>{tn('itinerary')}</h2>
           </CardTitle>
+          {itinerary.length > 0 ? (
+            <CardAction>
+              <AddCityDialog details={details} />
+            </CardAction>
+          ) : null}
         </CardHeader>
         <CardContent>
           {itinerary.length === 0 ? (
-            <div className="grid justify-items-center gap-2 rounded-lg border border-dashed px-4 py-8 text-center">
+            <div className="grid justify-items-center gap-3 rounded-lg border border-dashed px-4 py-8 text-center">
               <Route className="size-8 text-muted-foreground" aria-hidden />
               <p className="font-semibold">{t('itineraryEmptyTitle')}</p>
               <p className="max-w-sm text-sm text-muted-foreground">{t('itineraryEmpty')}</p>
+              <AddCityDialog details={details} first />
             </div>
           ) : (
             <ol className="grid min-w-0">
-              {itinerary.map((item) => (
-                <ItineraryItem key={item.stop.id} item={item} />
+              {itinerary.map((item, index) => (
+                <ItineraryItem
+                  key={item.stop.id}
+                  item={item}
+                  actions={
+                    <CityActionsMenu
+                      details={details}
+                      item={item}
+                      index={index}
+                      count={itinerary.length}
+                    />
+                  }
+                />
               ))}
             </ol>
           )}
@@ -336,7 +356,7 @@ const MODE_ICONS: Record<Leg['mode'], LucideIcon> = {
   other: Route,
 };
 
-function ItineraryItem({ item }: { item: ItineraryStop }) {
+function ItineraryItem({ item, actions }: { item: ItineraryStop; actions: ReactNode }) {
   const { t, i18n } = useTranslation('trips');
   const { stop, place, nights, stays, activities, legToNext, isLast } = item;
   const ModeIcon = legToNext ? MODE_ICONS[legToNext.mode] : Route;
@@ -352,13 +372,16 @@ function ItineraryItem({ item }: { item: ItineraryStop }) {
         {isLast ? null : <span className="w-px flex-1 bg-border" aria-hidden />}
       </div>
       <div className={isLast ? 'grid min-w-0 gap-2' : 'grid min-w-0 gap-2 pb-6'}>
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <h3 className="text-lg font-bold">{place?.name ?? '—'}</h3>
-          {place?.name_local ? (
-            <span className="text-muted-foreground" lang="und">
-              {place.name_local}
-            </span>
-          ) : null}
+        <div className="flex items-start gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
+            <h3 className="text-lg font-bold">{place?.name ?? '—'}</h3>
+            {place?.name_local ? (
+              <span className="text-muted-foreground" lang="und">
+                {place.name_local}
+              </span>
+            ) : null}
+          </div>
+          <div className="-mt-2 -mr-2 shrink-0">{actions}</div>
         </div>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1">

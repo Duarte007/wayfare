@@ -14,10 +14,12 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] App shell (sidebar / tab bar), profile (name, language, theme, sign out) — #5
 - [x] Create trip — #6 · Offline-first sync with the server — #7 · shadcn/ui — #8
 - [x] Trip page: summary, what's missing, itinerary timeline, edit, delete — #9
+- [x] Click audit fixes; this roadmap — #10
+- [x] Cities in the itinerary (search, add, nights, reorder, remove) — item 2
 
 ## Now — make the trip usable end to end
 
-### 1. Click audit fixes
+### 1. Click audit fixes ✅
 
 - **Goal:** every button, link and control does something visible; nothing is a dead end.
 - **Done when:** the Chromium click audit (all screens, phone + desktop) reports no `NO EFFECT`
@@ -28,14 +30,16 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
   - The trip page was 427 px wide on a 390 px phone (long hotel names), so the browser zoomed
     out and the bottom tab bar kept moving. Stay rows now truncate and stack on phones.
 
-### 2. Cities in the itinerary (add, edit, reorder, remove)
+### 2. Cities in the itinerary (add, edit, reorder, remove) ✅
 
 - **Goal:** build the route from the trip page: "Add city" → search a place → pick nights.
 - **Done when:** a city can be added with a place search (name, local name, country, lat/lng),
   its dates follow from nights (chained like the reference artifact), cities can be reordered
   and removed, and everything works offline and syncs (places + stops).
-- **Notes:** place search needs a geocoder reachable in China too (e.g. a server-side proxy in
-  `apps/api` over a provider that works there); cache recent results on the device.
+- **Shipped:** `GET /geo/search` on our API (signed-in only) proxies OpenStreetMap Nominatim
+  with names in the user's language plus the local name, cached per instance; the app talks only
+  to our API. Follow-ups: cache recent results on the device; consider a second geocoder if
+  Nominatim's fair-use limit is ever hit.
 
 ### 3. Stays (hotels) per city
 

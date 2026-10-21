@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
+import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
 import { SyncProvider } from '../features/sync/application/SyncProvider';
 import { TripsProvider } from '../features/trips/application/TripsProvider';
 import '../shared/lib/i18n';
@@ -28,7 +29,12 @@ createRoot(document.getElementById('root')!).render(
     >
       <SyncProvider engine={dependencies.sync} local={dependencies.syncLocal}>
         <TripsProvider repository={dependencies.trips}>
-          <RouterProvider router={router} />
+          <ItineraryProvider
+            repository={dependencies.itinerary}
+            placeSearch={dependencies.placeSearch}
+          >
+            <RouterProvider router={router} />
+          </ItineraryProvider>
         </TripsProvider>
       </SyncProvider>
     </AuthProvider>
