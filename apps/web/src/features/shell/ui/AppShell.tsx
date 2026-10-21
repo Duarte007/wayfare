@@ -1,9 +1,10 @@
 import { Link, Outlet } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
-import { CloudOff, Luggage, Plane, UserRound } from 'lucide-react';
+import { CloudOff, Luggage, Plane, Plus, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useOnline } from '../../../shared/lib/online';
 import { Avatar } from '../../../shared/ui/Avatar';
+import { buttonClass } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
 
 interface NavItem {
@@ -72,13 +73,18 @@ function OfflineBadge() {
 
 function Sidebar() {
   const { t } = useTranslation('nav');
+  const { t: tt } = useTranslation('trips');
   const { session } = useAuth();
   return (
     <aside className="sticky top-0 hidden h-dvh flex-col gap-8 border-r border-line bg-surface px-4 py-6 lg:flex">
       <div className="px-2">
         <Brand />
       </div>
-      <nav aria-label={t('mainMenu')}>
+      <Link to="/trips/new" className={buttonClass('primary', 'w-full')}>
+        <Plus className="size-5" aria-hidden />
+        {tt('newTrip')}
+      </Link>
+      <nav aria-label={t('mainMenu')} className="-mt-4">
         <ul className="grid gap-1">
           {NAV.map(({ to, icon: Icon, labelKey }) => (
             <li key={to}>
@@ -144,25 +150,44 @@ function MobileTopBar() {
 
 function MobileTabBar() {
   const { t } = useTranslation('nav');
+  const { t: tt } = useTranslation('trips');
+  const [trips, profile] = NAV as [NavItem, NavItem];
   return (
     <nav
       aria-label={t('mainMenu')}
       className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
-      <ul className="mx-auto grid max-w-md grid-cols-2">
-        {NAV.map(({ to, icon: Icon, labelKey }) => (
-          <li key={to}>
-            <Link
-              to={to}
-              activeOptions={{ exact: true }}
-              className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted aria-[current=page]:text-accent"
-            >
-              <Icon className="size-6" aria-hidden />
-              {t(labelKey)}
-            </Link>
-          </li>
-        ))}
+      <ul className="mx-auto grid max-w-md grid-cols-3">
+        <TabItem item={trips} label={t(trips.labelKey)} />
+        <li>
+          {/* The main action sits in the middle, raised, where the thumb rests. */}
+          <Link
+            to="/trips/new"
+            className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-accent"
+          >
+            <span className="-mt-5 inline-flex size-12 items-center justify-center rounded-2xl bg-accent text-on-accent shadow-md">
+              <Plus className="size-6" aria-hidden />
+            </span>
+            {tt('newTrip')}
+          </Link>
+        </li>
+        <TabItem item={profile} label={t(profile.labelKey)} />
       </ul>
     </nav>
+  );
+}
+
+function TabItem({ item: { to, icon: Icon }, label }: { item: NavItem; label: string }) {
+  return (
+    <li>
+      <Link
+        to={to}
+        activeOptions={{ exact: true }}
+        className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted aria-[current=page]:text-accent"
+      >
+        <Icon className="size-6" aria-hidden />
+        {label}
+      </Link>
+    </li>
   );
 }

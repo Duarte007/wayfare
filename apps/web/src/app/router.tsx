@@ -12,6 +12,7 @@ import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
 import { AppShell } from '../features/shell/ui/AppShell';
+import { NewTripPage } from '../features/trips/ui/NewTripPage';
 import { TripsPage } from '../features/trips/ui/TripsPage';
 
 function Root() {
@@ -47,6 +48,7 @@ const appRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   appRoute.addChildren([
     createRoute({ getParentRoute: () => appRoute, path: '/', component: TripsPage }),
+    createRoute({ getParentRoute: () => appRoute, path: '/trips/new', component: NewTripPage }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),
   createRoute({

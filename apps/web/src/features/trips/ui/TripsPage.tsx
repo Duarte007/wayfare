@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDateRange, localToday } from '../../../shared/lib/dates';
-import { Button, IconTile } from '../../../shared/ui/ui';
+import { Link } from '@tanstack/react-router';
+import { buttonClass, IconTile } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useTrips } from '../application/TripsProvider';
 import { summarizeTrip } from '../domain/trip-summary';
@@ -46,7 +47,10 @@ export function TripsPage() {
             <h2 id="trips-heading" className="text-lg font-bold">
               {t('title')}
             </h2>
-            <Button icon={<Plus className="size-5" />}>{t('newTrip')}</Button>
+            <Link to="/trips/new" className={buttonClass('primary')}>
+              <Plus className="size-5" aria-hidden />
+              {t('newTrip')}
+            </Link>
           </div>
           <ul className="grid gap-3">
             {trips.map((trip) => (
@@ -68,7 +72,10 @@ function EmptyTrips() {
         <h2 className="text-xl font-bold">{t('emptyTitle')}</h2>
         <p className="max-w-xs text-muted">{t('empty')}</p>
       </div>
-      <Button icon={<Plus className="size-5" />}>{t('newTrip')}</Button>
+      <Link to="/trips/new" className={buttonClass('primary')}>
+        <Plus className="size-5" aria-hidden />
+        {t('newTrip')}
+      </Link>
     </section>
   );
 }

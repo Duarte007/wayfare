@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { PasswordField } from './ui';
+import { Field, PasswordField } from './ui';
 
 describe('PasswordField', () => {
   it('toggles visibility with an accessible button', () => {
@@ -27,5 +27,15 @@ describe('PasswordField', () => {
     const input = screen.getByLabelText('Password');
     const hintId = input.getAttribute('aria-describedby');
     expect(hintId && document.getElementById(hintId)?.textContent).toBe('At least 10 characters.');
+  });
+});
+
+describe('Field', () => {
+  it('announces an error instead of the hint and marks the input invalid', () => {
+    render(<Field label="Trip name" hint="Shown on the card" error="Give the trip a name" />);
+    const input = screen.getByLabelText('Trip name');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    const id = input.getAttribute('aria-describedby');
+    expect(id && document.getElementById(id)?.textContent).toBe('Give the trip a name');
   });
 });
