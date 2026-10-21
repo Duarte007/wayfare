@@ -1,0 +1,26 @@
+import { RouterProvider } from '@tanstack/react-router';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
+import { AuthProvider } from '../features/auth/application/AuthProvider';
+import { TripsProvider } from '../features/trips/application/TripsProvider';
+import '../shared/lib/i18n';
+import '../styles.css';
+import { dependencies } from './dependencies';
+import { router } from './router';
+
+// Never swap code mid-session: a new version activates on the next reload.
+registerSW({ immediate: true });
+
+// Ask the browser not to evict offline data (maps, documents) under storage pressure.
+void navigator.storage?.persist?.();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <AuthProvider service={dependencies.auth} onSignedOut={dependencies.wipeDevice}>
+      <TripsProvider repository={dependencies.trips}>
+        <RouterProvider router={router} />
+      </TripsProvider>
+    </AuthProvider>
+  </StrictMode>,
+);
