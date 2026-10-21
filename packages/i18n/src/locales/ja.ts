@@ -91,6 +91,8 @@ export const ja = {
     themeLight: 'ライト',
     themeDark: 'ダーク',
     signOutHint: 'ログアウトすると、この端末に保存された旅行のコピーは削除されます。',
+    signOutPending:
+      '{count}件の変更がまだ送信されていません。ログアウトする前にインターネットに接続してください。接続しないと変更は失われます。',
   },
   labels: {
     passport: 'パスポート',

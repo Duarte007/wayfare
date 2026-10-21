@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
+import { SyncProvider } from '../features/sync/application/SyncProvider';
 import { TripsProvider } from '../features/trips/application/TripsProvider';
 import '../shared/lib/i18n';
 import { applyTheme, readTheme } from '../shared/lib/theme';
@@ -20,10 +21,16 @@ void navigator.storage?.persist?.();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider service={dependencies.auth} onSignedOut={dependencies.wipeDevice}>
-      <TripsProvider repository={dependencies.trips}>
-        <RouterProvider router={router} />
-      </TripsProvider>
+    <AuthProvider
+      service={dependencies.auth}
+      beforeSignOut={() => dependencies.sync.run().then(() => undefined)}
+      onSignedOut={dependencies.wipeDevice}
+    >
+      <SyncProvider engine={dependencies.sync} local={dependencies.syncLocal}>
+        <TripsProvider repository={dependencies.trips}>
+          <RouterProvider router={router} />
+        </TripsProvider>
+      </SyncProvider>
     </AuthProvider>
   </StrictMode>,
 );

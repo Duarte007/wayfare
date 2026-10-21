@@ -1,11 +1,12 @@
 import { Link, Outlet } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
-import { CloudOff, Luggage, Plane, Plus, UserRound } from 'lucide-react';
+import { CloudOff, CloudUpload, Luggage, Plane, Plus, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useOnline } from '../../../shared/lib/online';
 import { Avatar } from '../../../shared/ui/Avatar';
 import { buttonClass } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { useSync } from '../../sync/application/SyncProvider';
 
 interface NavItem {
   to: '/' | '/profile';
@@ -71,6 +72,22 @@ function OfflineBadge() {
   );
 }
 
+/** Changes saved on the device that the server hasn't accepted yet. */
+function PendingBadge() {
+  const { t } = useTranslation();
+  const { pending } = useSync();
+  if (pending === 0) return null;
+  return (
+    <span
+      role="status"
+      className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent"
+    >
+      <CloudUpload className="size-3.5" aria-hidden />
+      {t('pendingChanges', { count: pending })}
+    </span>
+  );
+}
+
 function Sidebar() {
   const { t } = useTranslation('nav');
   const { t: tt } = useTranslation('trips');
@@ -102,6 +119,7 @@ function Sidebar() {
       </nav>
       <div className="mt-auto grid gap-3">
         <OfflineBadge />
+        <PendingBadge />
         {session ? (
           <Link
             to="/profile"

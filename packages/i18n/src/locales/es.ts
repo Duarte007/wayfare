@@ -94,6 +94,8 @@ export const es = {
     themeLight: 'Claro',
     themeDark: 'Oscuro',
     signOutHint: 'Al cerrar sesión se borra la copia de tus viajes guardada en este dispositivo.',
+    signOutPending:
+      '{count, plural, one {# cambio aún no se ha enviado.} other {# cambios aún no se han enviado.}} Conéctate a internet antes de cerrar sesión o se perderán.',
   },
   labels: {
     passport: 'Pasaporte',

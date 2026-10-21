@@ -12,12 +12,14 @@ const AuthContext = createContext<AuthState | null>(null);
 
 interface AuthProviderProps {
   service: AuthService;
+  /** Last chance to send unsent changes; a failure never blocks signing out. */
+  beforeSignOut?: () => Promise<void>;
   /** Clears data stored on this device after sign-out. */
   onSignedOut?: () => Promise<void>;
   children: ReactNode;
 }
 
-export function AuthProvider({ service, onSignedOut, children }: AuthProviderProps) {
+export function AuthProvider({ service, beforeSignOut, onSignedOut, children }: AuthProviderProps) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,6 +38,7 @@ export function AuthProvider({ service, onSignedOut, children }: AuthProviderPro
   }, [service]);
 
   const signOut = async () => {
+    await beforeSignOut?.().catch(() => undefined);
     await service.signOut();
     await onSignedOut?.();
   };

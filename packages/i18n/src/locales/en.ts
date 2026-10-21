@@ -91,6 +91,8 @@ export const en = {
     themeLight: 'Light',
     themeDark: 'Dark',
     signOutHint: 'Signing out removes the copy of your trips saved on this device.',
+    signOutPending:
+      '{count, plural, one {# change hasn’t been sent yet.} other {# changes haven’t been sent yet.}} Connect to the internet before signing out, or they will be lost.',
   },
   labels: {
     passport: 'Passport',
