@@ -47,3 +47,10 @@ Composition roots are the only places that pick concrete adapters:
 - Functions stay small; comments explain why, not what.
 - Errors are typed in the application layer (`QuotaExceededError`) and mapped to HTTP in one place.
 - Conventional Commits (`feat:`, `fix:`, `refactor:`...), small pull requests, squash merge.
+
+## Maps
+
+Offline maps use Protomaps vector tiles from a PMTiles archive we host. Tiles go through a
+`wayfare-map://` protocol, so a downloaded city never touches the network. MapLibre is
+lazy-loaded behind the `MapRenderer` port. Decision, trade-offs (China, GCJ-02) and owner
+setup: see [`docs/MAPS.md`](MAPS.md).

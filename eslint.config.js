@@ -16,6 +16,10 @@ const SDKS = [
   'openai',
   'hono',
   'hono/*',
+  'maplibre-gl',
+  'maplibre-gl/*',
+  'pmtiles',
+  '@protomaps/*',
 ];
 
 const restrict = (patterns, message) => ({

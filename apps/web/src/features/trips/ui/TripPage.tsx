@@ -51,6 +51,7 @@ import { ActivityList } from '../../itinerary/ui/ActivityList';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
 import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
 import { LegDialog } from '../../itinerary/ui/LegDialog';
+import { MapLink } from '../../maps/ui/MapLink';
 import { StayDialog } from '../../itinerary/ui/StayDialog';
 import { formatZonedTime } from '@/shared/lib/timezone';
 import { useAuth } from '../../auth/application/AuthProvider';
@@ -170,6 +171,7 @@ function TripOverview({ details }: { details: TripDetails }) {
                   <span className="sr-only sm:not-sr-only">{tcal('open')}</span>
                 </Link>
               </Button>
+              <MapLink tripId={trip.id} />
               <AddCityDialog details={details} />
             </CardAction>
           ) : null}

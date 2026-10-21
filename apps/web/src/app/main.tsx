@@ -5,6 +5,7 @@ import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { ChecklistProvider } from '../features/checklist/application/ChecklistProvider';
 import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
 import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
+import { MapsProvider } from '../features/maps/application/MapsProvider';
 import { PwaProvider } from '../features/pwa/application/PwaProvider';
 import { MembersProvider } from '../features/members/application/MembersProvider';
 import { SyncProvider } from '../features/sync/application/SyncProvider';
@@ -45,7 +46,9 @@ createRoot(document.getElementById('root')!).render(
               >
                 <DocumentsProvider {...dependencies.documents}>
                   <ChecklistProvider repository={dependencies.checklist}>
-                    <RouterProvider router={router} />
+                    <MapsProvider {...dependencies.maps}>
+                      <RouterProvider router={router} />
+                    </MapsProvider>
                   </ChecklistProvider>
                 </DocumentsProvider>
               </PwaProvider>

@@ -9,6 +9,12 @@ import {
 import { SupabaseFileStore } from '../features/documents/infrastructure/supabase-file-store';
 import { ApiPlaceSearch } from '../features/itinerary/infrastructure/api-place-search';
 import { DexieItineraryRepository } from '../features/itinerary/infrastructure/dexie-itinerary-repository';
+import type { MapRenderer } from '../features/maps/domain/map-ports';
+import { CacheTileStore } from '../features/maps/infrastructure/cache-tile-store';
+import { DexieOfflineAreaRepository } from '../features/maps/infrastructure/dexie-offline-area-repository';
+import { readMapConfig } from '../features/maps/infrastructure/map-config';
+import { createOfflineLoader } from '../features/maps/infrastructure/offline-loader';
+import { createTileSource } from '../features/maps/infrastructure/tile-sources';
 import { SupabaseMemberDirectory } from '../features/members/infrastructure/supabase-member-directory';
 import {
   browserInstallEnvironment,
@@ -27,6 +33,26 @@ const db = new WayfareDB();
 const syncLocal = new DexieSyncStore(db);
 const remoteFiles = new SupabaseFileStore(supabase);
 const fileSync = new FileSync(new DexieFileStore(db), remoteFiles);
+
+const mapConfig = readMapConfig(import.meta.env);
+const mapTiles = new CacheTileStore(mapConfig.assetsUrl);
+const mapSource = createTileSource(mapConfig.tilesUrl);
+let mapRenderer: Promise<MapRenderer> | null = null;
+// MapLibre (~1 MB) is its own chunk, fetched the first time a map is shown (and precached).
+const loadMapRenderer = () => {
+  mapRenderer ??= import('../features/maps/infrastructure/maplibre-renderer').then(
+    ({ MapLibreRenderer }) =>
+      new MapLibreRenderer(
+        createOfflineLoader({
+          readTile: (tile) => mapTiles.readTile(tile),
+          fetchTile: (tile, signal) => mapSource.fetchTile(tile, signal),
+          readAsset: (path, signal) => mapTiles.readAsset(path, signal),
+        }),
+      ),
+  );
+  mapRenderer.catch(() => (mapRenderer = null));
+  return mapRenderer;
+};
 
 const auth = new SupabaseAuthService(supabase, {
   url: import.meta.env.VITE_SUPABASE_URL,
@@ -53,7 +79,15 @@ export const dependencies = {
     afterPush: [fileSync.sendChanges],
     afterPull: [fileSync.fetchMissing],
   }),
-  wipeDevice: () => wipeLocal(db),
+  maps: {
+    areas: new DexieOfflineAreaRepository(db),
+    tiles: mapTiles,
+    source: mapSource,
+    loadRenderer: loadMapRenderer,
+  },
+  wipeDevice: async () => {
+    await Promise.all([wipeLocal(db), mapTiles.clear()]);
+  },
   appUpdates: new ServiceWorkerAppUpdates(),
   // Listens for `beforeinstallprompt` from startup, before anything renders.
   installPrompts: new BrowserInstallPrompts(),

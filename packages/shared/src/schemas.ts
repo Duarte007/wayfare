@@ -92,6 +92,8 @@ export const staySchema = z.object({
   ...sharingColumns,
   trip_id: z.uuid(),
   stop_id: z.uuid(),
+  /** Where the stay is, for the map; optional (most stays only have a name). */
+  place_id: z.uuid().nullable().optional(),
   name: z.string().min(1).max(200),
   check_in: isoDate,
   check_out: isoDate,
@@ -123,6 +125,8 @@ export const activitySchema = z.object({
   ...sharingColumns,
   trip_id: z.uuid(),
   stop_id: z.uuid(),
+  /** Where the activity happens, for the map; optional. */
+  place_id: z.uuid().nullable().optional(),
   title: z.string().min(1).max(200),
   date: isoDate.nullable().optional(),
   /** Local time in the city, "HH:mm" or "HH:mm:ss" as Postgres returns it. */
