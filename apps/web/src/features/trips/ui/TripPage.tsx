@@ -46,6 +46,9 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
 import { ChecklistLink } from '../../checklist/ui/ChecklistLink';
+import { useLinkCounts } from '../../documents/application/useDocumentLinks';
+import type { LinkEntity } from '../../documents/domain/document-link';
+import { AttachedCount } from '../../documents/ui/AttachedCount';
 import { activityCounts } from '../../itinerary/domain/activity';
 import { ActivityList } from '../../itinerary/ui/ActivityList';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
@@ -119,6 +122,7 @@ function TripOverview({ details }: { details: TripDetails }) {
   const { session } = useAuth();
   const members = useTripMembers(trip.id);
   const itinerary = buildItinerary(details);
+  const documentCount = useLinkCounts(details);
   // Group trips switch between the viewer's own plan and the one everyone follows.
   const [mode, setMode] = useItineraryMode();
   const grouped = members.length > 1 && !!session;
@@ -203,6 +207,7 @@ function TripOverview({ details }: { details: TripDetails }) {
                     legHidden={!item.legToNext && !!itinerary[index]?.legToNext}
                     members={members}
                     currentUserId={session?.userId}
+                    documentCount={documentCount}
                     actions={
                       <CityActionsMenu
                         details={details}
@@ -444,6 +449,7 @@ function ItineraryItem({
   legHidden,
   members,
   currentUserId,
+  documentCount,
   actions,
 }: {
   item: ItineraryStop;
@@ -451,6 +457,7 @@ function ItineraryItem({
   legHidden: boolean;
   members: TripMember[];
   currentUserId: string | undefined;
+  documentCount: (entity: LinkEntity) => number;
   actions: ReactNode;
 }) {
   const { t, i18n } = useTranslation('trips');
@@ -527,6 +534,10 @@ function ItineraryItem({
                             aria-label={ti('private')}
                           />
                         ) : null}
+                        <AttachedCount
+                          count={documentCount({ type: 'stay', id: stay.id })}
+                          className="text-muted-foreground"
+                        />
                       </span>
                       <span className="text-xs text-muted-foreground sm:shrink-0 sm:text-sm">
                         {formatDateRange(stay.check_in, stay.check_out, i18n.language)}
@@ -556,6 +567,7 @@ function ItineraryItem({
           activities={activities}
           members={members}
           currentUserId={currentUserId}
+          documentCount={(id) => documentCount({ type: 'activity', id })}
         />
         {next && !legHidden ? (
           <LegDialog
@@ -575,6 +587,9 @@ function ItineraryItem({
                 <span className="truncate">
                   {legToNext ? legSummary(legToNext, t, i18n.language) : t('noLeg')}
                 </span>
+                {legToNext ? (
+                  <AttachedCount count={documentCount({ type: 'leg', id: legToNext.id })} />
+                ) : null}
               </button>
             }
           />

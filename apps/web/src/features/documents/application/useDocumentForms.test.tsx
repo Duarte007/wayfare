@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuth } from '../../auth/application/AuthProvider';
 import type { AuthService } from '../../auth/domain/auth-service';
 import type { LabelBoosts } from '../domain/document';
+import type { NewDocumentLink } from '../domain/document-link';
 import type { DocumentRepository } from '../domain/document-ports';
 import { DocumentsProvider } from './DocumentsProvider';
 import { useAddDocument, useEditDocument } from './useDocumentForms';
@@ -22,11 +23,13 @@ function setup(initialBoosts: LabelBoosts = {}) {
   let stored: LabelBoosts = initialBoosts;
   const repository = {
     observeTrip: vi.fn(() => () => {}),
-    add: vi.fn(async (_d: TravelDocument, _f: Blob) => {}),
+    add: vi.fn(async (_d: TravelDocument, _f: Blob, _l?: readonly NewDocumentLink[]) => {}),
     save: vi.fn(async (_d: TravelDocument) => {}),
     remove: vi.fn(async (_d: TravelDocument) => {}),
     readFile: vi.fn(async () => null),
     cacheFile: vi.fn(async () => {}),
+    link: vi.fn(async () => {}),
+    unlink: vi.fn(async () => {}),
   } satisfies DocumentRepository;
   const boosts = {
     read: vi.fn(async () => stored),
@@ -104,6 +107,29 @@ describe('useAddDocument', () => {
 
     await act(async () => void (await result.current.form.pick(pdf('acmecorp-2027.pdf'))));
     expect(result.current.form.draft?.label).toBe('insurance');
+  });
+
+  it('attaches a file added from a leg, with the type the leg implies', async () => {
+    const { wrapper, repository, boosts } = setup();
+    const attachTo = { entity: { type: 'leg' as const, id: 'leg-1' }, label: 'train' as const };
+    const { result } = renderHook(
+      () => ({ form: useAddDocument(tripId, attachTo), auth: useAuth() }),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.auth.session).not.toBeNull());
+    await act(async () => void (await result.current.form.pick(pdf('scan 0042 G1.pdf'))));
+    expect(result.current.form.draft).toMatchObject({
+      label: 'train',
+      title: 'Train G1',
+      alternatives: [],
+    });
+    await act(async () => void (await result.current.form.save()));
+    const [saved, , links] = repository.add.mock.calls[0]!;
+    expect(links).toEqual([
+      { document_id: saved.id, entity_type: 'leg', entity_id: 'leg-1', trip_id: tripId },
+    ]);
+    // The type came from the leg, not from a correction: nothing to learn.
+    expect(boosts.write).not.toHaveBeenCalled();
   });
 
   it('refuses unsupported and too large files with a reason', async () => {

@@ -38,6 +38,7 @@ export class DexieTripRepository implements TripRepository {
       db.legs,
       db.activities,
       db.documents,
+      db.documentLinks,
       db.checklist_items,
     ];
     await db.transaction('rw', children, async () => {

@@ -129,4 +129,14 @@ function SelectScrollDownButton({
   );
 }
 
-export { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue };
+function SelectLabel({ className, ...props }: ComponentProps<typeof SelectPrimitive.Label>) {
+  return (
+    <SelectPrimitive.Label
+      data-slot="select-label"
+      className={cn('px-2 py-1.5 text-xs font-semibold text-muted-foreground', className)}
+      {...props}
+    />
+  );
+}
+
+export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue };

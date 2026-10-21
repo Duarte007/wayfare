@@ -28,6 +28,7 @@ import { useDocumentFile } from '../application/useDocumentFile';
 import { useEditDocument } from '../application/useDocumentForms';
 import { canPreviewImage, downloadName } from '../domain/document-file';
 import { DocumentFields } from './DocumentFields';
+import { DocumentLinks } from './DocumentLinks';
 import { LABEL_ICONS } from './document-display';
 
 /** Opens a document (from the device when possible), edits it or removes it. */
@@ -63,6 +64,8 @@ export function DocumentDialog({
           <DialogDescription>{t('editHint')}</DialogDescription>
         </DialogHeader>
         <FileViewer document={document} enabled={open} />
+        <Separator />
+        <DocumentLinks document={document} />
         <Separator />
         <form noValidate onSubmit={(e) => void onSubmit(e)} className="grid gap-5">
           <DocumentFields input={form.input} update={form.update} errors={form.errors} />
