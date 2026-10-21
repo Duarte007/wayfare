@@ -203,7 +203,11 @@ describe('SyncEngine', () => {
     const step = vi.fn(async () => true);
     const engine = new SyncEngine(
       local,
-      { push: async () => ({ outcome: 'transient' }), pull: async () => [], memberTripIds: async () => [] },
+      {
+        push: async () => ({ outcome: 'transient' }),
+        pull: async () => [],
+        memberTripIds: async () => [],
+      },
       { afterPush: [step], afterPull: [step] },
     );
     expect(await engine.run()).toBe('offline');
