@@ -10,6 +10,7 @@ import { QwenTipsGenerator } from './infrastructure/ai/qwen-tips-generator.js';
 import { TemplateBuyLinks } from './infrastructure/ai/template-buy-links.js';
 import { SupabaseAiQuota } from './infrastructure/supabase/supabase-ai-quota.js';
 import { SupabaseTipsCache } from './infrastructure/supabase/supabase-tips-cache.js';
+import { SupabaseTripAccess } from './infrastructure/supabase/supabase-trip-access.js';
 import { authenticate } from './infrastructure/supabase/user-client.js';
 import type { AppDependencies } from './interface/http/app.js';
 
@@ -40,6 +41,7 @@ export const dependencies: AppDependencies = {
   authenticate: (token) => authenticate(env().SUPABASE_URL, env().SUPABASE_ANON_KEY, token),
   useCasesFor: (db: SupabaseClient) => ({
     getCityTips: new GetCityTips({
+      access: new SupabaseTripAccess(db),
       generator: (tipsGenerator ??= buildTipsGenerator()),
       cache: new SupabaseTipsCache(db),
       quota: new SupabaseAiQuota(db, env().AI_DAILY_QUOTA),

@@ -1,12 +1,13 @@
 import { CITY_TIPS_PROMPT_VERSION, type CityTips, type CityTipsRequest } from '@wayfare/shared';
 import { createHash } from 'node:crypto';
-import { QuotaExceededError } from './errors.js';
+import { NotFoundError, QuotaExceededError } from './errors.js';
 import type {
   AiQuota,
   BuyLinkBuilder,
   CityTipsWithLinks,
   TipsCache,
   TipsGenerator,
+  TripAccess,
 } from './ports.js';
 
 const CACHE_DAYS = 30;
@@ -17,6 +18,7 @@ export interface GetCityTipsResult {
 }
 
 interface Dependencies {
+  access: TripAccess;
   generator: TipsGenerator;
   cache: TipsCache;
   quota: AiQuota;
@@ -27,14 +29,17 @@ interface Dependencies {
 }
 
 /**
- * Use case: tips for one stop of a trip. Reuses a recent identical answer, otherwise spends one
+ * Use case: tips for one stop of a trip the user can see. Reuses a recent identical answer, otherwise spends one
  * unit of the user's daily quota, generates, attaches shopping links and stores the result.
  */
 export class GetCityTips {
   constructor(private readonly deps: Dependencies) {}
 
   async execute(request: CityTipsRequest): Promise<GetCityTipsResult> {
-    const { generator, cache, quota, links, now = () => new Date() } = this.deps;
+    const { access, generator, cache, quota, links, now = () => new Date() } = this.deps;
+    // Checked before anything is spent: outsiders must not burn AI calls on someone else's trip.
+    if (!(await access.canSeeStop(request.tripId, request.stopId))) throw new NotFoundError();
+
     const inputHash = this.inputHash(request);
     const since = new Date(now().getTime() - CACHE_DAYS * 86_400_000);
 

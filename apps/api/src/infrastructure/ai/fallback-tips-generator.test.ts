@@ -1,5 +1,6 @@
 import type { CityTips, CityTipsRequest } from '@wayfare/shared';
 import { describe, expect, it, vi } from 'vitest';
+import { AiUnavailableError } from '../../application/errors.js';
 import { FallbackTipsGenerator } from './fallback-tips-generator.js';
 
 const tips: CityTips = { events: [], tours_day_trips: [], food: [], shopping: [] };
@@ -15,10 +16,12 @@ describe('FallbackTipsGenerator', () => {
     expect(onFallback).toHaveBeenCalledOnce();
   });
 
-  it('throws the last error when every provider fails', async () => {
-    await expect(new FallbackTipsGenerator([failing, failing]).generate(request)).rejects.toThrow(
-      'overloaded',
-    );
+  it('reports the AI as unavailable, keeping the last error, when every provider fails', async () => {
+    const error = await new FallbackTipsGenerator([failing, failing])
+      .generate(request)
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AiUnavailableError);
+    expect((error as AiUnavailableError).cause).toEqual(new Error('overloaded'));
   });
 
   it('requires at least one provider', () => {

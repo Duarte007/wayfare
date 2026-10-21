@@ -1,6 +1,6 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
-import { QuotaExceededError } from '../../application/errors.js';
+import { AiUnavailableError, NotFoundError, QuotaExceededError } from '../../application/errors.js';
 import { createApp, type AppDependencies, type UseCases } from './app.js';
 
 type Execute = UseCases['getCityTips']['execute'];
@@ -55,9 +55,15 @@ describe('HTTP app', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it('maps quota errors to 429', async () => {
-    const execute = vi.fn<Execute>(async () => Promise.reject(new QuotaExceededError()));
-    expect((await post(createApp(deps(execute)), validBody, 'good')).status).toBe(429);
+  it.each([
+    [new NotFoundError(), 404],
+    [new QuotaExceededError(), 429],
+    [new AiUnavailableError('down'), 503],
+    [new Error('boom'), 500],
+  ])('maps %s to %i', async (error, status) => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const execute = vi.fn<Execute>(async () => Promise.reject(error));
+    expect((await post(createApp(deps(execute)), validBody, 'good')).status).toBe(status);
   });
 
   it('returns the use case result', async () => {
