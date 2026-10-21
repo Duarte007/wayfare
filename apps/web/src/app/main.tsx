@@ -32,7 +32,11 @@ createRoot(document.getElementById('root')!).render(
       beforeSignOut={() => dependencies.sync.run().then(() => undefined)}
       onSignedOut={dependencies.wipeDevice}
     >
-      <SyncProvider engine={dependencies.sync} local={dependencies.syncLocal}>
+      <SyncProvider
+        engine={dependencies.sync}
+        local={dependencies.syncLocal}
+        issueStore={dependencies.syncIssues}
+      >
         <TripsProvider repository={dependencies.trips}>
           <ItineraryProvider
             repository={dependencies.itinerary}

@@ -124,6 +124,11 @@ function Sidebar() {
               >
                 <Icon className="size-5" aria-hidden />
                 {t(labelKey)}
+                {to === '/profile' ? (
+                  <span className="ml-auto">
+                    <IssuesCount />
+                  </span>
+                ) : null}
               </Link>
             </li>
           ))}
@@ -206,23 +211,49 @@ function MobileTabBar() {
             {tt('newTrip')}
           </Link>
         </li>
-        <TabItem item={profile} label={t(profile.labelKey)} />
+        <TabItem item={profile} label={t(profile.labelKey)} badge={<IssuesCount />} />
       </ul>
     </nav>
   );
 }
 
-function TabItem({ item: { to, icon: Icon }, label }: { item: NavItem; label: string }) {
+function TabItem({
+  item: { to, icon: Icon },
+  label,
+  badge,
+}: {
+  item: NavItem;
+  label: string;
+  badge?: ReactNode;
+}) {
   return (
     <li>
       <Link
         to={to}
         activeOptions={{ exact: true }}
-        className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted-foreground aria-[current=page]:text-primary"
+        className="relative flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted-foreground aria-[current=page]:text-primary"
       >
         <Icon className="size-6" aria-hidden />
         {label}
+        {/* After the label, so screen readers hear "Profile, 2 sync issues". */}
+        {badge ? <span className="absolute top-1.5 left-1/2 ml-1.5">{badge}</span> : null}
       </Link>
     </li>
+  );
+}
+
+/**
+ * Changes the server refused, shown on the way to the profile, where they can be retried. Inside
+ * a link, so the count is read as part of its name.
+ */
+function IssuesCount() {
+  const { t } = useTranslation('syncIssues');
+  const { issues } = useSync();
+  if (issues.length === 0) return null;
+  return (
+    <Badge variant="destructive" className="px-1.5 py-0 leading-4">
+      <span aria-hidden>{issues.length}</span>
+      <span className="sr-only">{t('issuesCount', { count: issues.length })}</span>
+    </Badge>
   );
 }

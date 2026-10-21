@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // Sync runs a full refresh the first time a new build starts.
+  define: {
+    __APP_BUILD__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? new Date().toISOString()),
+  },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   // MapLibre's worker is an ES module (it imports the code it shares with the main thread).
   worker: { format: 'es' },

@@ -24,6 +24,7 @@ import {
 } from '../features/pwa/infrastructure/browser-install';
 import { ServiceWorkerAppUpdates } from '../features/pwa/infrastructure/service-worker-app-updates';
 import { SyncEngine } from '../features/sync/application/sync-engine';
+import { DexieSyncIssueStore } from '../features/sync/infrastructure/dexie-sync-issues';
 import { DexieSyncStore } from '../features/sync/infrastructure/dexie-sync-store';
 import { SupabaseSyncStore } from '../features/sync/infrastructure/supabase-sync-store';
 import { DexieTripRepository } from '../features/trips/infrastructure/dexie-trip-repository';
@@ -35,10 +36,13 @@ const db = new WayfareDB();
 const syncLocal = new DexieSyncStore(db);
 const remoteFiles = new SupabaseFileStore(supabase);
 const fileSync = new FileSync(new DexieFileStore(db), remoteFiles);
-const sync = new SyncEngine(syncLocal, new SupabaseSyncStore(supabase), {
-  afterPush: [fileSync.sendChanges],
-  afterPull: [fileSync.fetchMissing],
-});
+const sync = new SyncEngine(
+  syncLocal,
+  new SupabaseSyncStore(supabase),
+  { afterPush: [fileSync.sendChanges], afterPull: [fileSync.fetchMissing] },
+  // A new build runs a full refresh on its first pass.
+  { build: __APP_BUILD__ },
+);
 
 const mapConfig = readMapConfig(import.meta.env);
 const mapTiles = new CacheTileStore(mapConfig.assetsUrl);
@@ -76,6 +80,7 @@ export const dependencies = {
   members: new SupabaseMemberDirectory(supabase, db),
   trips: new DexieTripRepository(db),
   syncLocal,
+  syncIssues: new DexieSyncIssueStore(db),
   documents: {
     repository: new DexieDocumentRepository(db),
     boosts: new DexieLabelBoostStore(db),

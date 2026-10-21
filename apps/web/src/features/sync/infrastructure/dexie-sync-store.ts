@@ -8,13 +8,17 @@ import {
 } from '../../../shared/infrastructure/db';
 import {
   PULLED_TABLES,
+  type FullRefreshMark,
   type LocalSyncStore,
   type PendingChange,
   type PulledTable,
   type RemoteRow,
+  type SyncTimes,
 } from '../domain/sync-ports';
 
 const cursorKey = (table: PulledTable) => `sync.cursor.${table}`;
+const FULL_REFRESH_KEY = 'sync.fullRefresh';
+const LAST_SYNCED_KEY = 'sync.lastSyncedAt';
 
 /** The row's key on the device; document links have a composite key on the server. */
 function localId(table: PulledTable, row: RemoteRow): string {
@@ -63,14 +67,14 @@ export class DexieSyncStore implements LocalSyncStore {
     return entry ? Number(entry.value) : 0;
   }
 
+  localId(table: PulledTable, row: RemoteRow): string {
+    return localId(table, row);
+  }
+
   async applyRemote(table: PulledTable, rows: RemoteRow[], cursor: number) {
     const target = localTable(this.db, table);
     await this.db.transaction('rw', target, this.db.outbox, this.db.meta, async () => {
-      const pending = new Set(
-        (await this.db.outbox.where('table').equals(table).toArray())
-          .filter((e) => !e.rejected)
-          .map((e) => (e.row as { id: string }).id),
-      );
+      const pending = await this.unsentRowIds(table);
       for (const row of rows) {
         const id = localId(table, row);
         if (pending.has(id)) continue;
@@ -79,6 +83,56 @@ export class DexieSyncStore implements LocalSyncStore {
       }
       await this.db.meta.put({ key: cursorKey(table), value: String(cursor) });
     });
+  }
+
+  async removeMissing(table: PulledTable, liveIds: ReadonlySet<string>) {
+    const target = localTable(this.db, table);
+    return this.db.transaction('rw', target, this.db.outbox, async () => {
+      const pending = await this.unsentRowIds(table);
+      const here = (await target.toCollection().primaryKeys()) as string[];
+      const stale = here.filter((id) => !liveIds.has(id) && !pending.has(id));
+      await target.bulkDelete(stale);
+      return stale.length;
+    });
+  }
+
+  async lastFullRefresh(): Promise<FullRefreshMark | null> {
+    const entry = await this.db.meta.get(FULL_REFRESH_KEY);
+    if (!entry) return null;
+    try {
+      const mark = JSON.parse(entry.value) as Partial<FullRefreshMark>;
+      return typeof mark.at === 'number' && typeof mark.build === 'string'
+        ? { at: mark.at, build: mark.build }
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async markFullRefresh(mark: FullRefreshMark) {
+    await this.db.meta.put({ key: FULL_REFRESH_KEY, value: JSON.stringify(mark) });
+  }
+
+  async markSynced(at: number) {
+    await this.db.meta.put({ key: LAST_SYNCED_KEY, value: String(at) });
+  }
+
+  /** When the last pass and the last full refresh finished (epoch ms), as they change. */
+  observeSyncTimes(listener: (times: SyncTimes) => void) {
+    const subscription = liveQuery(async () => {
+      const [synced, full] = await Promise.all([
+        this.db.meta.get(LAST_SYNCED_KEY),
+        this.lastFullRefresh(),
+      ]);
+      return {
+        lastSyncedAt: synced ? Number(synced.value) : null,
+        lastFullRefreshAt: full?.at ?? null,
+      };
+    }).subscribe({
+      next: listener,
+      error: (err: unknown) => console.error('Failed to read sync times', err),
+    });
+    return () => subscription.unsubscribe();
   }
 
   async keepTrips(memberTripIds: readonly string[]) {
@@ -109,6 +163,12 @@ export class DexieSyncStore implements LocalSyncStore {
       // Same key as SupabaseMemberDirectory's cache.
       await this.db.meta.delete(`members.${tripId}`);
     });
+  }
+
+  /** Rows of `table` with changes still to send (rejected ones don't count: the server wins). */
+  private async unsentRowIds(table: PulledTable): Promise<Set<string>> {
+    const entries = await this.db.outbox.where('table').equals(table).toArray();
+    return new Set(entries.filter((e) => !e.rejected).map((e) => (e.row as { id: string }).id));
   }
 
   private async tripsWithUnsentChanges(): Promise<Set<string>> {
