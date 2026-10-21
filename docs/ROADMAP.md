@@ -18,7 +18,11 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] Cities in the itinerary (search, add, nights, reorder, remove) — #11
 - [x] Stays per city (add, edit, private/shared, remove) — #12
 - [x] Transport between cities (mode, carrier, number, local times with time zones) — #13
-- [x] Activities per city (date/time, booking tick-off, link, who is going) — item 5
+- [x] Activities per city (date/time, booking tick-off, link, who is going) — #14
+- [x] Owner-only trip delete (server rule), app update/install prompts, 404 and error screens — #16
+- [x] Calendar view coloured by city with a day plan — #17
+- [x] Documents: upload, offline cache, search/filter, auto label, private by default — #18
+- [x] Checklist with suggestions per destination country — #19
 
 ## Now — make the trip usable end to end
 
@@ -62,7 +66,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** activities with title, date, needs-booking/booked and URL can be added, ticked
   off and assigned to some members; counts show on the timeline.
 
-### 6. Documents (upload, offline, search, auto label)
+### 6. Documents (upload, offline, search, auto label) [~] (linking to stay/leg/activity in progress)
 
 - **Goal:** keep passports, tickets and vouchers available offline.
 - **Done when:** files upload to the private `documents` bucket, are cached on the device for
@@ -78,13 +82,13 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
   remove members and members can leave; a "Mine / Everyone" switch filters items by
   `assignees`; private items stay private.
 
-### 8. Calendar view
+### 8. Calendar view ✅
 
 - **Goal:** the reference artifact's month calendar with each city's days coloured.
 - **Done when:** a calendar tab shows the trip days coloured by city (stop `color_index`),
   stays and legs marked, and tapping a day shows that day's plan.
 
-### 9. Checklist
+### 9. Checklist ✅
 
 - **Goal:** a to-do list per trip (visa, insurance, SIM, money…).
 - **Done when:** `checklist_items` can be added, ticked, assigned and synced; a starter list
@@ -117,7 +121,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
   key and team), set Site URL and redirect URLs (`/` and `/reset`) for the production domain.
 - **Done when:** both buttons sign in on the live site and land on the trips page.
 
-### 14. Server rule: only the owner can delete a trip
+### 14. Server rule: only the owner can delete a trip ✅
 
 - **Done when:** a trigger rejects setting `trips.deleted_at` by anyone but the owner, with an
   RLS test in `supabase/tests`.
@@ -127,7 +131,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** the profile offers "Delete my account" (server function removes the user and
   their own data) and "Download my data"; required by the App Store and GDPR/LGPD.
 
-### 16. App updates and install
+### 16. App updates and install ✅
 
 - **Done when:** a toast says "New version available — reload" when the service worker has an
   update; an "Install app" hint shows on supported browsers; icons and splash for iOS/Android.
@@ -137,7 +141,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** routes are code-split (date picker, maps and documents load on demand) and the
   first load stays under ~200 KB gzipped.
 
-### 18. Not-found page and error boundary
+### 18. Not-found page and error boundary ✅
 
 - **Done when:** unknown URLs show a friendly 404 with a way back, and a crash in one screen
   shows a recoverable error instead of a blank page.
