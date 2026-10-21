@@ -117,9 +117,20 @@ const KEYWORDS: Record<Exclude<DocumentLabel, 'other'>, WeightedKeyword[]> = {
     ['booking.com', 1],
     ['booking confirmation', 0.8],
     ['voucher', 0.6],
+    // "reserva"/"reservation" alone is ambiguous (museum, restaurant…), so it only tips the balance.
     ['reserva', 0.4],
     ['reservation', 0.4],
     ['check in', 0.4],
+    ['guesthouse', 0.8],
+    ['guest house', 0.8],
+    ['pousada', 0.8],
+    ['bed and breakfast', 0.8],
+    ['b&b', 0.8],
+    ['ryokan', 1],
+    ['motel', 0.8],
+    ['resort', 0.6],
+    // "Book and Bed", "Bed & Breakfast", "bed 4 nights"…
+    [/\bbed\b/, 0.6],
     ['酒店', 1],
     ['宾馆', 1],
     ['民宿', 1],
@@ -274,7 +285,8 @@ export function learnBoosts(
 
 /** Turns "ETKT_CA1234_SMITH_JOHN.pdf" into "Flight CA1234". Falls back to a tidied file name. */
 export function suggestTitle(fileName: string, label: DocumentLabel): string {
-  const base = fileName.replace(/\.[a-z0-9]{2,5}$/i, '');
+  // Drop any folder path ("vouchers/…", "C:\Downloads\…") and the extension.
+  const base = (fileName.split(/[\\/]/).pop() ?? fileName).replace(/\.[a-z0-9]{2,5}$/i, '');
   if (label === 'flight') {
     const m = base.match(/(?:^|[^A-Za-z0-9])([A-Z][A-Z0-9]\s?\d{3,4})(?![0-9])/);
     if (m?.[1]) return `Flight ${m[1].replace(/\s/, '')}`;
@@ -283,6 +295,6 @@ export function suggestTitle(fileName: string, label: DocumentLabel): string {
     const m = base.match(/(?:^|[^A-Za-z0-9])([GDCKTZ]\d{1,4})(?![0-9])/);
     if (m?.[1]) return `Train ${m[1]}`;
   }
-  const tidy = base.replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const tidy = base.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
   return tidy.charAt(0).toUpperCase() + tidy.slice(1);
 }
