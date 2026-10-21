@@ -45,3 +45,13 @@ export interface RemoteSyncStore {
   /** Rows changed after `since`, by ascending version; null when the server can't be reached. */
   pull(table: PulledTable, since: number, limit: number): Promise<RemoteRow[] | null>;
 }
+
+/** Extra work in a sync pass (e.g. document files); false when the server couldn't be reached. */
+export type SyncStep = () => Promise<boolean>;
+
+export interface SyncSteps {
+  /** After local changes were pushed, so the rows a step depends on exist on the server. */
+  afterPush?: readonly SyncStep[];
+  /** After the pull, when the device holds every row it can see. */
+  afterPull?: readonly SyncStep[];
+}

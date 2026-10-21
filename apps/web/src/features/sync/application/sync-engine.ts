@@ -1,4 +1,10 @@
-import { PULLED_TABLES, type LocalSyncStore, type RemoteSyncStore } from '../domain/sync-ports';
+import {
+  PULLED_TABLES,
+  type LocalSyncStore,
+  type RemoteSyncStore,
+  type SyncSteps,
+  type SyncStep,
+} from '../domain/sync-ports';
 
 export type SyncResult = 'synced' | 'offline';
 
@@ -10,6 +16,10 @@ const PULL_PAGE = 500;
  * Last write wins per row; the local store keeps rows that still have unsent changes.
  * A call during a pass gets one follow-up pass, so a change saved mid-pass goes out right after
  * it instead of waiting for the next trigger. Further calls share that follow-up.
+ *
+ * Extra steps (file uploads, downloads) run after the push, when the rows they belong to are on
+ * the server, and after the pull, when the device knows every row it can see. A step never stops
+ * the pass; one that can't reach the server makes the pass report offline.
  */
 export class SyncEngine {
   private running: Promise<SyncResult> | null = null;
@@ -18,6 +28,7 @@ export class SyncEngine {
   constructor(
     private readonly local: LocalSyncStore,
     private readonly remote: RemoteSyncStore,
+    private readonly steps: SyncSteps = {},
   ) {}
 
   run(): Promise<SyncResult> {
@@ -36,7 +47,10 @@ export class SyncEngine {
 
   private async pass(): Promise<SyncResult> {
     if (!(await this.push())) return 'offline';
-    return (await this.pull()) ? 'synced' : 'offline';
+    const sent = await runSteps(this.steps.afterPush);
+    if (!(await this.pull())) return 'offline';
+    const fetched = await runSteps(this.steps.afterPull);
+    return sent && fetched ? 'synced' : 'offline';
   }
 
   /** False when the server could not be reached; the remaining changes wait for the next pass. */
@@ -67,4 +81,18 @@ export class SyncEngine {
     }
     return true;
   }
+}
+
+/** True when every step reached the server. A step that throws counts as unreachable. */
+async function runSteps(steps: readonly SyncStep[] = []): Promise<boolean> {
+  let reached = true;
+  for (const step of steps) {
+    try {
+      reached = (await step()) && reached;
+    } catch (error) {
+      console.error('Sync step failed', error);
+      reached = false;
+    }
+  }
+  return reached;
 }

@@ -128,4 +128,36 @@ select pg_temp.check(
     where id = '10000000-0000-0000-0000-000000000001'$q$) = '42501',
   'not even the owner changes owner_id');
 
+
+-- Documents: a row can't be used to reach someone else's file.
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$insert into public.documents (id, trip_id, owner_id, title, label, mime, size_bytes, storage_path)
+    values ('50000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000001',
+            '00000000-0000-0000-0000-00000000000a', 'Visa Ana', 'visa', 'application/pdf', 1000,
+            '00000000-0000-0000-0000-00000000000a/10000000-0000-0000-0000-000000000001/50000000-0000-0000-0000-000000000003')$q$) = '00000',
+  'the owner adds a document with its own file path');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$insert into public.documents (id, trip_id, owner_id, title, label, mime, size_bytes, visibility)
+    values ('50000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000001',
+            '00000000-0000-0000-0000-00000000000a', 'Fake', 'other', 'application/pdf', 1000, 'group')$q$) = '42501',
+  'a member cannot add a document in someone else''s name');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$insert into public.documents (id, trip_id, owner_id, title, label, mime, size_bytes, visibility, storage_path)
+    values ('50000000-0000-0000-0000-000000000005', '10000000-0000-0000-0000-000000000001',
+            '00000000-0000-0000-0000-00000000000b', 'Peek', 'other', 'application/pdf', 1000, 'group',
+            '00000000-0000-0000-0000-00000000000a/10000000-0000-0000-0000-000000000001/50000000-0000-0000-0000-000000000003')$q$) = '42501',
+  'a member cannot point a document at someone else''s file');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.documents
+    set storage_path = '00000000-0000-0000-0000-00000000000a/10000000-0000-0000-0000-000000000001/50000000-0000-0000-0000-000000000003'
+    where id = '50000000-0000-0000-0000-000000000002'$q$) = '42501',
+  'a member cannot swap the file of a shared document');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.documents set title = 'Train G1234 (seat 5A)'
+    where id = '50000000-0000-0000-0000-000000000002'$q$) = '00000',
+  'a member can still edit a shared document''s details');
+
 rollback;

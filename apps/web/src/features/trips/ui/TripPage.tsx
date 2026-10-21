@@ -143,7 +143,13 @@ function TripOverview({ details }: { details: TripDetails }) {
           labelKey="statNights"
         />
         <Stat icon={BedDouble} value={details.stays.length} labelKey="statStays" />
-        <Stat icon={FileText} value={details.documents.length} labelKey="statDocuments" />
+        <Link
+          to="/trips/$tripId/documents"
+          params={{ tripId: trip.id }}
+          className="grid rounded-xl transition hover:brightness-95 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
+          <Stat icon={FileText} value={details.documents.length} labelKey="statDocuments" />
+        </Link>
       </section>
 
       <MissingCard details={details} itinerary={itinerary} />
@@ -225,6 +231,7 @@ function PhaseBadge({ trip }: { trip: Trip }) {
 function TripActions({ trip }: { trip: Trip }) {
   const { t } = useTranslation('trips');
   const { t: tc } = useTranslation();
+  const { t: td } = useTranslation('documents');
   const { session } = useAuth();
   const removeTrip = useRemoveTrip();
   const navigate = useNavigate();
@@ -232,7 +239,13 @@ function TripActions({ trip }: { trip: Trip }) {
   const isOwner = session?.userId === trip.owner_id;
 
   return (
-    <div className="flex shrink-0 gap-2">
+    <div className="flex shrink-0 flex-wrap gap-2">
+      <Button asChild variant="outline">
+        <Link to="/trips/$tripId/documents" params={{ tripId: trip.id }}>
+          <FileText aria-hidden />
+          {td('title')}
+        </Link>
+      </Button>
       <Button asChild variant="outline">
         <Link to="/trips/$tripId/edit" params={{ tripId: trip.id }}>
           <Pencil aria-hidden />
@@ -358,12 +371,22 @@ function MissingCard({ details, itinerary }: { details: TripDetails; itinerary: 
             {gaps.map((gap, i) => {
               const Icon = GAP_ICONS[gap.kind];
               return (
-                <li
-                  key={`${gap.kind}-${i}`}
-                  className="flex items-start gap-3 rounded-lg bg-muted px-3 py-2.5 text-sm"
-                >
-                  <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                  {describe(gap)}
+                <li key={`${gap.kind}-${i}`}>
+                  {gap.kind === 'missing_document' ? (
+                    <Link
+                      to="/trips/$tripId/documents"
+                      params={{ tripId: details.trip.id }}
+                      className="flex min-h-11 items-start gap-3 rounded-lg bg-muted px-3 py-2.5 text-sm transition hover:brightness-95 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+                    >
+                      <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      {describe(gap)}
+                    </Link>
+                  ) : (
+                    <p className="flex items-start gap-3 rounded-lg bg-muted px-3 py-2.5 text-sm">
+                      <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      {describe(gap)}
+                    </p>
+                  )}
                 </li>
               );
             })}
