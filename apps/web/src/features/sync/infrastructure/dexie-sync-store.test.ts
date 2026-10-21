@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveLocal, WayfareDB } from '../../../shared/infrastructure/db';
 import { DexieSyncStore } from './dexie-sync-store';
 
@@ -116,5 +116,43 @@ describe('DexieSyncStore', () => {
     await store.resetCursors();
     expect(await store.cursor('trips')).toBe(0);
     expect(await store.cursor('stops')).toBe(0);
+  });
+
+  it('after a full pull, removes rows the server no longer has, except ones with unsent changes', async () => {
+    await db.trips.bulkPut([trip('live', 'Live'), trip('stray', 'Stray'), trip('refused', 'No')]);
+    await saveLocal(db, 'trips', trip('offline', 'Made offline'));
+    await saveLocal(db, 'trips', trip('refused', 'Not allowed'));
+    const refused = (await store.pendingChanges(10)).find((c) => c.row.id === 'refused')!;
+    await store.markRejected(refused.id, '42501');
+
+    expect(await store.removeMissing('trips', new Set(['live']))).toBe(2);
+
+    expect((await db.trips.toCollection().primaryKeys()).sort()).toEqual(['live', 'offline']);
+  });
+
+  it('matches document links by their device id', async () => {
+    const link = { document_id: 'd', entity_type: 'stay', entity_id: 's', trip_id: 't' } as const;
+    const row = { ...link, version: 1 };
+    expect(store.localId('document_links', row)).toBe('d:stay:s');
+    await store.applyRemote('document_links', [row], 1);
+    await db.documentLinks.put({ ...link, id: 'd:stay:old', entity_id: 'old' });
+    await store.removeMissing('document_links', new Set(['d:stay:s']));
+    expect(await db.documentLinks.toCollection().primaryKeys()).toEqual(['d:stay:s']);
+  });
+
+  it('remembers the last full refresh and the last sync, and reports them as they change', async () => {
+    expect(await store.lastFullRefresh()).toBeNull();
+    const seen: unknown[] = [];
+    const stop = store.observeSyncTimes((times) => seen.push(times));
+    await store.markFullRefresh({ at: 1000, build: 'b1' });
+    await store.markSynced(2000);
+    expect(await store.lastFullRefresh()).toEqual({ at: 1000, build: 'b1' });
+    await vi.waitFor(() =>
+      expect(seen.at(-1)).toEqual({ lastSyncedAt: 2000, lastFullRefreshAt: 1000 }),
+    );
+    stop();
+    // A damaged entry counts as never refreshed.
+    await db.meta.put({ key: 'sync.fullRefresh', value: 'oops' });
+    expect(await store.lastFullRefresh()).toBeNull();
   });
 });

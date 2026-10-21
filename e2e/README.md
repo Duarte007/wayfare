@@ -48,13 +48,14 @@ The fake is not a test of the database: row-level security and triggers are cove
 
 ## What is covered
 
-| Spec                | Project(s)      | What                                                                                                                                                                   |
-| ------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth.spec.ts`      | phone           | wrong password refused; sign-in opens the trips list                                                                                                                   |
-| `trip-flow.spec.ts` | phone           | new trip (range picker), two cities via search, nights stepper, stay, train with times and time zones, activity + booked; "O que falta" follows; rows reach the server |
-| `sync.spec.ts`      | phone           | offline edits wait in the outbox, reach the server when back online, and show on a second device                                                                       |
-| `documents.spec.ts` | phone           | a PDF saved on the device is uploaded to storage                                                                                                                       |
-| `screens.spec.ts`   | phone + desktop | trips list, trip page, profile: axe + click audit; new trip, calendar, checklist, documents: open + axe; 404 page with a way back                                      |
+| Spec                     | Project(s)      | What                                                                                                                                                                                      |
+| ------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.spec.ts`           | phone           | wrong password refused; sign-in opens the trips list                                                                                                                                      |
+| `trip-flow.spec.ts`      | phone           | new trip (range picker), two cities via search, nights stepper, stay, train with times and time zones, activity + booked; "O que falta" follows; rows reach the server                    |
+| `sync.spec.ts`           | phone           | offline edits wait in the outbox, reach the server when back online, and show on a second device                                                                                          |
+| `sync-hardening.spec.ts` | phone           | "Atualizar tudo" removes a row the server dropped without a tombstone; sync times; a refused change is listed under sync issues, retry keeps it, discard removes it and the device's copy |
+| `documents.spec.ts`      | phone           | a PDF saved on the device is uploaded to storage                                                                                                                                          |
+| `screens.spec.ts`        | phone + desktop | trips list, trip page, profile: axe + click audit; new trip, calendar, checklist, documents: open + axe; 404 page with a way back                                                         |
 
 Projects: `phone-pt-BR` (390×844, touch, pt-BR) runs everything; `desktop-en` (1280×900, English)
 runs `screens.spec.ts`. The flow specs read pt-BR labels literally; the screen specs look labels

@@ -13,6 +13,7 @@ import { Field } from '@/shared/ui/ui';
 import { UserAvatar } from '@/shared/ui/UserAvatar';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useSync } from '../../sync/application/SyncProvider';
+import { SyncCard, SyncIssuesCard } from '../../sync/ui/SyncSection';
 import { useDisplayNameForm } from '../application/useDisplayNameForm';
 
 export function ProfilePage() {
@@ -40,6 +41,8 @@ export function ProfilePage() {
         </div>
       </header>
 
+      <SyncIssuesCard />
+
       <Card>
         <CardHeader>
           <CardTitle>
@@ -62,6 +65,8 @@ export function ProfilePage() {
           <ThemePicker />
         </CardContent>
       </Card>
+
+      <SyncCard />
 
       <SignOutCard />
     </>
