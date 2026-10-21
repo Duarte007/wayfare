@@ -31,15 +31,20 @@ export class DexieTripRepository implements TripRepository {
     await deleteLocal(this.db, 'trips', trip.id);
     // The server keeps the children of a deleted trip; the device has no use for them.
     const db = this.db;
-    await db.transaction(
-      'rw',
-      [db.places, db.stops, db.stays, db.legs, db.activities, db.documents],
-      async () => {
-        for (const table of [db.places, db.stops, db.stays, db.legs, db.activities, db.documents]) {
-          await table.where('trip_id').equals(trip.id).delete();
-        }
-      },
-    );
+    const children = [
+      db.places,
+      db.stops,
+      db.stays,
+      db.legs,
+      db.activities,
+      db.documents,
+      db.checklist_items,
+    ];
+    await db.transaction('rw', children, async () => {
+      for (const table of children) {
+        await table.where('trip_id').equals(trip.id).delete();
+      }
+    });
   }
 
   private async readTrip(tripId: string): Promise<TripDetails | null> {

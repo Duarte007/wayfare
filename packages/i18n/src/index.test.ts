@@ -37,6 +37,7 @@ describe('translations', () => {
             stay: 'S',
             day: 1,
             total: 2,
+            done: 1,
           }),
         key,
       ).not.toThrow();

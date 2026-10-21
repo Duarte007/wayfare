@@ -45,6 +45,7 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
+import { ChecklistLink } from '../../checklist/ui/ChecklistLink';
 import { activityCounts } from '../../itinerary/domain/activity';
 import { ActivityList } from '../../itinerary/ui/ActivityList';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
@@ -144,6 +145,8 @@ function TripOverview({ details }: { details: TripDetails }) {
         <Stat icon={BedDouble} value={details.stays.length} labelKey="statStays" />
         <Stat icon={FileText} value={details.documents.length} labelKey="statDocuments" />
       </section>
+
+      <ChecklistLink tripId={trip.id} />
 
       <MissingCard details={details} itinerary={itinerary} />
 

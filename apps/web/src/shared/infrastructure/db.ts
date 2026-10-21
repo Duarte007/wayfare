@@ -1,5 +1,6 @@
 import type {
   Activity,
+  ChecklistItem,
   DocumentLink,
   Leg,
   Place,
@@ -38,6 +39,8 @@ export class WayfareDB extends Dexie {
   activities!: EntityTable<Activity, 'id'>;
   documents!: EntityTable<TravelDocument, 'id'>;
   documentLinks!: EntityTable<DocumentLink & { id: string }, 'id'>;
+  // Named like the server table: sync stores pulled rows by table name.
+  checklist_items!: EntityTable<ChecklistItem, 'id'>;
   outbox!: EntityTable<OutboxEntry, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
 
@@ -57,6 +60,8 @@ export class WayfareDB extends Dexie {
     });
     // v2: sync looks up pending changes by table.
     this.version(2).stores({ outbox: 'id, createdAt, table' });
+    // v4 (v3 is taken by documents): the trip checklist.
+    this.version(4).stores({ checklist_items: 'id, trip_id' });
   }
 }
 

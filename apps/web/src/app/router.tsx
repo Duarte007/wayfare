@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/application/AuthProvider';
 import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
+import { ChecklistPage } from '../features/checklist/ui/ChecklistPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
 import { AppShell } from '../features/shell/ui/AppShell';
 import { EditTripPage } from '../features/trips/ui/EditTripPage';
@@ -56,6 +57,11 @@ const routeTree = rootRoute.addChildren([
       getParentRoute: () => appRoute,
       path: '/trips/$tripId/edit',
       component: EditTripPage,
+    }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/checklist',
+      component: ChecklistPage,
     }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),

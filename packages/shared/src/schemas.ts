@@ -178,3 +178,28 @@ export const tripMemberSchema = z.object({
   role: z.enum(MEMBER_ROLES),
 });
 export type TripMember = z.infer<typeof tripMemberSchema>;
+
+/** Checklist sections, in the order they are shown. Unknown keys from the server show as 'other'. */
+export const CHECKLIST_GROUPS = [
+  'documents',
+  'money',
+  'health',
+  'tech',
+  'packing',
+  'other',
+] as const;
+export type ChecklistGroup = (typeof CHECKLIST_GROUPS)[number];
+
+export const checklistItemSchema = z.object({
+  ...syncColumns,
+  ...sharingColumns,
+  trip_id: z.uuid(),
+  group_key: z.string().min(1).max(40),
+  title: z.string().min(1).max(200),
+  done: z.boolean().default(false),
+  due_date: isoDate.nullable().optional(),
+  /** Set when the item came from a starter template, so it is never suggested twice. */
+  template_key: z.string().max(80).nullable().optional(),
+  position: z.number().int().nonnegative().default(0),
+});
+export type ChecklistItem = z.infer<typeof checklistItemSchema>;
