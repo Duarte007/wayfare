@@ -171,12 +171,13 @@ function TripOverview({ details }: { details: TripDetails }) {
       <MissingCard details={details} itinerary={itinerary} />
 
       <Card>
-        <CardHeader>
+        {/* Calendar, map and add city don't fit beside the title on phones: let them wrap below. */}
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle>
             <h2>{tn('itinerary')}</h2>
           </CardTitle>
           {itinerary.length > 0 ? (
-            <CardAction className="flex gap-2">
+            <CardAction className="flex flex-wrap gap-2">
               <Button asChild variant="outline">
                 <Link to="/trips/$tripId/calendar" params={{ tripId: trip.id }}>
                   <CalendarDays aria-hidden />
