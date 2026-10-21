@@ -23,6 +23,10 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] Calendar view coloured by city with a day plan — #17
 - [x] Documents: upload, offline cache, search/filter, auto label, private by default — #18
 - [x] Checklist with suggestions per destination country — #19
+- [x] Group trips: invite links, members and roles, Mine / Everyone itinerary — #21
+- [x] End-to-end tests (Playwright, fake backend) on every PR — #22 · pending changes on phones — #23
+- [x] Documents linked to stays, legs and activities — #24
+- [x] Trip map with per-city offline download (tiles: owner action in docs/MAPS.md) — #25
 
 ## Now — make the trip usable end to end
 
@@ -66,7 +70,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** activities with title, date, needs-booking/booked and URL can be added, ticked
   off and assigned to some members; counts show on the timeline.
 
-### 6. Documents (upload, offline, search, auto label) [~] (linking to stay/leg/activity in progress)
+### 6. Documents (upload, offline, search, auto label) ✅
 
 - **Goal:** keep passports, tickets and vouchers available offline.
 - **Done when:** files upload to the private `documents` bucket, are cached on the device for
@@ -74,7 +78,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
   and filtered by label, linked to a stay/leg/activity (pushes `document_links`), and are
   private by default with an option to share with the group.
 
-### 7. Group trips (invites, members, my itinerary)
+### 7. Group trips (invites, members, my itinerary) ✅
 
 - **Goal:** plan together and still see your own plan.
 - **Done when:** the owner creates an invite link (`create_trip_invite`), a friend opens it,
@@ -106,7 +110,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Goal:** the reference artifact's short summary per city (what to know, getting around,
   money, phrases), cached in `ai_content` and readable offline.
 
-### 12. Offline maps
+### 12. Offline maps ✅ (owner action: host the PMTiles extract, see docs/MAPS.md)
 
 - **Goal:** see cities, stays and activities on a map without network, also in China.
 - **Done when:** a map tab (MapLibre) shows the trip's places; the user can download the area
@@ -151,7 +155,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** a periodic full refresh catches rows a version cursor could miss; sync errors
   that were set aside are visible (and retryable) from the profile.
 
-### 20. Automated end-to-end tests in CI
+### 20. Automated end-to-end tests in CI ✅
 
 - **Done when:** the Playwright flows used in QA (sign-in, create trip, trip page, sync, click
   audit, axe) run in GitHub Actions against a preview build on every PR.
