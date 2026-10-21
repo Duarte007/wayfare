@@ -31,6 +31,7 @@ describe('translations', () => {
             name: 'n',
             date: 'd',
             range: 'r',
+            activity: 'x',
             max: 120,
             leg: 'L',
             stay: 'S',

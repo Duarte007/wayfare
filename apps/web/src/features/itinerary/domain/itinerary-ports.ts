@@ -1,4 +1,4 @@
-import type { Leg, Place, PlaceSuggestion, Stay, Stop, Trip } from '@wayfare/shared';
+import type { Activity, Leg, Place, PlaceSuggestion, Stay, Stop, Trip } from '@wayfare/shared';
 
 /** One edit of the itinerary, saved atomically on the device and queued for sync. */
 export interface ItineraryChange {
@@ -7,6 +7,7 @@ export interface ItineraryChange {
   stops?: Stop[];
   stays?: Stay[];
   legs?: Leg[];
+  activities?: Activity[];
   /** Ids to delete, children first so nothing on the server points at a deleted city. */
   removed?: { activities?: string[]; stays?: string[]; legs?: string[]; stops?: string[] };
 }

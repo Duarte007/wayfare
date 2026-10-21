@@ -10,6 +10,7 @@ export class DexieItineraryRepository implements ItineraryRepository {
       ...(change.stops ?? []).map((row) => ({ table: 'stops' as const, row })),
       ...(change.stays ?? []).map((row) => ({ table: 'stays' as const, row })),
       ...(change.legs ?? []).map((row) => ({ table: 'legs' as const, row })),
+      ...(change.activities ?? []).map((row) => ({ table: 'activities' as const, row })),
       ...(change.trip ? [{ table: 'trips' as const, row: change.trip }] : []),
     ];
     const r = change.removed ?? {};

@@ -125,10 +125,17 @@ export const activitySchema = z.object({
   stop_id: z.uuid(),
   title: z.string().min(1).max(200),
   date: isoDate.nullable().optional(),
+  /** Local time in the city, "HH:mm" or "HH:mm:ss" as Postgres returns it. */
+  start_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .nullable()
+    .optional(),
   needs_booking: z.boolean().default(false),
   booked: z.boolean().default(false),
   url: z.url().nullable().optional(),
   source: z.enum(['user', 'ai']).default('user'),
+  notes: z.string().max(5000).nullable().optional(),
 });
 export type Activity = z.infer<typeof activitySchema>;
 

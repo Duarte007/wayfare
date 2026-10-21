@@ -44,4 +44,23 @@ describe('computeGaps', () => {
     });
     expect(gaps).toEqual([]);
   });
+
+  it('lists activities that still need booking', () => {
+    const gaps = computeGaps({
+      stops: [],
+      stays: [],
+      legs: [],
+      activities: [
+        { id: 'a1', needs_booking: true, booked: false },
+        { id: 'a2', needs_booking: true, booked: true },
+        { id: 'a3', needs_booking: false, booked: false },
+      ],
+      documents: [
+        { id: 'd1', label: 'passport' },
+        { id: 'd2', label: 'insurance' },
+      ],
+      links: [],
+    });
+    expect(gaps).toEqual([{ kind: 'activity_to_book', activityId: 'a1' }]);
+  });
 });

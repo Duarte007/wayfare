@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
+import { MembersProvider } from '../features/members/application/MembersProvider';
 import { SyncProvider } from '../features/sync/application/SyncProvider';
 import { TripsProvider } from '../features/trips/application/TripsProvider';
 import '../shared/lib/i18n';
@@ -33,7 +34,9 @@ createRoot(document.getElementById('root')!).render(
             repository={dependencies.itinerary}
             placeSearch={dependencies.placeSearch}
           >
-            <RouterProvider router={router} />
+            <MembersProvider directory={dependencies.members}>
+              <RouterProvider router={router} />
+            </MembersProvider>
           </ItineraryProvider>
         </TripsProvider>
       </SyncProvider>
