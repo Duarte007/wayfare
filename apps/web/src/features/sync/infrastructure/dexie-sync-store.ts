@@ -1,18 +1,18 @@
-import { liveQuery, type Table } from 'dexie';
-import type { WayfareDB } from '../../../shared/infrastructure/db';
+import { liveQuery } from 'dexie';
+import {
+  documentLinkId,
+  localTable,
+  type StoredDocumentLink,
+  type WayfareDB,
+} from '../../../shared/infrastructure/db';
 import type { LocalSyncStore, PendingChange, PulledTable, RemoteRow } from '../domain/sync-ports';
 
 const cursorKey = (table: PulledTable) => `sync.cursor.${table}`;
 
-/** Server table → device table, and the row's key on the device. */
-function localTable(db: WayfareDB, table: PulledTable): Table<Record<string, unknown>, string> {
-  // Server rows are stored as they come; the screens read them through the typed tables.
-  return table === 'document_links' ? (db.documentLinks as unknown as Table) : db.table(table);
-}
-
+/** The row's key on the device; document links have a composite key on the server. */
 function localId(table: PulledTable, row: RemoteRow): string {
   return table === 'document_links'
-    ? `${String(row.document_id)}:${String(row.entity_type)}:${String(row.entity_id)}`
+    ? documentLinkId(row as unknown as StoredDocumentLink)
     : row.id!;
 }
 

@@ -27,7 +27,10 @@ import {
 import { Label } from '@/shared/ui/label';
 import { Switch } from '@/shared/ui/switch';
 import { Textarea } from '@/shared/ui/textarea';
+import { Separator } from '@/shared/ui/separator';
 import { Field } from '@/shared/ui/ui';
+import { labelFor } from '../../documents/domain/document-link';
+import { EntityDocuments } from '../../documents/ui/EntityDocuments';
 import { useStayForm } from '../application/useStayForm';
 import { STAY_NAME_MAX, type StayError } from '../domain/stay';
 
@@ -99,6 +102,17 @@ export function StayDialog({
             })}
           </DialogDescription>
         </DialogHeader>
+        {existing ? (
+          <>
+            {/* Outside the form: attaching opens dialogs with forms of their own. */}
+            <EntityDocuments
+              tripId={stop.trip_id}
+              entity={{ type: 'stay', id: existing.id }}
+              label={labelFor({ type: 'stay' })}
+            />
+            <Separator />
+          </>
+        ) : null}
         <form noValidate onSubmit={(e) => void onSubmit(e)} className="grid gap-5">
           <Field
             label={t('stayName')}

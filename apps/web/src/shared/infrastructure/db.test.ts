@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { applyLocal, nextQueuedAt, saveLocal, WayfareDB } from './db';
+import {
+  applyLocal,
+  documentLinkId,
+  documentLinkKey,
+  nextQueuedAt,
+  saveLocal,
+  WayfareDB,
+} from './db';
 
 const db = new WayfareDB();
 
@@ -47,5 +54,51 @@ describe('outbox order', () => {
       'stops:stop-1',
       'stops:stop-1',
     ]);
+  });
+});
+
+describe('document links', () => {
+  const link = (documentId: string, entityType: 'stay' | 'leg' | 'activity', entityId: string) => {
+    const key = { document_id: documentId, entity_type: entityType, entity_id: entityId };
+    return { id: documentLinkId(key), ...key, trip_id: 't', deleted_at: null };
+  };
+
+  it('builds and reads back the composite id', () => {
+    const key = { document_id: 'd', entity_type: 'leg' as const, entity_id: 'l' };
+    expect(documentLinkId(key)).toBe('d:leg:l');
+    expect(documentLinkKey('d:leg:l')).toEqual({ id: 'd:leg:l', ...key });
+  });
+
+  it('removing a stay, leg or activity also removes the links pointing at it, first', async () => {
+    const db3 = new WayfareDB();
+    await db3.open();
+    await Promise.all([db3.outbox.clear(), db3.documentLinks.clear()]);
+    await db3.documentLinks.bulkPut([
+      link('d1', 'stay', 's1'),
+      link('d2', 'stay', 's1'),
+      link('d1', 'leg', 'l1'),
+      link('d1', 'activity', 'a1'),
+    ]);
+    await applyLocal(db3, {
+      upserts: [],
+      deletes: [
+        { table: 'stays', id: 's1' },
+        { table: 'activities', id: 'a1' },
+      ],
+    });
+    expect((await db3.documentLinks.toArray()).map((l) => l.id)).toEqual(['d1:leg:l1']);
+    const queued = await db3.outbox.orderBy('createdAt').toArray();
+    expect(queued.map((e) => `${e.table}:${(e.row as { id: string }).id}`)).toEqual([
+      'document_links:d1:stay:s1',
+      'document_links:d2:stay:s1',
+      'stays:s1',
+      'document_links:d1:activity:a1',
+      'activities:a1',
+    ]);
+    expect(queued[0]!.row).toMatchObject({
+      document_id: 'd1',
+      entity_type: 'stay',
+      entity_id: 's1',
+    });
   });
 });

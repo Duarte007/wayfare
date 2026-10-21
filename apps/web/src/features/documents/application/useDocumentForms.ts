@@ -1,4 +1,4 @@
-import { learnBoosts, type TravelDocument } from '@wayfare/shared';
+import { learnBoosts, type DocumentLabel, type TravelDocument } from '@wayfare/shared';
 import { useState } from 'react';
 import { useAuth } from '../../auth/application/AuthProvider';
 import {
@@ -11,13 +11,20 @@ import {
   type DocumentInput,
 } from '../domain/document';
 import { mimeOf, validateFile, type FileError } from '../domain/document-file';
+import { buildLink, type LinkEntity } from '../domain/document-link';
 import { useDocumentsDependencies } from './DocumentsProvider';
+
+/** A document added from a stay, leg or activity: attached to it, with the type it implies. */
+export interface AttachTo {
+  entity: LinkEntity;
+  label: DocumentLabel;
+}
 
 /**
  * Add a document: pick a file, review the suggested title and label, save. The file stays on the
- * device (it opens offline) and uploads on the next sync.
+ * device (it opens offline) and uploads on the next sync. With `attachTo` it is also linked.
  */
-export function useAddDocument(tripId: string) {
+export function useAddDocument(tripId: string, attachTo?: AttachTo) {
   const { repository, boosts } = useDocumentsDependencies();
   const { session } = useAuth();
   const [file, setFile] = useState<File | null>(null);
@@ -35,7 +42,7 @@ export function useAddDocument(tripId: string) {
     if (error || !session) return false;
     const learned = await boosts.read(session.userId).catch(() => ({}));
     setFile(picked);
-    setDraft(draftFromFileName(picked.name, learned));
+    setDraft(draftFromFileName(picked.name, learned, attachTo?.label));
     setSubmitted(false);
     return true;
   };
@@ -64,9 +71,15 @@ export function useAddDocument(tripId: string) {
         file: { mime: mimeOf(file)!, size: file.size },
         suggestion: { label: draft.suggestedLabel, confidence: draft.confidence },
       });
-      await repository.add(document, file);
-      // A corrected label teaches the next similar file name.
-      if (draft.label !== draft.suggestedLabel && draft.label !== 'other') {
+      await repository.add(
+        document,
+        file,
+        attachTo ? [buildLink(document.id, tripId, attachTo.entity)] : [],
+      );
+      // A corrected label teaches the next similar file name (a type that came from where the
+      // file was attached is no correction).
+      const corrected = draft.label !== draft.suggestedLabel && draft.label !== attachTo?.label;
+      if (corrected && draft.label !== 'other') {
         const current = await boosts.read(session.userId).catch(() => ({}));
         await boosts
           .write(session.userId, learnBoosts(file.name, draft.label, current))

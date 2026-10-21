@@ -73,4 +73,16 @@ describe('DexieSyncStore', () => {
     );
     expect(await db.documentLinks.count()).toBe(0);
   });
+
+  it('keeps a link made offline when the server still has it removed', async () => {
+    const link = { document_id: 'd1', entity_type: 'leg', entity_id: 'l1', trip_id: 't' } as const;
+    await saveLocal(db, 'document_links', { id: 'd1:leg:l1', ...link, deleted_at: null });
+    await store.applyRemote(
+      'document_links',
+      [{ ...link, version: 5, deleted_at: '2026-10-21T00:00:00Z' }],
+      5,
+    );
+    expect(await db.documentLinks.get('d1:leg:l1')).toMatchObject(link);
+    expect((await store.pendingChanges(10)).map((c) => c.table)).toEqual(['document_links']);
+  });
 });

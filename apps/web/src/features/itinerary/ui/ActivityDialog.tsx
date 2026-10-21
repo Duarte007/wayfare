@@ -30,7 +30,10 @@ import { Label } from '@/shared/ui/label';
 import { Switch } from '@/shared/ui/switch';
 import { Textarea } from '@/shared/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group';
+import { Separator } from '@/shared/ui/separator';
 import { Field } from '@/shared/ui/ui';
+import { labelFor } from '../../documents/domain/document-link';
+import { EntityDocuments } from '../../documents/ui/EntityDocuments';
 import type { TripMember } from '../../members/domain/members';
 import { useActivityForm } from '../application/useActivityForm';
 import { ACTIVITY_TITLE_MAX, type ActivityError } from '../domain/activity';
@@ -96,6 +99,17 @@ export function ActivityDialog({
           <DialogTitle>{existing ? t('editActivity') : t('addActivityIn', { city })}</DialogTitle>
           <DialogDescription>{t('activityHint')}</DialogDescription>
         </DialogHeader>
+        {existing ? (
+          <>
+            {/* Outside the form: attaching opens dialogs with forms of their own. */}
+            <EntityDocuments
+              tripId={existing.trip_id}
+              entity={{ type: 'activity', id: existing.id }}
+              label={labelFor({ type: 'activity' })}
+            />
+            <Separator />
+          </>
+        ) : null}
         <form noValidate onSubmit={(e) => void onSubmit(e)} className="grid gap-5">
           <Field
             label={t('activityName')}

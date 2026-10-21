@@ -41,7 +41,10 @@ import { Label } from '@/shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { Switch } from '@/shared/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group';
+import { Separator } from '@/shared/ui/separator';
 import { Field } from '@/shared/ui/ui';
+import { labelFor } from '../../documents/domain/document-link';
+import { EntityDocuments } from '../../documents/ui/EntityDocuments';
 import type { ItineraryStop } from '../../trips/domain/trip-overview';
 import { useLegForm } from '../application/useLegForm';
 import type { TransportMode } from '../domain/leg';
@@ -100,6 +103,17 @@ export function LegDialog({
           <DialogTitle>{t('legTitle', { from: fromName, to: toName })}</DialogTitle>
           <DialogDescription>{t('legHint')}</DialogDescription>
         </DialogHeader>
+        {existing ? (
+          <>
+            {/* Outside the form: attaching opens dialogs with forms of their own. */}
+            <EntityDocuments
+              tripId={existing.trip_id}
+              entity={{ type: 'leg', id: existing.id }}
+              label={labelFor({ type: 'leg', mode: existing.mode })}
+            />
+            <Separator />
+          </>
+        ) : null}
         <form noValidate onSubmit={(e) => void onSubmit(e)} className="grid gap-5">
           <div className="grid gap-2">
             <Label id={modeId}>{t('legMode')}</Label>
