@@ -8,7 +8,7 @@ describe('local store', () => {
     const trip = {
       id: crypto.randomUUID(),
       owner_id: crypto.randomUUID(),
-      name: 'China 2026',
+      name: 'Lisbon & Porto',
       start_date: '2026-10-23',
       end_date: '2026-11-19',
     };

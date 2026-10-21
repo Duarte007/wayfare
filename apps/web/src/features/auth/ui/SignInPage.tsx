@@ -1,23 +1,36 @@
+import {
+  CloudOff,
+  KeyRound,
+  LogIn,
+  Mail,
+  MailCheck,
+  Plane,
+  Send,
+  UserPlus,
+  type LucideIcon,
+} from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AppleLogo, GoogleLogo } from '../../../shared/ui/BrandIcons';
 import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
-import { Button, Field } from '../../../shared/ui/ui';
+import { Button, Divider, Field, IconTile, PasswordField } from '../../../shared/ui/ui';
 import { useSignInFlow, type FlowMessage, type SignInMode } from '../application/useSignInFlow';
 
-const SUBMIT_LABELS: Record<
-  SignInMode,
-  'signIn' | 'createAccount' | 'sendReset' | 'emailCode' | 'verifyCode'
-> = {
-  signIn: 'signIn',
-  signUp: 'createAccount',
-  forgot: 'sendReset',
-  code: 'emailCode',
-  verify: 'verifyCode',
+type SubmitKey = 'signIn' | 'createAccount' | 'sendReset' | 'emailCode' | 'verifyCode';
+
+const SUBMIT: Record<SignInMode, { label: SubmitKey; icon: LucideIcon }> = {
+  signIn: { label: 'signIn', icon: LogIn },
+  signUp: { label: 'createAccount', icon: UserPlus },
+  forgot: { label: 'sendReset', icon: Send },
+  code: { label: 'emailCode', icon: Send },
+  verify: { label: 'verifyCode', icon: MailCheck },
 };
 
 export function SignInPage() {
   const { t } = useTranslation('auth');
   const flow = useSignInFlow();
+  const submit = SUBMIT[flow.mode];
+  const SubmitIcon = submit.icon;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -26,18 +39,16 @@ export function SignInPage() {
 
   return (
     <main className="mx-auto grid min-h-dvh max-w-sm content-center gap-6 px-4 py-10">
-      <header className="grid gap-2">
+      <header className="grid justify-items-start gap-3">
+        <IconTile icon={Plane} />
         <h1 className="text-3xl font-extrabold tracking-tight">{t('title')}</h1>
         <p className="text-muted">{t('subtitle')}</p>
       </header>
 
-      <p className="rounded-lg border border-line bg-surface p-3 text-sm" role="note">
-        {t('chinaNotice')}
-      </p>
-
-      <form className="grid gap-4" onSubmit={onSubmit} noValidate>
+      <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={flow.busy}>
         <Field
           label={t('email')}
+          icon={Mail}
           type="email"
           autoComplete="email"
           inputMode="email"
@@ -46,9 +57,11 @@ export function SignInPage() {
           onChange={(e) => flow.setEmail(e.target.value)}
         />
         {flow.mode === 'signIn' || flow.mode === 'signUp' ? (
-          <Field
+          <PasswordField
             label={t('password')}
-            type="password"
+            icon={KeyRound}
+            showLabel={t('showPassword')}
+            hideLabel={t('hidePassword')}
             autoComplete={flow.mode === 'signUp' ? 'new-password' : 'current-password'}
             required
             hint={flow.mode === 'signUp' ? t('passwordHint') : undefined}
@@ -59,6 +72,7 @@ export function SignInPage() {
         {flow.mode === 'verify' ? (
           <Field
             label={t('code')}
+            icon={KeyRound}
             inputMode="numeric"
             autoComplete="one-time-code"
             required
@@ -69,23 +83,20 @@ export function SignInPage() {
 
         {flow.message ? <FlowMessageText message={flow.message} /> : null}
 
-        <Button type="submit" disabled={!flow.canSubmit}>
-          {t(SUBMIT_LABELS[flow.mode])}
+        <Button type="submit" disabled={!flow.canSubmit} icon={<SubmitIcon className="size-5" />}>
+          {t(submit.label)}
         </Button>
 
         <ModeLinks mode={flow.mode} onSwitch={flow.switchMode} />
       </form>
 
-      <div className="flex items-center gap-3 text-sm text-muted" aria-hidden="true">
-        <span className="h-px flex-1 bg-line" />
-        {t('or')}
-        <span className="h-px flex-1 bg-line" />
-      </div>
+      <Divider label={t('or')} />
 
       <div className="grid gap-3">
         <Button
-          variant="secondary"
+          variant="dark"
           disabled={flow.busy}
+          icon={<AppleLogo />}
           onClick={() => void flow.signInWith('apple')}
         >
           {t('continueApple')}
@@ -93,16 +104,27 @@ export function SignInPage() {
         <Button
           variant="secondary"
           disabled={flow.busy}
+          icon={<GoogleLogo />}
           onClick={() => void flow.signInWith('google')}
         >
           {t('continueGoogle')}
         </Button>
         {flow.mode !== 'code' && flow.mode !== 'verify' ? (
-          <Button variant="secondary" disabled={flow.busy} onClick={() => flow.switchMode('code')}>
+          <Button
+            variant="secondary"
+            disabled={flow.busy}
+            icon={<Mail className="size-5" />}
+            onClick={() => flow.switchMode('code')}
+          >
             {t('emailCode')}
           </Button>
         ) : null}
       </div>
+
+      <aside className="flex gap-3 rounded-[var(--radius-card)] bg-sky-soft p-4 text-sm">
+        <CloudOff className="mt-0.5 size-5 shrink-0 text-sky" aria-hidden />
+        <p>{t('offlineTip')}</p>
+      </aside>
 
       <footer className="flex justify-center">
         <LanguageSelect />
@@ -115,13 +137,13 @@ function FlowMessageText({ message }: { message: FlowMessage }) {
   const { t } = useTranslation('auth');
   if (message.kind === 'error') {
     return (
-      <p className="text-sm text-danger" role="alert">
+      <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">
         {t(message.key)}
       </p>
     );
   }
   return (
-    <p className="text-sm" role="status">
+    <p className="rounded-xl bg-success/10 px-3 py-2 text-sm" role="status">
       {t(message.key, { email: message.email })}
     </p>
   );
@@ -132,7 +154,6 @@ function ModeLinks({ mode, onSwitch }: { mode: SignInMode; onSwitch: (mode: Sign
   if (mode !== 'signIn') {
     return (
       <Button
-        type="button"
         variant="link"
         className="justify-self-start text-sm"
         onClick={() => onSwitch('signIn')}
@@ -143,10 +164,10 @@ function ModeLinks({ mode, onSwitch }: { mode: SignInMode; onSwitch: (mode: Sign
   }
   return (
     <div className="flex flex-wrap justify-between gap-2 text-sm">
-      <Button type="button" variant="link" onClick={() => onSwitch('signUp')}>
+      <Button variant="link" onClick={() => onSwitch('signUp')}>
         {t('noAccount')}
       </Button>
-      <Button type="button" variant="link" onClick={() => onSwitch('forgot')}>
+      <Button variant="link" onClick={() => onSwitch('forgot')}>
         {t('forgotPassword')}
       </Button>
     </div>

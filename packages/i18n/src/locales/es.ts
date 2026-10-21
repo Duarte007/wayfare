@@ -39,14 +39,19 @@ export const es = {
     verifyCode: 'Verificar código',
     codeSent: 'Enviamos un código a {email}.',
     confirmEmail: 'Revisa {email} para confirmar tu cuenta y luego inicia sesión.',
-    chinaNotice:
-      '¿Vas a China continental? Inicia sesión antes de salir. Google no funciona en las redes chinas; el correo y Apple sí.',
+    offlineTip:
+      'Inicia sesión una vez antes de viajar. Después, tus viajes, mapas y documentos funcionan sin conexión, en cualquier lugar.',
+    showPassword: 'Mostrar contraseña',
+    hidePassword: 'Ocultar contraseña',
     errorGeneric: 'Algo salió mal. Revisa tu conexión e inténtalo de nuevo.',
     errorInvalid: 'Correo o contraseña incorrectos.',
   },
   trips: {
     title: 'Tus viajes',
-    empty: 'Aún no tienes viajes. Crea uno para empezar.',
+    greeting: '¿Cuál es tu próximo destino?',
+    welcome: 'Qué bueno verte',
+    emptyTitle: 'Aún no tienes viajes',
+    empty: 'Planifica tu primera aventura: ciudades, fechas y documentos, todo en un solo lugar.',
     newTrip: 'Nuevo viaje',
     nights: '{count, plural, one {# noche} other {# noches}}',
     cities: '{count, plural, one {# ciudad} other {# ciudades}}',

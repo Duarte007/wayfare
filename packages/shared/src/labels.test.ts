@@ -23,6 +23,20 @@ describe('suggestLabel', () => {
     ['Certificado vacina febre amarela.pdf', 'health'],
     ['Visto China.pdf', 'visa'],
     ['Forbidden City ingresso.pdf', 'activity'],
+    // Destinations around the world
+    ['Eurostar-London-Paris.pdf', 'train'],
+    ['SNCF e-billet Lyon.pdf', 'train'],
+    ['Trenitalia Roma Firenze.pdf', 'train'],
+    ['Amtrak NYC to Boston.pdf', 'train'],
+    ['ICE 578 Berlin.pdf', 'train'],
+    ['FlixBus Lisboa Porto.pdf', 'bus_ferry'],
+    ['Airbnb Lisbon.pdf', 'stay'],
+    ['Booking.com confirmation Mexico City.pdf', 'stay'],
+    ['Louvre museum tickets.pdf', 'activity'],
+    ['ESTA approval USA.pdf', 'visa'],
+    ['Canada eTA.pdf', 'visa'],
+    ['India e-Visa.pdf', 'visa'],
+    ['Estação de trem Porto.pdf', 'train'],
   ];
   it.each(cases)('%s -> %s', (name, label) => {
     expect(suggestLabel(name).label).toBe(label);

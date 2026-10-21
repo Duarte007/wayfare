@@ -1,37 +1,59 @@
 @import 'tailwindcss';
 
-/* Design tokens: light by default, dark from the system or a forced data-theme. */
+/*
+ * Design tokens: light by default, dark from the system or a forced data-theme.
+ * Text on `accent` uses `on-accent`; both pairs meet WCAG AA (4.5:1) for normal text.
+ * Fonts are system fonts only: nothing is downloaded, so text renders offline and on any network.
+ */
 @theme {
-  --color-bg: #edf0ee;
-  --color-surface: #fafbfa;
-  --color-ink: #15222b;
-  --color-muted: #586972;
-  --color-line: #d3dbd8;
-  --color-accent: #c96a24;
-  --color-danger: #b4432f;
-  --font-sans: 'Inter', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --color-bg: #f6f4ef;
+  --color-surface: #ffffff;
+  --color-ink: #1d2730;
+  --color-muted: #5b6770;
+  --color-line: #e2ddd3;
+  --color-accent: #a84e17;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #fbe9dc;
+  --color-sky-soft: #e3f0f7;
+  --color-sky: #2f6f8f;
+  --color-success: #2e7d4f;
+  --color-danger: #b23a2b;
+  --font-sans:
+    ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', 'Noto Sans',
+    'Noto Sans SC', 'Noto Sans JP', sans-serif;
+  --radius-card: 1.25rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg: #0e171d;
-    --color-surface: #16232b;
-    --color-ink: #e7eeea;
-    --color-muted: #97a7ae;
-    --color-line: #2a3a43;
-    --color-accent: #f09a55;
-    --color-danger: #e4745e;
+    --color-bg: #11181d;
+    --color-surface: #1a242b;
+    --color-ink: #eef2f0;
+    --color-muted: #a3b0b6;
+    --color-line: #2c3a42;
+    --color-accent: #f2a066;
+    --color-on-accent: #1d1206;
+    --color-accent-soft: #3a2616;
+    --color-sky-soft: #15303d;
+    --color-sky: #8cc6e0;
+    --color-success: #6cbf82;
+    --color-danger: #f08a77;
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --color-bg: #0e171d;
-  --color-surface: #16232b;
-  --color-ink: #e7eeea;
-  --color-muted: #97a7ae;
-  --color-line: #2a3a43;
-  --color-accent: #f09a55;
-  --color-danger: #e4745e;
+  --color-bg: #11181d;
+  --color-surface: #1a242b;
+  --color-ink: #eef2f0;
+  --color-muted: #a3b0b6;
+  --color-line: #2c3a42;
+  --color-accent: #f2a066;
+  --color-on-accent: #1d1206;
+  --color-accent-soft: #3a2616;
+  --color-sky-soft: #15303d;
+  --color-sky: #8cc6e0;
+  --color-success: #6cbf82;
+  --color-danger: #f08a77;
   color-scheme: dark;
 }
 
@@ -40,6 +62,22 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* One visible focus style for keyboard users, everywhere. */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 :lang(ja) {

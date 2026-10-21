@@ -25,9 +25,9 @@ $$;
 -- Ana creates a trip with a shared stop, a private activity and a private passport.
 select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
 insert into public.trips (id, name, start_date, end_date)
-  values ('10000000-0000-0000-0000-000000000001', 'China 2026', '2026-10-23', '2026-11-19');
+  values ('10000000-0000-0000-0000-000000000001', 'Lisbon & Porto', '2026-10-23', '2026-11-19');
 insert into public.places (id, trip_id, name, lat, lng, country_code)
-  values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'Beijing', 39.9, 116.4, 'CN');
+  values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'Lisbon', 38.72, -9.14, 'PT');
 insert into public.stops (id, trip_id, place_id, start_date, end_date, position)
   values ('30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
           '20000000-0000-0000-0000-000000000001', '2026-10-23', '2026-10-28', 0);

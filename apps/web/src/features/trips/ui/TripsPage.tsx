@@ -1,9 +1,19 @@
 import type { Trip } from '@wayfare/shared';
-import { LogOut, Plus } from 'lucide-react';
+import {
+  CalendarDays,
+  ChevronRight,
+  Hourglass,
+  Loader2,
+  LogOut,
+  Luggage,
+  MapPinned,
+  Moon,
+  Plus,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { localToday } from '../../../shared/lib/dates';
+import { formatDateRange, localToday } from '../../../shared/lib/dates';
 import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
-import { Button } from '../../../shared/ui/ui';
+import { Button, IconButton, IconTile } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useTrips } from '../application/TripsProvider';
 import { summarizeTrip } from '../domain/trip-summary';
@@ -17,26 +27,38 @@ export function TripsPage() {
 
   return (
     <main className="mx-auto grid max-w-2xl gap-6 px-4 py-6">
-      <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Button variant="secondary" onClick={() => void signOut()} aria-label={tc('signOut')}>
-          <LogOut className="size-5" aria-hidden />
-        </Button>
+      <header className="flex items-start justify-between gap-4">
+        <div className="grid gap-1">
+          <p className="text-sm font-medium text-muted">{t('welcome')}</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">{t('greeting')}</h1>
+        </div>
+        <IconButton icon={LogOut} label={tc('signOut')} onClick={() => void signOut()} />
       </header>
 
       {trips === undefined ? (
-        <p className="text-muted">{tc('loading')}</p>
+        <p className="inline-flex items-center gap-2 text-muted" role="status">
+          <Loader2 className="size-5 animate-spin" aria-hidden />
+          {tc('loading')}
+        </p>
       ) : trips.length === 0 ? (
         <EmptyTrips />
       ) : (
-        <ul className="grid gap-3">
-          {trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
-          ))}
-        </ul>
+        <section className="grid gap-3" aria-labelledby="trips-heading">
+          <div className="flex items-center justify-between">
+            <h2 id="trips-heading" className="text-lg font-bold">
+              {t('title')}
+            </h2>
+            <Button icon={<Plus className="size-5" />}>{t('newTrip')}</Button>
+          </div>
+          <ul className="grid gap-3">
+            {trips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} />
+            ))}
+          </ul>
+        </section>
       )}
 
-      <footer>
+      <footer className="flex justify-center pt-4">
         <LanguageSelect />
       </footer>
     </main>
@@ -46,27 +68,45 @@ export function TripsPage() {
 function EmptyTrips() {
   const { t } = useTranslation('trips');
   return (
-    <section className="grid justify-items-start gap-4 rounded-xl border border-dashed border-line p-6">
-      <p className="text-muted">{t('empty')}</p>
-      <Button>
-        <span className="inline-flex items-center gap-2">
-          <Plus className="size-5" aria-hidden /> {t('newTrip')}
-        </span>
-      </Button>
+    <section className="grid justify-items-center gap-4 rounded-[var(--radius-card)] border border-dashed border-line bg-surface px-6 py-10 text-center">
+      <IconTile icon={Luggage} size="lg" />
+      <div className="grid gap-1">
+        <h2 className="text-xl font-bold">{t('emptyTitle')}</h2>
+        <p className="max-w-xs text-muted">{t('empty')}</p>
+      </div>
+      <Button icon={<Plus className="size-5" />}>{t('newTrip')}</Button>
     </section>
   );
 }
 
 function TripCard({ trip }: { trip: Trip }) {
-  const { t } = useTranslation('trips');
+  const { t, i18n } = useTranslation('trips');
   const { nights, daysToGo } = summarizeTrip(trip, localToday());
   return (
-    <li className="rounded-xl border border-line bg-surface p-4">
-      <h2 className="text-lg font-semibold">{trip.name}</h2>
-      <p className="text-sm text-muted">
-        {trip.start_date} – {trip.end_date} · {t('nights', { count: nights })}
-        {daysToGo > 0 ? ` · ${t('daysToGo', { count: daysToGo })}` : ''}
-      </p>
+    <li>
+      <article className="flex items-center gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-sm">
+        <IconTile icon={MapPinned} tone="sky" />
+        <div className="grid min-w-0 flex-1 gap-1">
+          <h3 className="truncate text-lg font-bold">{trip.name}</h3>
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+            <span className="inline-flex items-center gap-1">
+              <CalendarDays className="size-4" aria-hidden />
+              {formatDateRange(trip.start_date, trip.end_date, i18n.language)}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Moon className="size-4" aria-hidden />
+              {t('nights', { count: nights })}
+            </span>
+          </p>
+          {daysToGo > 0 ? (
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent">
+              <Hourglass className="size-3.5" aria-hidden />
+              {t('daysToGo', { count: daysToGo })}
+            </span>
+          ) : null}
+        </div>
+        <ChevronRight className="size-5 shrink-0 text-muted" aria-hidden />
+      </article>
     </li>
   );
 }

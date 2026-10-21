@@ -37,14 +37,19 @@ export const en = {
     verifyCode: 'Verify code',
     codeSent: 'We sent a code to {email}.',
     confirmEmail: 'Check {email} to confirm your account, then sign in.',
-    chinaNotice:
-      'Going to mainland China? Sign in before you leave. Google sign-in does not work on Chinese networks; email and Apple do.',
+    offlineTip:
+      'Sign in once before you travel. After that, your trips, maps and documents work offline, anywhere.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
     errorGeneric: 'Something went wrong. Check your connection and try again.',
     errorInvalid: 'Email or password is incorrect.',
   },
   trips: {
     title: 'Your trips',
-    empty: 'No trips yet. Create one to start planning.',
+    greeting: 'Where to next?',
+    welcome: 'Welcome back',
+    emptyTitle: 'No trips yet',
+    empty: 'Plan your first adventure: add cities, dates and documents, all in one place.',
     newTrip: 'New trip',
     nights: '{count, plural, one {# night} other {# nights}}',
     cities: '{count, plural, one {# city} other {# cities}}',
