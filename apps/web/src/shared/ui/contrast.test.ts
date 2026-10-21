@@ -72,3 +72,11 @@ describe('browser chrome colors', () => {
     expect(vite).toContain(`background_color: '${light.bg}'`);
   });
 });
+
+describe('focus style', () => {
+  it('lives in the base layer so a field can show its ring on the wrapper, not the bare input', () => {
+    const base = css.match(/@layer base\s*{([\s\S]*?)\n}/)?.[1] ?? '';
+    expect(base).toContain(':focus-visible');
+    expect(css.replace(/@layer base\s*{[\s\S]*?\n}/, '')).not.toMatch(/^:focus-visible/m);
+  });
+});
