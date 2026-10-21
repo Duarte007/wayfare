@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/application/AuthProvider';
 import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
+import { ProfilePage } from '../features/profile/ui/ProfilePage';
+import { AppShell } from '../features/shell/ui/AppShell';
 import { TripsPage } from '../features/trips/ui/TripsPage';
 
 function Root() {
@@ -31,16 +33,22 @@ function GuestOnly({ children }: { children: ReactNode }) {
 
 const rootRoute = createRootRoute({ component: Root });
 
+// Pathless layout: every signed-in page shares the sidebar / tab bar.
+const appRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'app',
+  component: () => (
+    <RequireSession>
+      <AppShell />
+    </RequireSession>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
-  createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/',
-    component: () => (
-      <RequireSession>
-        <TripsPage />
-      </RequireSession>
-    ),
-  }),
+  appRoute.addChildren([
+    createRoute({ getParentRoute: () => appRoute, path: '/', component: TripsPage }),
+    createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
+  ]),
   createRoute({
     getParentRoute: () => rootRoute,
     path: '/sign-in',

@@ -1,11 +1,23 @@
 import type { AuthError, Session, SupabaseClient } from '@supabase/supabase-js';
 import type { AuthFailure, AuthResult, AuthService, AuthSession } from '../domain/auth-service';
 
+function metadataString(session: Session, ...keys: string[]): string | null {
+  const metadata = session.user.user_metadata as Record<string, unknown>;
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 function toSession(session: Session | null): AuthSession | null {
   if (!session) return null;
   return {
     userId: session.user.id,
     email: session.user.email ?? null,
+    // Google sends full_name/avatar_url, Apple sends name; our own form writes full_name.
+    displayName: metadataString(session, 'full_name', 'name'),
+    avatarUrl: metadataString(session, 'avatar_url', 'picture'),
     accessToken: session.access_token,
   };
 }
@@ -81,6 +93,20 @@ export class SupabaseAuthService implements AuthService {
   async signInWithProvider(provider: 'apple' | 'google', redirectTo: string) {
     const { error } = await this.client.auth.signInWithOAuth({ provider, options: { redirectTo } });
     return result(error);
+  }
+
+  async updateDisplayName(name: string) {
+    // Metadata updates the session right away (offline-friendly); the profile row is what trip
+    // mates read through RLS.
+    const { data, error } = await this.client.auth.updateUser({ data: { full_name: name } });
+    if (error) return result(error);
+    const { error: profileError } = await this.client
+      .from('profiles')
+      .update({ display_name: name })
+      .eq('id', data.user.id);
+    return profileError
+      ? { ok: false as const, reason: 'unknown' as const }
+      : { ok: true as const };
   }
 
   async signOut() {

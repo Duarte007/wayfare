@@ -38,7 +38,11 @@ export function SignInPage() {
   };
 
   return (
-    <main className="mx-auto grid min-h-dvh max-w-sm content-center gap-6 px-4 py-10">
+    <main className="relative mx-auto grid min-h-dvh max-w-sm content-center gap-6 px-4 py-16">
+      {/* Before sign-in there is no profile yet, so the language picker sits in the corner. */}
+      <div className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4">
+        <LanguageSelect />
+      </div>
       <header className="grid justify-items-start gap-3">
         <IconTile icon={Plane} />
         <h1 className="text-3xl font-extrabold tracking-tight">{t('title')}</h1>
@@ -125,10 +129,6 @@ export function SignInPage() {
         <CloudOff className="mt-0.5 size-5 shrink-0 text-sky" aria-hidden />
         <p>{t('offlineTip')}</p>
       </aside>
-
-      <footer className="flex justify-center">
-        <LanguageSelect />
-      </footer>
     </main>
   );
 }

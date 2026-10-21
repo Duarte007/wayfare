@@ -5,9 +5,12 @@ import { registerSW } from 'virtual:pwa-register';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { TripsProvider } from '../features/trips/application/TripsProvider';
 import '../shared/lib/i18n';
+import { applyTheme, readTheme } from '../shared/lib/theme';
 import '../styles.css';
 import { dependencies } from './dependencies';
 import { router } from './router';
+
+applyTheme(readTheme());
 
 // Never swap code mid-session: a new version activates on the next reload.
 registerSW({ immediate: true });
