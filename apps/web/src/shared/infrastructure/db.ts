@@ -11,6 +11,7 @@ import type {
 } from '@wayfare/shared';
 import type { SyncedTable } from '@wayfare/shared';
 import Dexie, { type EntityTable, type Table } from 'dexie';
+import type { OfflineArea } from '../../features/maps/domain/map-ports';
 
 /** A local change waiting to be pushed to `POST /sync/push`, in order. */
 export interface OutboxEntry {
@@ -75,6 +76,8 @@ export class WayfareDB extends Dexie {
   outbox!: EntityTable<OutboxEntry, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
   files!: EntityTable<StoredFile, 'documentId'>;
+  /** Cities whose map tiles are on the device (the tiles live in Cache Storage). Never synced. */
+  map_areas!: EntityTable<OfflineArea, 'placeId'>;
 
   constructor() {
     super('wayfare');
@@ -98,6 +101,8 @@ export class WayfareDB extends Dexie {
     this.version(4).stores({ checklist_items: 'id, trip_id' });
     // v5: document links by trip, so a trip leaving the device takes its links along.
     this.version(5).stores({ documentLinks: 'id, document_id, [entity_type+entity_id], trip_id' });
+    // v6: offline map areas (local only, never synced).
+    this.version(6).stores({ map_areas: 'placeId, tripId' });
   }
 }
 

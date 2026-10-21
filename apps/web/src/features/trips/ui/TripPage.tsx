@@ -54,6 +54,7 @@ import { ActivityList } from '../../itinerary/ui/ActivityList';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
 import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
 import { LegDialog } from '../../itinerary/ui/LegDialog';
+import { MapLink } from '../../maps/ui/MapLink';
 import { StayDialog } from '../../itinerary/ui/StayDialog';
 import { formatZonedTime } from '@/shared/lib/timezone';
 import { useAuth } from '../../auth/application/AuthProvider';
@@ -170,18 +171,20 @@ function TripOverview({ details }: { details: TripDetails }) {
       <MissingCard details={details} itinerary={itinerary} />
 
       <Card>
-        <CardHeader>
+        {/* Calendar, map and add city don't fit beside the title on phones: let them wrap below. */}
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle>
             <h2>{tn('itinerary')}</h2>
           </CardTitle>
           {itinerary.length > 0 ? (
-            <CardAction className="flex gap-2">
+            <CardAction className="flex flex-wrap gap-2">
               <Button asChild variant="outline">
                 <Link to="/trips/$tripId/calendar" params={{ tripId: trip.id }}>
                   <CalendarDays aria-hidden />
                   <span className="sr-only sm:not-sr-only">{tcal('open')}</span>
                 </Link>
               </Button>
+              <MapLink tripId={trip.id} />
               <AddCityDialog details={details} />
             </CardAction>
           ) : null}

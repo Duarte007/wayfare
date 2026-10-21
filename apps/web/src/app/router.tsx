@@ -16,6 +16,7 @@ import { ChecklistPage } from '../features/checklist/ui/ChecklistPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
 import { CalendarPage } from '../features/calendar/ui/CalendarPage';
 import { DocumentsPage } from '../features/documents/ui/DocumentsPage';
+import { MapPage } from '../features/maps/ui/MapPage';
 import { AppShell } from '../features/shell/ui/AppShell';
 import { InvitePage, PendingInviteRedirect } from '../features/group/ui/InvitePage';
 import { EditTripPage } from '../features/trips/ui/EditTripPage';
@@ -101,6 +102,7 @@ const routeTree = rootRoute.addChildren([
       path: '/trips/$tripId/checklist',
       component: ChecklistPage,
     }),
+    createRoute({ getParentRoute: () => appRoute, path: '/trips/$tripId/map', component: MapPage }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),
   createRoute({
