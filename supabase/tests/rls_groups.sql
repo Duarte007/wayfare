@@ -160,4 +160,49 @@ select pg_temp.check(
     where id = '50000000-0000-0000-0000-000000000002'$q$) = '00000',
   'a member can still edit a shared document''s details');
 
+
+-- Group management, as the app's members card and invite page use it.
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+create temp table viewer_invite as
+  select public.create_trip_invite('10000000-0000-0000-0000-000000000001', 'viewer') as token;
+grant select on viewer_invite to authenticated;
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000c');
+select public.accept_trip_invite((select token from viewer_invite));
+select pg_temp.check(
+  (select role from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000c') = 'viewer',
+  'an invite grants its role');
+do $$
+begin
+  perform public.create_trip_invite('10000000-0000-0000-0000-000000000001');
+  raise exception 'FAILED: a viewer created an invite';
+exception when insufficient_privilege then
+  raise notice 'ok - viewers cannot invite';
+end;
+$$;
+do $$
+begin
+  perform public.accept_trip_invite('not-a-real-token-0000000');
+  raise exception 'FAILED: an unknown token was accepted';
+exception when no_data_found then
+  raise notice 'ok - unknown or expired tokens are refused (P0002)';
+end;
+$$;
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000b');
+delete from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.check(
+  (select count(*) from public.trip_members where trip_id = '10000000-0000-0000-0000-000000000001') = 3,
+  'a member cannot remove someone else');
+delete from public.trip_members
+  where trip_id = '10000000-0000-0000-0000-000000000001' and user_id = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.check((select count(*) from public.trips) = 0, 'a member can leave, and then sees nothing');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+delete from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.check(
+  (select array_agg(user_id) from public.trip_members where trip_id = '10000000-0000-0000-0000-000000000001')
+    = array['00000000-0000-0000-0000-00000000000a']::uuid[],
+  'the owner removes members and stays');
+
 rollback;
