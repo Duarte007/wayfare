@@ -16,7 +16,7 @@ export function TripsProvider({
   );
 }
 
-function useTripRepository(): TripRepository {
+export function useTripRepository(): TripRepository {
   const repository = useContext(TripRepositoryContext);
   if (!repository) throw new Error('useTrips must be used inside TripsProvider');
   return repository;

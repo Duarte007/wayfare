@@ -22,6 +22,11 @@ const BUTTON_STYLES: Record<ButtonVariant, string> = {
   link: 'min-h-11 rounded-md text-ink underline underline-offset-4 hover:text-accent',
 };
 
+/** Button look for elements that navigate (router links), so a link never pretends to be a button. */
+export function buttonClass(variant: ButtonVariant = 'primary', className = ''): string {
+  return `inline-flex items-center gap-2 font-semibold transition ${BUTTON_STYLES[variant]} ${className}`;
+}
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   /** Leading icon; decorative, so it is hidden from screen readers. */
@@ -39,7 +44,10 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center gap-2 font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${BUTTON_STYLES[variant]} ${className}`}
+      className={buttonClass(
+        variant,
+        `disabled:cursor-not-allowed disabled:opacity-50 ${className}`,
+      )}
       {...props}
     >
       {icon ? (
@@ -79,32 +87,45 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: LucideIcon;
   hint?: ReactNode;
+  /** Replaces the hint and marks the input invalid for assistive tech. */
+  error?: string;
   /** Optional control at the end of the input, e.g. the show-password toggle. */
   trailing?: ReactNode;
 }
 
-export function Field({ label, icon: Icon, hint, trailing, id, ...props }: FieldProps) {
+export function Field({ label, icon: Icon, hint, error, trailing, id, ...props }: FieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
-  const hintId = hint ? `${inputId}-hint` : undefined;
+  const message = error ?? hint;
+  const hintId = message ? `${inputId}-hint` : undefined;
   return (
     <div className="grid gap-1.5">
       <label htmlFor={inputId} className="text-sm font-semibold">
         {label}
       </label>
-      <div className="flex min-h-12 items-center gap-2 rounded-2xl border border-line bg-surface px-4 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
+      <div
+        className={`flex min-h-12 items-center gap-2 rounded-2xl border bg-surface px-4 focus-within:ring-2 ${
+          error
+            ? 'border-danger focus-within:ring-danger/25'
+            : 'border-line focus-within:border-accent focus-within:ring-accent/25'
+        }`}
+      >
         {Icon ? <Icon className="size-5 shrink-0 text-muted" aria-hidden /> : null}
         <input
           id={inputId}
           aria-describedby={hintId}
+          aria-invalid={error ? true : undefined}
           className="min-w-0 flex-1 bg-transparent py-3 text-base text-ink outline-none placeholder:text-muted"
           {...props}
         />
         {trailing}
       </div>
-      {hint ? (
-        <span id={hintId} className="text-xs text-muted">
-          {hint}
+      {message ? (
+        <span
+          id={hintId}
+          className={error ? 'text-sm font-medium text-danger' : 'text-xs text-muted'}
+        >
+          {message}
         </span>
       ) : null}
     </div>
