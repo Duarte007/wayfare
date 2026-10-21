@@ -75,4 +75,57 @@ select pg_temp.check(
   (select count(*) from public.profiles where id = '00000000-0000-0000-0000-00000000000b') = 1,
   'trip mates can see each other''s profile');
 
+-- Only the owner deletes (soft-deletes) or restores the trip; nobody changes its owner.
+create function pg_temp.sqlstate_of(statement text) returns text language plpgsql as $$
+begin
+  execute statement;
+  return '00000';
+exception when others then
+  return sqlstate;
+end;
+$$;
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set name = 'Lisbon, Porto & Sintra', deleted_at = null
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '00000',
+  'an editor can still edit the trip');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set deleted_at = now()
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '42501',
+  'an editor cannot soft-delete the trip (insufficient_privilege)');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set owner_id = '00000000-0000-0000-0000-00000000000b'
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '42501',
+  'an editor cannot take over the trip');
+select pg_temp.check(
+  (select deleted_at is null and owner_id = '00000000-0000-0000-0000-00000000000a'
+     from public.trips where id = '10000000-0000-0000-0000-000000000001'),
+  'the trip is untouched after the refused changes');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set deleted_at = now()
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '00000',
+  'the owner can soft-delete the trip');
+select pg_temp.check(
+  (select deleted_at is not null from public.trips where id = '10000000-0000-0000-0000-000000000001'),
+  'the trip is marked deleted');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set deleted_at = null
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '42501',
+  'an editor cannot restore a deleted trip');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set deleted_at = null
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '00000',
+  'the owner can restore the trip');
+select pg_temp.check(
+  pg_temp.sqlstate_of($q$update public.trips set owner_id = '00000000-0000-0000-0000-00000000000b'
+    where id = '10000000-0000-0000-0000-000000000001'$q$) = '42501',
+  'not even the owner changes owner_id');
+
 rollback;

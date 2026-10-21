@@ -109,6 +109,7 @@ function BackToTrips() {
 function TripOverview({ details }: { details: TripDetails }) {
   const { t, i18n } = useTranslation('trips');
   const { t: tn } = useTranslation('nav');
+  const { t: tcal } = useTranslation('calendar');
   const { trip } = details;
   const { session } = useAuth();
   const members = useTripMembers(trip.id);
@@ -159,7 +160,13 @@ function TripOverview({ details }: { details: TripDetails }) {
             <h2>{tn('itinerary')}</h2>
           </CardTitle>
           {itinerary.length > 0 ? (
-            <CardAction>
+            <CardAction className="flex gap-2">
+              <Button asChild variant="outline">
+                <Link to="/trips/$tripId/calendar" params={{ tripId: trip.id }}>
+                  <CalendarDays aria-hidden />
+                  <span className="sr-only sm:not-sr-only">{tcal('open')}</span>
+                </Link>
+              </Button>
               <AddCityDialog details={details} />
             </CardAction>
           ) : null}
