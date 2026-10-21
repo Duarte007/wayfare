@@ -65,10 +65,26 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* One visible focus style for keyboard users, everywhere. */
-:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+/*
+ * One visible focus style for keyboard users, everywhere. It lives in the base layer so components
+ * can replace it: a text field shows the ring on its rounded wrapper (focus-within), not a square
+ * outline on the bare <input> inside it.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Browser autofill paints a square blue box on the bare input; keep the field's own surface. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-ink);
+    caret-color: var(--color-ink);
+    box-shadow: 0 0 0 1000px var(--color-surface) inset;
+    transition: background-color 9999s ease-out;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
