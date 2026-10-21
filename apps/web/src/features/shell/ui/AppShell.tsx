@@ -1,12 +1,14 @@
-import { Link, Outlet } from '@tanstack/react-router';
+import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import { CloudOff, CloudUpload, Luggage, Plane, Plus, UserRound } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOnline } from '@/shared/lib/online';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { UserAvatar } from '@/shared/ui/UserAvatar';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { ScreenErrorBoundary } from '../../errors/ui/ErrorScreen';
 import { useSync } from '../../sync/application/SyncProvider';
 
 interface NavItem {
@@ -23,9 +25,11 @@ const NAV: NavItem[] = [
 /**
  * Signed-in layout: a sidebar on wide screens, a top bar plus a thumb-reachable tab bar on phones.
  * Pages render inside <main>; the shell owns navigation, the signed-in user and the offline state.
+ * `children` replaces the routed page (the not-found screen uses it).
  */
-export function AppShell() {
+export function AppShell({ children }: { children?: ReactNode }) {
   const { t } = useTranslation('nav');
+  const { pathname } = useLocation();
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
       <a
@@ -38,7 +42,7 @@ export function AppShell() {
       <MobileTopBar />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <div className="mx-auto grid max-w-3xl gap-6 px-4 pt-4 pb-28 lg:px-10 lg:py-10">
-          <Outlet />
+          <ScreenErrorBoundary resetKey={pathname}>{children ?? <Outlet />}</ScreenErrorBoundary>
         </div>
       </main>
       <MobileTabBar />

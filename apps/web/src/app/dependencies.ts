@@ -2,6 +2,11 @@ import { SupabaseAuthService } from '../features/auth/infrastructure/supabase-au
 import { ApiPlaceSearch } from '../features/itinerary/infrastructure/api-place-search';
 import { DexieItineraryRepository } from '../features/itinerary/infrastructure/dexie-itinerary-repository';
 import { SupabaseMemberDirectory } from '../features/members/infrastructure/supabase-member-directory';
+import {
+  browserInstallEnvironment,
+  BrowserInstallPrompts,
+} from '../features/pwa/infrastructure/browser-install';
+import { ServiceWorkerAppUpdates } from '../features/pwa/infrastructure/service-worker-app-updates';
 import { SyncEngine } from '../features/sync/application/sync-engine';
 import { DexieSyncStore } from '../features/sync/infrastructure/dexie-sync-store';
 import { SupabaseSyncStore } from '../features/sync/infrastructure/supabase-sync-store';
@@ -30,4 +35,8 @@ export const dependencies = {
   syncLocal,
   sync: new SyncEngine(syncLocal, new SupabaseSyncStore(supabase)),
   wipeDevice: () => wipeLocal(db),
+  appUpdates: new ServiceWorkerAppUpdates(),
+  // Listens for `beforeinstallprompt` from startup, before anything renders.
+  installPrompts: new BrowserInstallPrompts(),
+  installEnvironment: browserInstallEnvironment,
 };

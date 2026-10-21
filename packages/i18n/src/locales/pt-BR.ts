@@ -278,4 +278,24 @@ export const ptBR = {
     emptyTitle: 'Nada para mostrar ainda',
     empty: 'Adicione cidades ao roteiro e os dias delas aparecem aqui, cada uma com sua cor.',
   },
+  app: {
+    updateAvailable: 'Nova versão disponível',
+    reload: 'Recarregar',
+    reloading: 'Recarregando…',
+    dismissUpdate: 'Fechar o aviso de atualização',
+    installTitle: 'Instale o Wayfare',
+    installBody: 'Abra pela tela inicial e use offline, como qualquer outro app.',
+    installAction: 'Instalar app',
+    installIos: 'Toque em Compartilhar e depois em “Adicionar à Tela de Início”.',
+    dismissInstall: 'Fechar a dica de instalação',
+    notFoundTitle: 'Página não encontrada',
+    notFoundBody:
+      'Este link não leva a lugar nenhum no Wayfare. Pode estar digitado errado ou desatualizado.',
+    goToTrips: 'Ir para minhas viagens',
+    goToSignIn: 'Ir para o login',
+    errorTitle: 'Algo deu errado',
+    errorBody:
+      'Esta tela teve um problema. Suas viagens e alterações estão seguras neste aparelho.',
+    tryAgain: 'Tentar de novo',
+  },
 } satisfies Messages;
