@@ -37,8 +37,13 @@ test('changes made offline wait in the outbox and reach the server when back onl
   await expect(page.getByRole('button', { name: 'Editar Jantar na Ribeira' })).toBeVisible();
 
   await expect.poll(() => outboxCount(page)).toBe(2);
-  // The count badge lives in the sidebar, which only shows from the desktop breakpoint.
-  await expect(page.getByText('2 alterações aguardando sincronização')).toBeAttached();
+  // On phones the top bar shows the count; screen readers hear the full sentence.
+  await expect(
+    page
+      .getByRole('banner')
+      .getByRole('status')
+      .filter({ hasText: '2 alterações aguardando sincronização' }),
+  ).toBeVisible();
   const before = await backend.rows(user.id, 'activities');
   expect(before).toEqual([expect.objectContaining({ title: 'Museu do Azulejo', booked: false })]);
 
