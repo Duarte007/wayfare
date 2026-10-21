@@ -4,6 +4,7 @@ import { expectNoDeadClicks } from '../support/click-audit.ts';
 import {
   expect,
   expectAccessible,
+  expectNoHorizontalScroll,
   expectPulled,
   signInWithSession,
   test,
@@ -36,6 +37,7 @@ test.describe('screens', () => {
       page.getByRole('heading', { level: 1, name: msg(locale, 'trips.greeting') }),
     ).toBeVisible();
     await expectAccessible(page, 'trips list');
+    await expectNoHorizontalScroll(page, 'trips list');
     await expectNoDeadClicks(page, '/', {
       ready: (p) => p.getByRole('link', { name: /Viagem de teste/ }),
     });
@@ -48,6 +50,7 @@ test.describe('screens', () => {
       page.getByRole('heading', { name: msg(locale, 'trips.missingTitle') }),
     ).toBeVisible();
     await expectAccessible(page, 'trip page');
+    await expectNoHorizontalScroll(page, 'trip page');
     await expectNoDeadClicks(page, `/trips/${tripId}`, { ready: tripHeading });
   });
 
@@ -56,6 +59,7 @@ test.describe('screens', () => {
     const ready = (p: Page) => p.getByRole('heading', { name: msg(locale, 'profile.account') });
     await expect(ready(page)).toBeVisible();
     await expectAccessible(page, 'profile');
+    await expectNoHorizontalScroll(page, 'profile');
     await expectNoDeadClicks(page, '/profile', { ready, skip: [msg(locale, 'common.signOut')] });
   });
 
@@ -66,6 +70,7 @@ test.describe('screens', () => {
     await page.goto('/trips/new');
     await expect(page.getByLabel(msg(locale, 'trips.tripName'))).toBeVisible();
     await expectAccessible(page, 'new trip');
+    await expectNoHorizontalScroll(page, 'new trip');
 
     for (const [path, title] of [
       ['calendar', 'calendar.title'],
@@ -75,6 +80,7 @@ test.describe('screens', () => {
       await page.goto(`/trips/${tripId}/${path}`);
       await expect(page.getByRole('heading', { level: 1, name: msg(locale, title) })).toBeVisible();
       await expectAccessible(page, path);
+      await expectNoHorizontalScroll(page, path);
     }
     // The seeded checklist item made it to the checklist.
     await page.goto(`/trips/${tripId}/checklist`);
@@ -87,6 +93,7 @@ test.describe('screens', () => {
       page.getByRole('heading', { name: msg(locale, 'app.notFoundTitle') }),
     ).toBeVisible();
     await expectAccessible(page, '404');
+    await expectNoHorizontalScroll(page, '404');
     await page.getByRole('link', { name: msg(locale, 'app.goToTrips') }).click();
     await expect(page.getByRole('link', { name: /Viagem de teste/ })).toBeVisible();
   });

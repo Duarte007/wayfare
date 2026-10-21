@@ -41,7 +41,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
       <Sidebar />
       <MobileTopBar />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-        <div className="mx-auto grid max-w-3xl gap-6 px-4 pt-4 pb-28 lg:px-10 lg:py-10">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 px-4 pt-4 pb-28 lg:px-10 lg:py-10">
           <ScreenErrorBoundary resetKey={pathname}>{children ?? <Outlet />}</ScreenErrorBoundary>
         </div>
       </main>

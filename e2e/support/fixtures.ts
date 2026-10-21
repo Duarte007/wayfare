@@ -102,6 +102,22 @@ export async function expectPulled(page: Page, tables: string[]): Promise<void> 
   await expect.poll(missing, { message: 'tables not pulled yet' }).toEqual([]);
 }
 
+/**
+ * Nothing wider than the screen: on a phone, a page that overflows makes the browser widen the
+ * layout viewport, and taps land off target.
+ */
+export async function expectNoHorizontalScroll(page: Page, label: string): Promise<void> {
+  const overflow = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    return [...document.querySelectorAll('body *')]
+      .filter((e) => e.getBoundingClientRect().right > width + 0.5)
+      .filter((e) => !e.closest('[data-radix-popper-content-wrapper]'))
+      .map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? '').trim().slice(0, 40)}"`)
+      .slice(0, 5);
+  });
+  expect(overflow, `elements wider than the screen on ${label}`).toEqual([]);
+}
+
 /** Waits until every local change has reached the (fake) server. */
 export async function expectSynced(page: Page): Promise<void> {
   await expect.poll(() => outboxCount(page), { message: 'outbox should drain' }).toBe(0);
