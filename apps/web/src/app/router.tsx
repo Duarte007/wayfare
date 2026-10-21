@@ -13,6 +13,7 @@ import { UpdateBanner } from '../features/pwa/ui/UpdateBanner';
 import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
+import { CalendarPage } from '../features/calendar/ui/CalendarPage';
 import { AppShell } from '../features/shell/ui/AppShell';
 import { EditTripPage } from '../features/trips/ui/EditTripPage';
 import { NewTripPage } from '../features/trips/ui/NewTripPage';
@@ -79,6 +80,11 @@ const routeTree = rootRoute.addChildren([
       getParentRoute: () => appRoute,
       path: '/trips/$tripId/edit',
       component: EditTripPage,
+    }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/calendar',
+      component: CalendarPage,
     }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),
