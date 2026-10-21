@@ -12,3 +12,10 @@ export class AiUnavailableError extends Error {
     this.name = 'AiUnavailableError';
   }
 }
+
+export class NotFoundError extends Error {
+  constructor(message = 'Not found') {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}

@@ -1,6 +1,6 @@
 import type { CityTips, CityTipsRequest } from '@wayfare/shared';
 import { describe, expect, it, vi } from 'vitest';
-import { QuotaExceededError } from './errors.js';
+import { NotFoundError, QuotaExceededError } from './errors.js';
 import { GetCityTips } from './get-city-tips.js';
 import type { TipsCache } from './ports.js';
 
@@ -33,8 +33,13 @@ const request: CityTipsRequest = {
   locale: 'pt-BR',
 };
 
-function setup({ quotaOk = true, cached = null as Awaited<ReturnType<TipsCache['find']>> } = {}) {
+function setup({
+  quotaOk = true,
+  canSee = true,
+  cached = null as Awaited<ReturnType<TipsCache['find']>>,
+} = {}) {
   const deps = {
+    access: { canSeeStop: vi.fn(async (_tripId: string, _stopId: string) => canSee) },
     generator: { generate: vi.fn(async () => ({ tips, model: 'claude-opus-5-5' })) },
     cache: {
       find: vi.fn(async (_stopId: string, _inputHash: string, _since: Date) => cached),
@@ -67,6 +72,15 @@ describe('GetCityTips', () => {
   it('refuses when the daily quota is used up', async () => {
     const { deps, useCase } = setup({ quotaOk: false });
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(QuotaExceededError);
+    expect(deps.generator.generate).not.toHaveBeenCalled();
+  });
+
+  it("refuses a stop the user can't see before reading the cache or spending quota", async () => {
+    const { deps, useCase } = setup({ canSee: false });
+    await expect(useCase.execute(request)).rejects.toBeInstanceOf(NotFoundError);
+    expect(deps.access.canSeeStop).toHaveBeenCalledWith(request.tripId, request.stopId);
+    expect(deps.cache.find).not.toHaveBeenCalled();
+    expect(deps.quota.consume).not.toHaveBeenCalled();
     expect(deps.generator.generate).not.toHaveBeenCalled();
   });
 

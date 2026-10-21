@@ -1,4 +1,5 @@
 import type { CityTipsRequest } from '@wayfare/shared';
+import { AiUnavailableError } from '../../application/errors.js';
 import type { GeneratedTips, TipsGenerator } from '../../application/ports.js';
 
 /**
@@ -23,6 +24,6 @@ export class FallbackTipsGenerator implements TipsGenerator {
         if (index < this.generators.length - 1) this.onFallback(error, index);
       }
     }
-    throw lastError;
+    throw new AiUnavailableError('Every AI provider failed', { cause: lastError });
   }
 }

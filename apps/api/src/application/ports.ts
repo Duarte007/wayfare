@@ -31,6 +31,11 @@ export interface TipsCache {
   }): Promise<void>;
 }
 
+export interface TripAccess {
+  /** True when the signed-in user can see this stop of this trip (enforced by RLS). */
+  canSeeStop(tripId: string, stopId: string): Promise<boolean>;
+}
+
 export interface AiQuota {
   /** Counts one generation; false when today's limit is already used. */
   consume(): Promise<boolean>;
