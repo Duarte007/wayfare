@@ -2,6 +2,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
+import { ChecklistProvider } from '../features/checklist/application/ChecklistProvider';
 import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
 import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
 import { PwaProvider } from '../features/pwa/application/PwaProvider';
@@ -43,7 +44,9 @@ createRoot(document.getElementById('root')!).render(
                 flushChanges={() => dependencies.sync.run()}
               >
                 <DocumentsProvider {...dependencies.documents}>
-                  <RouterProvider router={router} />
+                  <ChecklistProvider repository={dependencies.checklist}>
+                    <RouterProvider router={router} />
+                  </ChecklistProvider>
                 </DocumentsProvider>
               </PwaProvider>
             </MembersProvider>

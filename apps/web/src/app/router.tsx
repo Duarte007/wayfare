@@ -12,6 +12,7 @@ import { NotFoundScreen, RouteError } from '../features/errors/ui/ErrorScreen';
 import { UpdateBanner } from '../features/pwa/ui/UpdateBanner';
 import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
+import { ChecklistPage } from '../features/checklist/ui/ChecklistPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
 import { CalendarPage } from '../features/calendar/ui/CalendarPage';
 import { DocumentsPage } from '../features/documents/ui/DocumentsPage';
@@ -91,6 +92,11 @@ const routeTree = rootRoute.addChildren([
       getParentRoute: () => appRoute,
       path: '/trips/$tripId/calendar',
       component: CalendarPage,
+    }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/checklist',
+      component: ChecklistPage,
     }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),

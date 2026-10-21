@@ -1,4 +1,5 @@
 import { SupabaseAuthService } from '../features/auth/infrastructure/supabase-auth-service';
+import { DexieChecklistRepository } from '../features/checklist/infrastructure/dexie-checklist-repository';
 import { FileSync } from '../features/documents/application/file-sync';
 import {
   DexieDocumentRepository,
@@ -34,6 +35,7 @@ const auth = new SupabaseAuthService(supabase, {
 
 export const dependencies = {
   auth,
+  checklist: new DexieChecklistRepository(db),
   itinerary: new DexieItineraryRepository(db),
   placeSearch: new ApiPlaceSearch(import.meta.env.VITE_API_URL, async () => {
     const session = await auth.currentSession();
