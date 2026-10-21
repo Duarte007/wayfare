@@ -10,6 +10,7 @@ export const SYNCED_TABLES = [
   'legs',
   'activities',
   'documents',
+  'checklist_items',
 ] as const;
 
 export type SyncedTable = (typeof SYNCED_TABLES)[number];

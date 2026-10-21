@@ -54,3 +54,13 @@ export interface RemoteSyncStore {
   /** Trips the user is a member of right now (not deleted); null when the server can't be reached. */
   memberTripIds(): Promise<string[] | null>;
 }
+
+/** Extra work in a sync pass (e.g. document files); false when the server couldn't be reached. */
+export type SyncStep = () => Promise<boolean>;
+
+export interface SyncSteps {
+  /** After local changes were pushed, so the rows a step depends on exist on the server. */
+  afterPush?: readonly SyncStep[];
+  /** After the pull, when the device holds every row it can see. */
+  afterPull?: readonly SyncStep[];
+}

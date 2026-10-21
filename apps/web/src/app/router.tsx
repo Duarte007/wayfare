@@ -8,9 +8,14 @@ import {
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/application/AuthProvider';
+import { NotFoundScreen, RouteError } from '../features/errors/ui/ErrorScreen';
+import { UpdateBanner } from '../features/pwa/ui/UpdateBanner';
 import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
+import { ChecklistPage } from '../features/checklist/ui/ChecklistPage';
 import { ProfilePage } from '../features/profile/ui/ProfilePage';
+import { CalendarPage } from '../features/calendar/ui/CalendarPage';
+import { DocumentsPage } from '../features/documents/ui/DocumentsPage';
 import { AppShell } from '../features/shell/ui/AppShell';
 import { InvitePage, PendingInviteRedirect } from '../features/group/ui/InvitePage';
 import { EditTripPage } from '../features/trips/ui/EditTripPage';
@@ -21,8 +26,29 @@ import { TripsPage } from '../features/trips/ui/TripsPage';
 function Root() {
   const { loading } = useAuth();
   const { t } = useTranslation();
-  if (loading) return <p className="p-6 text-muted-foreground">{t('loading')}</p>;
-  return <Outlet />;
+  return (
+    <>
+      {loading ? <p className="p-6 text-muted-foreground">{t('loading')}</p> : <Outlet />}
+      <UpdateBanner />
+    </>
+  );
+}
+
+/** Unknown URL: inside the app shell when signed in, on its own page otherwise. */
+function NotFound() {
+  const { session } = useAuth();
+  if (session) {
+    return (
+      <AppShell>
+        <NotFoundScreen signedIn />
+      </AppShell>
+    );
+  }
+  return (
+    <main id="main" className="mx-auto grid min-h-dvh max-w-md content-center px-4 py-10">
+      <NotFoundScreen signedIn={false} />
+    </main>
+  );
 }
 
 function RequireSession({ children }: { children: ReactNode }) {
@@ -35,7 +61,7 @@ function GuestOnly({ children }: { children: ReactNode }) {
   return session ? <Navigate to="/" /> : children;
 }
 
-const rootRoute = createRootRoute({ component: Root });
+const rootRoute = createRootRoute({ component: Root, notFoundComponent: NotFound });
 
 // Pathless layout: every signed-in page shares the sidebar / tab bar.
 const appRoute = createRoute({
@@ -60,6 +86,21 @@ const routeTree = rootRoute.addChildren([
       path: '/trips/$tripId/edit',
       component: EditTripPage,
     }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/documents',
+      component: DocumentsPage,
+    }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/calendar',
+      component: CalendarPage,
+    }),
+    createRoute({
+      getParentRoute: () => appRoute,
+      path: '/trips/$tripId/checklist',
+      component: ChecklistPage,
+    }),
     createRoute({ getParentRoute: () => appRoute, path: '/profile', component: ProfilePage }),
   ]),
   createRoute({
@@ -75,7 +116,11 @@ const routeTree = rootRoute.addChildren([
   createRoute({ getParentRoute: () => rootRoute, path: '/invite/$token', component: InvitePage }),
 ]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+  routeTree,
+  defaultErrorComponent: RouteError,
+  defaultNotFoundComponent: NotFound,
+});
 
 declare module '@tanstack/react-router' {
   interface Register {

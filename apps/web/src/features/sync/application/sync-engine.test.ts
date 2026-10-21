@@ -158,4 +158,55 @@ describe('SyncEngine', () => {
     expect(await new SyncEngine(local, remote).run()).toBe('offline');
     expect([...localTrips]).toEqual(['a']);
   });
+
+  it('runs file steps after the push and after the pull, in that order', async () => {
+    const { local } = memoryLocal([change('a')]);
+    const calls: string[] = [];
+    const remote: RemoteSyncStore = {
+      push: async (c) => (calls.push(`push:${c.id}`), { outcome: 'pushed' }),
+      pull: async (table) => (table === 'trips' && calls.push('pull'), []),
+      memberTripIds: async () => [],
+    };
+    const engine = new SyncEngine(local, remote, {
+      afterPush: [async () => (calls.push('upload'), true)],
+      afterPull: [async () => (calls.push('download'), true)],
+    });
+    expect(await engine.run()).toBe('synced');
+    expect(calls).toEqual(['push:a', 'upload', 'pull', 'download']);
+  });
+
+  it('still pulls when a step cannot reach the server, but reports offline', async () => {
+    const { local } = memoryLocal();
+    const pull = vi.fn(async () => []);
+    const download = vi.fn(async () => true);
+    const engine = new SyncEngine(
+      local,
+      { push: async () => ({ outcome: 'pushed' }), pull, memberTripIds: async () => [] },
+      {
+        afterPush: [
+          async () => false,
+          async () => {
+            throw new Error('boom');
+          },
+        ],
+        afterPull: [download],
+      },
+    );
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await engine.run()).toBe('offline');
+    expect(pull).toHaveBeenCalled();
+    expect(download).toHaveBeenCalled();
+  });
+
+  it('skips the steps when the push could not reach the server', async () => {
+    const { local } = memoryLocal([change('a')]);
+    const step = vi.fn(async () => true);
+    const engine = new SyncEngine(
+      local,
+      { push: async () => ({ outcome: 'transient' }), pull: async () => [], memberTripIds: async () => [] },
+      { afterPush: [step], afterPull: [step] },
+    );
+    expect(await engine.run()).toBe('offline');
+    expect(step).not.toHaveBeenCalled();
+  });
 });

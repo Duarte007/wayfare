@@ -4,6 +4,8 @@
 
 - Every change goes through a pull request. Never push to `main` directly: create a branch
   (`feat/…`, `fix/…`, `chore/…`), push it, and open a PR against `main`.
+- After a PR is merged into `main`, delete its remote feature branch (`feat/…`, `fix/…`,
+  `chore/…`). Keep "Automatically delete head branches" on in the GitHub repository settings.
 - Conventional Commits for commit messages and PR titles.
 - Before opening a PR: `pnpm format:check`, `pnpm lint`, `pnpm turbo run build typecheck test`.
 - Database changes: add a migration in `supabase/migrations`, run `supabase/tests/rls_groups.sql`

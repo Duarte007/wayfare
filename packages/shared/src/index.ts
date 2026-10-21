@@ -6,3 +6,4 @@ export * from './ai.js';
 export * from './sharing.js';
 export * from './sync.js';
 export * from './geo.js';
+export * from './checklist-templates.js';

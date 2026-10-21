@@ -17,6 +17,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { InstallHint } from '../../pwa/ui/InstallHint';
 import { useTrips } from '../application/TripsProvider';
 import { summarizeTrip } from '../domain/trip-summary';
 
@@ -36,6 +37,8 @@ export function TripsPage() {
         </p>
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t('greeting')}</h1>
       </header>
+
+      <InstallHint />
 
       {trips === undefined ? (
         <p className="inline-flex items-center gap-2 text-muted-foreground" role="status">
