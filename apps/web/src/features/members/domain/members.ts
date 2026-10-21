@@ -7,12 +7,17 @@ export interface TripMember {
   name: string | null;
 }
 
+/** How removing someone from a trip ended; 'offline' and 'failed' changed nothing. */
+export type MemberRemoval = 'removed' | 'offline' | 'failed';
+
 /** Who is on a trip. The last list fetched stays on the device, so it works offline. */
 export interface MemberDirectory {
   /** Last known members; empty when this device never loaded them. */
   cached(tripId: string): Promise<TripMember[]>;
   /** Fetches the current members and updates the cache; null when the server can't be reached. */
   refresh(tripId: string): Promise<TripMember[] | null>;
+  /** Takes someone out of the trip (the owner removing them, or the person leaving). */
+  remove(tripId: string, userId: string): Promise<MemberRemoval>;
 }
 
 /** Owner first, then by name, so lists don't reshuffle between loads. */

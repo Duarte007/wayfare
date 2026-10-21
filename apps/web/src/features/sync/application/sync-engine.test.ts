@@ -8,8 +8,9 @@ import type {
 } from '../domain/sync-ports';
 import { SyncEngine } from './sync-engine';
 
-function memoryLocal(pending: PendingChange[] = []) {
+function memoryLocal(pending: PendingChange[] = [], trips: string[] = []) {
   const queue = [...pending];
+  const localTrips = new Set(trips);
   const rejected: string[] = [];
   const applied: Record<string, RemoteRow[]> = {};
   const cursors: Partial<Record<PulledTable, number>> = {};
@@ -25,10 +26,18 @@ function memoryLocal(pending: PendingChange[] = []) {
     cursor: async (table) => cursors[table] ?? 0,
     applyRemote: async (table, rows, cursor) => {
       (applied[table] ??= []).push(...rows);
+      if (table === 'trips') rows.forEach((r) => localTrips.add(r.id!));
       cursors[table] = cursor;
     },
+    keepTrips: async (memberTripIds) => {
+      for (const id of localTrips) if (!memberTripIds.includes(id)) localTrips.delete(id);
+      return { missing: memberTripIds.filter((id) => !localTrips.has(id)) };
+    },
+    resetCursors: async () => {
+      for (const key of Object.keys(cursors)) delete cursors[key as PulledTable];
+    },
   };
-  return { local, queue, rejected, applied, cursors };
+  return { local, queue, rejected, applied, cursors, localTrips };
 }
 
 const change = (id: string, rowId = id): PendingChange => ({
@@ -46,6 +55,7 @@ describe('SyncEngine', () => {
       push: async (c) => (pushed.push(c.id), { outcome: 'pushed' }),
       pull: async (table, since) =>
         table === 'trips' && since === 0 ? [{ id: 't1', version: 7 }] : [],
+      memberTripIds: async () => ['t1'],
     };
     expect(await new SyncEngine(local, remote).run()).toBe('synced');
     expect(pushed).toEqual(['a', 'b']);
@@ -57,7 +67,11 @@ describe('SyncEngine', () => {
   it('stops at the first transient failure and keeps the rest queued, without pulling', async () => {
     const { local, queue } = memoryLocal([change('a'), change('b')]);
     const pull = vi.fn();
-    const remote: RemoteSyncStore = { push: async () => ({ outcome: 'transient' }), pull };
+    const remote: RemoteSyncStore = {
+      push: async () => ({ outcome: 'transient' }),
+      pull,
+      memberTripIds: async () => [],
+    };
     expect(await new SyncEngine(local, remote).run()).toBe('offline');
     expect(queue.map((c) => c.id)).toEqual(['a', 'b']);
     expect(pull).not.toHaveBeenCalled();
@@ -68,6 +82,7 @@ describe('SyncEngine', () => {
     const remote: RemoteSyncStore = {
       push: async (c) => ({ outcome: c.id === 'bad' ? 'rejected' : 'pushed', reason: '42501' }),
       pull: async () => [],
+      memberTripIds: async () => [],
     };
     expect(await new SyncEngine(local, remote).run()).toBe('synced');
     expect(rejected).toEqual(['bad']);
@@ -86,6 +101,7 @@ describe('SyncEngine', () => {
         if (passes === 1 && table === 'trips') queue.push(change('mid-pass'));
         return [];
       },
+      memberTripIds: async () => [],
     });
     await Promise.all([engine.run(), engine.run(), engine.run()]);
     expect(passes).toBe(2);
@@ -97,8 +113,50 @@ describe('SyncEngine', () => {
     const remote: RemoteSyncStore = {
       push: async () => ({ outcome: 'pushed' }),
       pull: async () => null,
+      memberTripIds: async () => [],
     };
     expect(await new SyncEngine(local, remote).run()).toBe('offline');
+  });
+
+  it('forgets trips the user is no longer a member of', async () => {
+    const { local, localTrips } = memoryLocal([], ['kept', 'left']);
+    const remote: RemoteSyncStore = {
+      push: async () => ({ outcome: 'pushed' }),
+      pull: async () => [],
+      memberTripIds: async () => ['kept'],
+    };
+    expect(await new SyncEngine(local, remote).run()).toBe('synced');
+    expect([...localTrips]).toEqual(['kept']);
+  });
+
+  it('pulls everything again when the user joined a trip the device does not have', async () => {
+    const { local, cursors, localTrips } = memoryLocal([], ['mine']);
+    cursors.trips = 50;
+    const sinces: number[] = [];
+    const remote: RemoteSyncStore = {
+      push: async () => ({ outcome: 'pushed' }),
+      // The joined trip was written long ago, so its version is below the cursor.
+      pull: async (table, since) => {
+        if (table !== 'trips') return [];
+        sinces.push(since);
+        return since < 10 ? [{ id: 'joined', version: 9 }] : [];
+      },
+      memberTripIds: async () => ['mine', 'joined'],
+    };
+    expect(await new SyncEngine(local, remote).run()).toBe('synced');
+    expect(sinces).toEqual([50, 0]);
+    expect(localTrips.has('joined')).toBe(true);
+  });
+
+  it('reports offline and keeps every trip when memberships cannot be read', async () => {
+    const { local, localTrips } = memoryLocal([], ['a']);
+    const remote: RemoteSyncStore = {
+      push: async () => ({ outcome: 'pushed' }),
+      pull: async () => [],
+      memberTripIds: async () => null,
+    };
+    expect(await new SyncEngine(local, remote).run()).toBe('offline');
+    expect([...localTrips]).toEqual(['a']);
   });
 
   it('runs file steps after the push and after the pull, in that order', async () => {
@@ -107,6 +165,7 @@ describe('SyncEngine', () => {
     const remote: RemoteSyncStore = {
       push: async (c) => (calls.push(`push:${c.id}`), { outcome: 'pushed' }),
       pull: async (table) => (table === 'trips' && calls.push('pull'), []),
+      memberTripIds: async () => [],
     };
     const engine = new SyncEngine(local, remote, {
       afterPush: [async () => (calls.push('upload'), true)],
@@ -122,7 +181,7 @@ describe('SyncEngine', () => {
     const download = vi.fn(async () => true);
     const engine = new SyncEngine(
       local,
-      { push: async () => ({ outcome: 'pushed' }), pull },
+      { push: async () => ({ outcome: 'pushed' }), pull, memberTripIds: async () => [] },
       {
         afterPush: [
           async () => false,
@@ -144,7 +203,11 @@ describe('SyncEngine', () => {
     const step = vi.fn(async () => true);
     const engine = new SyncEngine(
       local,
-      { push: async () => ({ outcome: 'transient' }), pull: async () => [] },
+      {
+        push: async () => ({ outcome: 'transient' }),
+        pull: async () => [],
+        memberTripIds: async () => [],
+      },
       { afterPush: [step], afterPull: [step] },
     );
     expect(await engine.run()).toBe('offline');

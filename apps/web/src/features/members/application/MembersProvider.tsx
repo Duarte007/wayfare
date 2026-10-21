@@ -1,8 +1,23 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useOnline } from '../../../shared/lib/online';
 import type { MemberDirectory, TripMember } from '../domain/members';
 
-const MembersContext = createContext<MemberDirectory | null>(null);
+interface MembersState {
+  directory: MemberDirectory;
+  /** Bumped after a change (someone removed or joined) so every member list reloads. */
+  revision: number;
+  changed: () => void;
+}
+
+const MembersContext = createContext<MembersState | null>(null);
 
 export function MembersProvider({
   directory,
@@ -11,18 +26,30 @@ export function MembersProvider({
   directory: MemberDirectory;
   children: ReactNode;
 }) {
-  return <MembersContext.Provider value={directory}>{children}</MembersContext.Provider>;
+  const [revision, setRevision] = useState(0);
+  const changed = useCallback(() => setRevision((r) => r + 1), []);
+  const value = useMemo(() => ({ directory, revision, changed }), [directory, revision, changed]);
+  return <MembersContext.Provider value={value}>{children}</MembersContext.Provider>;
 }
 
-function useMemberDirectory(): MemberDirectory {
-  const directory = useContext(MembersContext);
-  if (!directory) throw new Error('Member hooks must be used inside MembersProvider');
-  return directory;
+function useMembersState(): MembersState {
+  const state = useContext(MembersContext);
+  if (!state) throw new Error('Member hooks must be used inside MembersProvider');
+  return state;
+}
+
+export function useMemberDirectory(): MemberDirectory {
+  return useMembersState().directory;
+}
+
+/** Call after changing who is on a trip, so lists on screen reload. */
+export function useMembersChanged(): () => void {
+  return useMembersState().changed;
 }
 
 /** The trip's members: what the device knows right away, refreshed when online. */
 export function useTripMembers(tripId: string): TripMember[] {
-  const directory = useMemberDirectory();
+  const { directory, revision } = useMembersState();
   const online = useOnline();
   const [state, setState] = useState<{ tripId: string; members: TripMember[] }>();
 
@@ -39,7 +66,7 @@ export function useTripMembers(tripId: string): TripMember[] {
     return () => {
       active = false;
     };
-  }, [directory, tripId, online]);
+  }, [directory, tripId, online, revision]);
 
   return state?.tripId === tripId ? state.members : [];
 }
