@@ -60,4 +60,22 @@ export class SupabaseSyncStore implements RemoteSyncStore {
       return null;
     }
   }
+
+  async memberTripIds(): Promise<string[] | null> {
+    try {
+      // Without a session the query would run as anon and see nothing, which would look like
+      // "left every trip"; never answer for a signed-out client.
+      const { data: auth } = await this.client.auth.getSession();
+      const userId = auth.session?.user.id;
+      if (!userId) return null;
+      const { data, error } = await this.client
+        .from('trip_members')
+        .select('trip_id, trips!inner(deleted_at)')
+        .eq('user_id', userId)
+        .is('trips.deleted_at', null);
+      return error ? null : data.map((m) => m.trip_id as string);
+    } catch {
+      return null;
+    }
+  }
 }

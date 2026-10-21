@@ -38,10 +38,19 @@ export interface LocalSyncStore {
    * Rejected changes don't count: the server's row wins.
    */
   applyRemote(table: PulledTable, rows: RemoteRow[], cursor: number): Promise<void>;
+  /**
+   * Removes trips the user is no longer a member of (with everything under them), except those
+   * with unsent changes, and returns the ids in `memberTripIds` this device doesn't have yet.
+   */
+  keepTrips(memberTripIds: readonly string[]): Promise<{ missing: string[] }>;
+  /** Forgets every pull cursor, so the next pull brings every visible row again. */
+  resetCursors(): Promise<void>;
 }
 
 export interface RemoteSyncStore {
   push(change: PendingChange): Promise<{ outcome: PushOutcome; reason?: string }>;
   /** Rows changed after `since`, by ascending version; null when the server can't be reached. */
   pull(table: PulledTable, since: number, limit: number): Promise<RemoteRow[] | null>;
+  /** Trips the user is a member of right now (not deleted); null when the server can't be reached. */
+  memberTripIds(): Promise<string[] | null>;
 }

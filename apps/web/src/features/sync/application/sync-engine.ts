@@ -54,6 +54,20 @@ export class SyncEngine {
   }
 
   private async pull(): Promise<boolean> {
+    if (!(await this.pullTables())) return false;
+    // Pulls only bring rows the user can still see, so trips they left (or were removed from)
+    // have to be cleaned up by comparing with the current memberships.
+    const memberTripIds = await this.remote.memberTripIds();
+    if (memberTripIds === null) return false;
+    const { missing } = await this.local.keepTrips(memberTripIds);
+    if (missing.length === 0) return true;
+    // A trip joined since the last pass: its rows carry versions older than the cursors, so
+    // incremental pulls would skip them. Pull everything again (rows already here are kept).
+    await this.local.resetCursors();
+    return this.pullTables();
+  }
+
+  private async pullTables(): Promise<boolean> {
     for (const table of PULLED_TABLES) {
       let since = await this.local.cursor(table);
       for (;;) {

@@ -53,6 +53,10 @@ import { LegDialog } from '../../itinerary/ui/LegDialog';
 import { StayDialog } from '../../itinerary/ui/StayDialog';
 import { formatZonedTime } from '@/shared/lib/timezone';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { useItineraryMode } from '../../group/application/useItineraryMode';
+import { filterPlan } from '../../group/domain/group';
+import { ItineraryModeSwitch } from '../../group/ui/ItineraryModeSwitch';
+import { MembersCard } from '../../group/ui/MembersCard';
 import { useTripMembers } from '../../members/application/MembersProvider';
 import type { TripMember } from '../../members/domain/members';
 import { useRemoveTrip, useTripDetails } from '../application/useTripDetails';
@@ -113,6 +117,10 @@ function TripOverview({ details }: { details: TripDetails }) {
   const { session } = useAuth();
   const members = useTripMembers(trip.id);
   const itinerary = buildItinerary(details);
+  // Group trips switch between the viewer's own plan and the one everyone follows.
+  const [mode, setMode] = useItineraryMode();
+  const grouped = members.length > 1 && !!session;
+  const shown = grouped ? buildItinerary(filterPlan(details, mode, session.userId)) : itinerary;
   const nightsTotal = itinerary.length ? itinerary.reduce((sum, s) => sum + s.nights, 0) : null;
 
   return (
@@ -167,28 +175,35 @@ function TripOverview({ details }: { details: TripDetails }) {
               <AddCityDialog details={details} first />
             </div>
           ) : (
-            <ol className="grid min-w-0">
-              {itinerary.map((item, index) => (
-                <ItineraryItem
-                  key={item.stop.id}
-                  item={item}
-                  next={itinerary[index + 1]}
-                  members={members}
-                  currentUserId={session?.userId}
-                  actions={
-                    <CityActionsMenu
-                      details={details}
-                      item={item}
-                      index={index}
-                      count={itinerary.length}
-                    />
-                  }
-                />
-              ))}
-            </ol>
+            <div className="grid gap-5">
+              {grouped ? <ItineraryModeSwitch mode={mode} onChange={setMode} /> : null}
+              <ol className="grid min-w-0">
+                {shown.map((item, index) => (
+                  <ItineraryItem
+                    key={item.stop.id}
+                    item={item}
+                    next={shown[index + 1]}
+                    // A leg outside this view exists: don't offer to add another one.
+                    legHidden={!item.legToNext && !!itinerary[index]?.legToNext}
+                    members={members}
+                    currentUserId={session?.userId}
+                    actions={
+                      <CityActionsMenu
+                        details={details}
+                        item={item}
+                        index={index}
+                        count={itinerary.length}
+                      />
+                    }
+                  />
+                ))}
+              </ol>
+            </div>
           )}
         </CardContent>
       </Card>
+
+      <MembersCard trip={trip} />
     </>
   );
 }
@@ -393,12 +408,14 @@ function legSummary(leg: Leg, t: (key: string) => string, locale: string): strin
 function ItineraryItem({
   item,
   next,
+  legHidden,
   members,
   currentUserId,
   actions,
 }: {
   item: ItineraryStop;
   next: ItineraryStop | undefined;
+  legHidden: boolean;
   members: TripMember[];
   currentUserId: string | undefined;
   actions: ReactNode;
@@ -507,7 +524,7 @@ function ItineraryItem({
           members={members}
           currentUserId={currentUserId}
         />
-        {next ? (
+        {next && !legHidden ? (
           <LegDialog
             from={item}
             to={next}
