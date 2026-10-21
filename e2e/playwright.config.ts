@@ -51,18 +51,23 @@ export default defineConfig({
       },
     },
   ],
+  // Started one after the other, each once its URL answers.
   webServer: [
     {
-      command: 'node --experimental-strip-types --no-warnings fake-backend/cli.ts',
+      // The fake validates rows with @wayfare/shared, so the workspace packages are built first
+      // (shared, i18n: also what the app needs).
+      command: [
+        'pnpm -w exec turbo run build --filter=@wayfare/e2e^... --filter=@wayfare/web^...',
+        'node --experimental-strip-types --no-warnings fake-backend/cli.ts',
+      ].join(' && '),
       url: `${BACKEND_URL}/__admin/health`,
       reuseExistingServer: !CI,
       stdout: 'pipe',
+      timeout: 120_000,
     },
     {
-      // Dependencies first (shared, i18n), then the app into its own folder so a local
-      // production build in apps/web/dist is never overwritten.
+      // Into its own folder, so a local production build in apps/web/dist is never overwritten.
       command: [
-        'pnpm -w exec turbo run build --filter=@wayfare/web^...',
         'pnpm --filter @wayfare/web exec vite build --outDir dist-e2e --emptyOutDir',
         `pnpm --filter @wayfare/web exec vite preview --outDir dist-e2e --port ${APP_PORT} --strictPort`,
       ].join(' && '),
