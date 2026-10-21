@@ -13,3 +13,11 @@ export const SYNCED_TABLES = [
 ] as const;
 
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
+
+/**
+ * Tables pulled to the device. `document_links` is read-only for now (nothing on the device
+ * writes links yet) and has a composite key, which the device turns into one id.
+ */
+export const PULLED_TABLES = [...SYNCED_TABLES, 'document_links'] as const;
+
+export type PulledTable = (typeof PULLED_TABLES)[number];

@@ -78,6 +78,20 @@ export async function saveLocal<T extends { id: string }>(
   });
 }
 
+/** Deletes locally and queues the deletion for sync in one transaction. */
+export async function deleteLocal(db: WayfareDB, table: SyncedTable, id: string): Promise<void> {
+  await db.transaction('rw', db.table(table), db.outbox, async () => {
+    await db.table(table).delete(id);
+    await db.outbox.put({
+      id: crypto.randomUUID(),
+      table,
+      op: 'delete',
+      row: { id },
+      createdAt: Date.now(),
+    });
+  });
+}
+
 /** Removes everything stored on this device (used on sign-out). */
 export async function wipeLocal(db: WayfareDB): Promise<void> {
   await db.delete();

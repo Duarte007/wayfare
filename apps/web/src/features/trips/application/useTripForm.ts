@@ -1,3 +1,4 @@
+import type { Trip } from '@wayfare/shared';
 import { useState } from 'react';
 import { useAuth } from '../../auth/application/AuthProvider';
 import {
@@ -9,13 +10,17 @@ import {
 import { useTripRepository } from './TripsProvider';
 
 /**
- * Form state for a new trip. Saving writes to the device first, so it works offline; the change
- * waits in the outbox until sync sends it.
+ * Form state to create a trip, or to edit `existing`. Saving writes to the device first, so it
+ * works offline; the change waits in the outbox until sync sends it.
  */
-export function useCreateTrip() {
+export function useTripForm(existing?: Trip) {
   const repository = useTripRepository();
   const { session } = useAuth();
-  const [input, setInput] = useState<NewTripInput>({ name: '', startDate: '', endDate: '' });
+  const [input, setInput] = useState<NewTripInput>({
+    name: existing?.name ?? '',
+    startDate: existing?.start_date ?? '',
+    endDate: existing?.end_date ?? '',
+  });
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -28,13 +33,16 @@ export function useCreateTrip() {
   const update = (patch: Partial<NewTripInput>) =>
     setInput((current) => ({ ...current, ...patch }));
 
-  /** Resolves to the new trip's id, or null when the form is not valid yet. */
+  /** Resolves to the trip's id, or null when the form is not valid yet. */
   const submit = async (): Promise<string | null> => {
     setSubmitted(true);
     if (errors.length > 0 || !session || saving) return null;
     setSaving(true);
     try {
-      const trip = buildTrip(input, session.userId, crypto.randomUUID());
+      // Editing keeps the id and the owner; only the trip's own fields change.
+      const trip = existing
+        ? { ...existing, ...buildTrip(input, existing.owner_id, existing.id) }
+        : buildTrip(input, session.userId, crypto.randomUUID());
       await repository.save(trip);
       return trip.id;
     } finally {

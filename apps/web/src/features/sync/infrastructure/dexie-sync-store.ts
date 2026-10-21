@@ -1,8 +1,20 @@
-import { liveQuery } from 'dexie';
+import { liveQuery, type Table } from 'dexie';
 import type { WayfareDB } from '../../../shared/infrastructure/db';
-import type { LocalSyncStore, PendingChange, RemoteRow, SyncedTable } from '../domain/sync-ports';
+import type { LocalSyncStore, PendingChange, PulledTable, RemoteRow } from '../domain/sync-ports';
 
-const cursorKey = (table: SyncedTable) => `sync.cursor.${table}`;
+const cursorKey = (table: PulledTable) => `sync.cursor.${table}`;
+
+/** Server table → device table, and the row's key on the device. */
+function localTable(db: WayfareDB, table: PulledTable): Table<Record<string, unknown>, string> {
+  // Server rows are stored as they come; the screens read them through the typed tables.
+  return table === 'document_links' ? (db.documentLinks as unknown as Table) : db.table(table);
+}
+
+function localId(table: PulledTable, row: RemoteRow): string {
+  return table === 'document_links'
+    ? `${String(row.document_id)}:${String(row.entity_type)}:${String(row.entity_id)}`
+    : row.id!;
+}
 
 export class DexieSyncStore implements LocalSyncStore {
   constructor(private readonly db: WayfareDB) {}
@@ -39,13 +51,13 @@ export class DexieSyncStore implements LocalSyncStore {
     return () => subscription.unsubscribe();
   }
 
-  async cursor(table: SyncedTable) {
+  async cursor(table: PulledTable) {
     const entry = await this.db.meta.get(cursorKey(table));
     return entry ? Number(entry.value) : 0;
   }
 
-  async applyRemote(table: SyncedTable, rows: RemoteRow[], cursor: number) {
-    const target = this.db.table(table);
+  async applyRemote(table: PulledTable, rows: RemoteRow[], cursor: number) {
+    const target = localTable(this.db, table);
     await this.db.transaction('rw', target, this.db.outbox, this.db.meta, async () => {
       const pending = new Set(
         (await this.db.outbox.where('table').equals(table).toArray())
@@ -53,9 +65,10 @@ export class DexieSyncStore implements LocalSyncStore {
           .map((e) => (e.row as { id: string }).id),
       );
       for (const row of rows) {
-        if (pending.has(row.id)) continue;
-        if (row.deleted_at) await target.delete(row.id);
-        else await target.put(row);
+        const id = localId(table, row);
+        if (pending.has(id)) continue;
+        if (row.deleted_at) await target.delete(id);
+        else await target.put({ ...row, id });
       }
       await this.db.meta.put({ key: cursorKey(table), value: String(cursor) });
     });

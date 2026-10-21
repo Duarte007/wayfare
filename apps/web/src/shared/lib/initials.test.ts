@@ -8,6 +8,8 @@ describe('initials', () => {
     ['Maria da Silva Santos', null, 'MS'],
     [null, 'teste.dono@example.com', 'TD'],
     ['王小明', null, '王'],
+    ['Ana (teste)', null, 'AT'],
+    ['José Ñúñez', null, 'JÑ'],
     ['  ', 'bia@example.com', 'B'],
     [null, null, '?'],
   ])('%s / %s → %s', (name, email, expected) => {

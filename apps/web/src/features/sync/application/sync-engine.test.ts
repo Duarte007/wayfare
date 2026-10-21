@@ -4,7 +4,7 @@ import type {
   PendingChange,
   RemoteRow,
   RemoteSyncStore,
-  SyncedTable,
+  PulledTable,
 } from '../domain/sync-ports';
 import { SyncEngine } from './sync-engine';
 
@@ -12,7 +12,7 @@ function memoryLocal(pending: PendingChange[] = []) {
   const queue = [...pending];
   const rejected: string[] = [];
   const applied: Record<string, RemoteRow[]> = {};
-  const cursors: Partial<Record<SyncedTable, number>> = {};
+  const cursors: Partial<Record<PulledTable, number>> = {};
   const local: LocalSyncStore = {
     pendingChanges: async (limit) => queue.filter((c) => !rejected.includes(c.id)).slice(0, limit),
     markPushed: async (id) =>
