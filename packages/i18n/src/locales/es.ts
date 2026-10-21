@@ -14,6 +14,7 @@ export const es = {
     pendingChanges:
       '{count, plural, one {# cambio pendiente de sincronizar} other {# cambios pendientes de sincronizar}}',
     signOut: 'Cerrar sesión',
+    close: 'Cerrar',
   },
   auth: {
     title: 'Inicia sesión en Wayfare',
@@ -78,8 +79,7 @@ export const es = {
     missingTitle: 'Lo que falta',
     allSet: '¡Todo listo por aquí!',
     itineraryEmptyTitle: 'Aún sin ciudades',
-    itineraryEmpty:
-      'Pronto podrás añadir aquí las ciudades, alojamientos y transportes de este viaje.',
+    itineraryEmpty: 'Añade las ciudades en el orden del viaje; las fechas se ajustan solas.',
     activities: '{count, plural, one {# actividad} other {# actividades}}',
     noLeg: 'Transporte aún sin definir',
     edit: 'Editar',
@@ -125,6 +125,34 @@ export const es = {
     signOutHint: 'Al cerrar sesión se borra la copia de tus viajes guardada en este dispositivo.',
     signOutPending:
       '{count, plural, one {# cambio aún no se ha enviado.} other {# cambios aún no se han enviado.}} Conéctate a internet antes de cerrar sesión o se perderán.',
+  },
+  itinerary: {
+    addCity: 'Añadir ciudad',
+    addFirstCity: 'Añadir la primera ciudad',
+    addCityHint: 'Las ciudades se encadenan desde el primer día del viaje.',
+    searchCity: 'Ciudad',
+    searchPlaceholder: 'Busca una ciudad',
+    searching: 'Buscando…',
+    noResults: 'No se encontró ninguna ciudad. Prueba otra grafía.',
+    searchOffline: 'La búsqueda de ciudades necesita internet. Lo demás funciona sin conexión.',
+    searchError: 'No se pudo buscar ahora. Inténtalo de nuevo en un momento.',
+    results: 'Resultados de la búsqueda',
+    change: 'Cambiar',
+    nights: 'Noches',
+    fewerNights: 'Una noche menos',
+    moreNights: 'Una noche más',
+    extendsTrip: 'El viaje terminará el {date}.',
+    cityActions: 'Opciones de {city}',
+    editNights: 'Cambiar noches',
+    moveUp: 'Subir',
+    moveDown: 'Bajar',
+    removeCity: 'Quitar ciudad',
+    removeTitle: '¿Quitar {city}?',
+    removeBody:
+      'Sus alojamientos, actividades y transportes también salen del itinerario. Las ciudades siguientes suben para cerrar el hueco.',
+    remove: 'Quitar',
+    nightsIn: 'Noches en {city}',
+    nightsShiftHint: 'Las ciudades siguientes se ajustan para que el viaje siga entero.',
   },
   labels: {
     passport: 'Pasaporte',

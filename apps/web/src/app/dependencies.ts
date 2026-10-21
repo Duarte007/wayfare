@@ -1,4 +1,6 @@
 import { SupabaseAuthService } from '../features/auth/infrastructure/supabase-auth-service';
+import { ApiPlaceSearch } from '../features/itinerary/infrastructure/api-place-search';
+import { DexieItineraryRepository } from '../features/itinerary/infrastructure/dexie-itinerary-repository';
 import { SyncEngine } from '../features/sync/application/sync-engine';
 import { DexieSyncStore } from '../features/sync/infrastructure/dexie-sync-store';
 import { SupabaseSyncStore } from '../features/sync/infrastructure/supabase-sync-store';
@@ -10,10 +12,17 @@ import { supabase } from '../shared/infrastructure/supabase';
 const db = new WayfareDB();
 const syncLocal = new DexieSyncStore(db);
 
+const auth = new SupabaseAuthService(supabase, {
+  url: import.meta.env.VITE_SUPABASE_URL,
+  apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+});
+
 export const dependencies = {
-  auth: new SupabaseAuthService(supabase, {
-    url: import.meta.env.VITE_SUPABASE_URL,
-    apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  auth,
+  itinerary: new DexieItineraryRepository(db),
+  placeSearch: new ApiPlaceSearch(import.meta.env.VITE_API_URL, async () => {
+    const session = await auth.currentSession();
+    return session?.accessToken ?? null;
   }),
   trips: new DexieTripRepository(db),
   syncLocal,

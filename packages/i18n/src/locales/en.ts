@@ -13,6 +13,7 @@ export const en = {
     pendingChanges:
       '{count, plural, one {# change waiting to sync} other {# changes waiting to sync}}',
     signOut: 'Sign out',
+    close: 'Close',
   },
   auth: {
     title: 'Sign in to Wayfare',
@@ -75,7 +76,8 @@ export const en = {
     missingTitle: 'Still missing',
     allSet: 'All set here!',
     itineraryEmptyTitle: 'No cities yet',
-    itineraryEmpty: 'Soon you’ll add this trip’s cities, stays and transport here.',
+    itineraryEmpty:
+      'Add the cities in the order you’ll visit them; the dates adjust by themselves.',
     activities: '{count, plural, one {# activity} other {# activities}}',
     noLeg: 'Transport not set yet',
     edit: 'Edit',
@@ -121,6 +123,34 @@ export const en = {
     signOutHint: 'Signing out removes the copy of your trips saved on this device.',
     signOutPending:
       '{count, plural, one {# change hasn’t been sent yet.} other {# changes haven’t been sent yet.}} Connect to the internet before signing out, or they will be lost.',
+  },
+  itinerary: {
+    addCity: 'Add city',
+    addFirstCity: 'Add the first city',
+    addCityHint: 'Cities follow each other from the first day of the trip.',
+    searchCity: 'City',
+    searchPlaceholder: 'Search a city or town',
+    searching: 'Searching…',
+    noResults: 'No city found. Try another spelling.',
+    searchOffline: 'City search needs the internet. Everything else works offline.',
+    searchError: 'Couldn’t search right now. Try again in a moment.',
+    results: 'Search results',
+    change: 'Change',
+    nights: 'Nights',
+    fewerNights: 'One night less',
+    moreNights: 'One night more',
+    extendsTrip: 'The trip will now end on {date}.',
+    cityActions: 'Options for {city}',
+    editNights: 'Change nights',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    removeCity: 'Remove city',
+    removeTitle: 'Remove {city}?',
+    removeBody:
+      'Its stays, activities and transport leave the itinerary too. Later cities move up to close the gap.',
+    remove: 'Remove',
+    nightsIn: 'Nights in {city}',
+    nightsShiftHint: 'The cities after it shift to keep the trip in one piece.',
   },
   labels: {
     passport: 'Passport',
