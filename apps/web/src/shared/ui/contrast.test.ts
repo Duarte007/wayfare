@@ -47,6 +47,12 @@ const PAIRS: [string, string][] = [
   ['foreground', 'sky-soft'],
   ['destructive', 'card'],
   ['background', 'foreground'],
+  // Calendar: day numbers on each city's fill, the city's short name in its ink, the legend.
+  ...Array.from({ length: 8 }, (_, i): [string, string][] => [
+    ['foreground', `city-${i}`],
+    [`city-${i}-ink`, `city-${i}`],
+    [`city-${i}-ink`, 'card'],
+  ]).flat(),
 ];
 
 describe.each([
@@ -57,6 +63,13 @@ describe.each([
     expect(theme[fg], fg).toBeDefined();
     expect(theme[bg], bg).toBeDefined();
     expect(contrast(theme[fg]!, theme[bg]!)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('dark theme', () => {
+  it('is the same whether it comes from the system or is forced', () => {
+    const system = tokens(css.match(/:root:not\(\[data-theme='light'\]\)\s*{([^}]*)}/)![1]!);
+    expect(system).toEqual(dark);
   });
 });
 

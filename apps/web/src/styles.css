@@ -31,6 +31,23 @@
   --input: #e2ddd3;
   --ring: #a84e17;
   --radius: 1rem;
+  /* Calendar: one soft fill per city (stop color_index 0–7) and an ink that reads on it. */
+  --city-0: #fbe1cf;
+  --city-0-ink: #9a4512;
+  --city-1: #d8eaf5;
+  --city-1-ink: #24607e;
+  --city-2: #d9efdc;
+  --city-2-ink: #2b6b3c;
+  --city-3: #e7defa;
+  --city-3-ink: #5b3f9e;
+  --city-4: #f8ecc2;
+  --city-4-ink: #7a5a00;
+  --city-5: #f9dbe6;
+  --city-5-ink: #9b2c58;
+  --city-6: #d3efec;
+  --city-6-ink: #19675f;
+  --city-7: #e1e4ee;
+  --city-7-ink: #3f4a6b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,6 +73,22 @@
     --border: #2c3a42;
     --input: #2c3a42;
     --ring: #f2a066;
+    --city-0: #4a2a17;
+    --city-0-ink: #f6b78a;
+    --city-1: #173a4d;
+    --city-1-ink: #9fd0ea;
+    --city-2: #1d3d26;
+    --city-2-ink: #93d3a2;
+    --city-3: #33275a;
+    --city-3-ink: #c7b5f5;
+    --city-4: #44380f;
+    --city-4-ink: #ecd27a;
+    --city-5: #4d1f33;
+    --city-5-ink: #f2a7c4;
+    --city-6: #133f3b;
+    --city-6-ink: #86d5cc;
+    --city-7: #2b3247;
+    --city-7-ink: #b9c2dc;
     color-scheme: dark;
   }
 }
@@ -81,6 +114,22 @@
   --border: #2c3a42;
   --input: #2c3a42;
   --ring: #f2a066;
+  --city-0: #4a2a17;
+  --city-0-ink: #f6b78a;
+  --city-1: #173a4d;
+  --city-1-ink: #9fd0ea;
+  --city-2: #1d3d26;
+  --city-2-ink: #93d3a2;
+  --city-3: #33275a;
+  --city-3-ink: #c7b5f5;
+  --city-4: #44380f;
+  --city-4-ink: #ecd27a;
+  --city-5: #4d1f33;
+  --city-5-ink: #f2a7c4;
+  --city-6: #133f3b;
+  --city-6-ink: #86d5cc;
+  --city-7: #2b3247;
+  --city-7-ink: #b9c2dc;
   color-scheme: dark;
 }
 
@@ -106,6 +155,22 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-city-0: var(--city-0);
+  --color-city-0-ink: var(--city-0-ink);
+  --color-city-1: var(--city-1);
+  --color-city-1-ink: var(--city-1-ink);
+  --color-city-2: var(--city-2);
+  --color-city-2-ink: var(--city-2-ink);
+  --color-city-3: var(--city-3);
+  --color-city-3-ink: var(--city-3-ink);
+  --color-city-4: var(--city-4);
+  --color-city-4-ink: var(--city-4-ink);
+  --color-city-5: var(--city-5);
+  --color-city-5-ink: var(--city-5-ink);
+  --color-city-6: var(--city-6);
+  --color-city-6-ink: var(--city-6-ink);
+  --color-city-7: var(--city-7);
+  --color-city-7-ink: var(--city-7-ink);
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
