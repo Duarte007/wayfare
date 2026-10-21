@@ -49,3 +49,30 @@ jobs:
           for f in supabase/migrations/*.sql; do psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"; done
       - name: Row Level Security tests
         run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_groups.sql
+
+  e2e:
+    # Playwright against a preview build of the web app and a fake backend (see e2e/README.md):
+    # no production, no secrets.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm --filter @wayfare/e2e exec playwright install --with-deps chromium
+      - name: End-to-end tests
+        run: pnpm --filter @wayfare/e2e test:e2e
+      - name: Upload the report and traces
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 14

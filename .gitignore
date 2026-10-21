@@ -10,3 +10,7 @@ coverage
 .DS_Store
 supabase/.branches
 supabase/.temp
+dist-e2e
+playwright-report
+test-results
+blob-report
