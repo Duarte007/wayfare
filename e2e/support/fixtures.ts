@@ -69,6 +69,39 @@ export function outboxCount(page: Page): Promise<number> {
   );
 }
 
+/**
+ * Waits until the first sync pulled every given table (its cursor is saved after each page), so a
+ * test never acts on a half-downloaded trip.
+ */
+export async function expectPulled(page: Page, tables: string[]): Promise<void> {
+  const missing = () =>
+    page.evaluate(
+      (names) =>
+        new Promise<string[]>((resolve) => {
+          const open = indexedDB.open('wayfare');
+          open.onsuccess = () => {
+            const db = open.result;
+            if (!db.objectStoreNames.contains('meta')) return resolve(names);
+            const store = db.transaction('meta').objectStore('meta');
+            const left: string[] = [];
+            let pending = names.length;
+            for (const name of names) {
+              const get = store.get(`sync.cursor.${name}`);
+              get.onsuccess = () => {
+                if (!get.result) left.push(name);
+                if (--pending === 0) {
+                  db.close();
+                  resolve(left);
+                }
+              };
+            }
+          };
+        }),
+      tables,
+    );
+  await expect.poll(missing, { message: 'tables not pulled yet' }).toEqual([]);
+}
+
 /** Waits until every local change has reached the (fake) server. */
 export async function expectSynced(page: Page): Promise<void> {
   await expect.poll(() => outboxCount(page), { message: 'outbox should drain' }).toBe(0);

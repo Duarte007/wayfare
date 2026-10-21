@@ -1,5 +1,11 @@
 import { backend } from '../support/backend.ts';
-import { expect, expectSynced, signInWithSession, test } from '../support/fixtures.ts';
+import {
+  expect,
+  expectPulled,
+  expectSynced,
+  signInWithSession,
+  test,
+} from '../support/fixtures.ts';
 import { plannedTrip } from '../support/seed.ts';
 
 const PDF = Buffer.from(
@@ -11,6 +17,7 @@ test('a document saved on the device is uploaded to storage', async ({ page, con
   await backend.seed(user.id, rows);
   await signInWithSession(context, user);
   await page.goto(`/trips/${tripId}/documents`);
+  await expectPulled(page, Object.keys(rows));
   await expect(page.getByRole('heading', { level: 1, name: 'Documentos' })).toBeVisible();
 
   await page.locator('input[type=file]').setInputFiles({

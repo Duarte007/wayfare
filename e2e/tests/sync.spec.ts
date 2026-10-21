@@ -1,5 +1,12 @@
 import { backend } from '../support/backend.ts';
-import { expect, expectSynced, outboxCount, signInWithSession, test } from '../support/fixtures.ts';
+import {
+  expect,
+  expectPulled,
+  expectSynced,
+  outboxCount,
+  signInWithSession,
+  test,
+} from '../support/fixtures.ts';
 import { plannedTrip } from '../support/seed.ts';
 
 test('changes made offline wait in the outbox and reach the server when back online', async ({
@@ -14,8 +21,8 @@ test('changes made offline wait in the outbox and reach the server when back onl
 
   // The trip comes down from the server on the first sync.
   await page.goto(`/trips/${tripId}`);
+  await expectPulled(page, Object.keys(rows));
   await expect(page.locator('ol h3')).toHaveText(['Lisboa', 'Porto']);
-  await expectSynced(page);
 
   await context.setOffline(true);
   await expect(page.getByRole('status').filter({ hasText: 'Offline' })).toBeVisible();

@@ -1,7 +1,13 @@
 import type { Page } from '@playwright/test';
 import { backend } from '../support/backend.ts';
 import { expectNoDeadClicks } from '../support/click-audit.ts';
-import { expect, expectAccessible, signInWithSession, test } from '../support/fixtures.ts';
+import {
+  expect,
+  expectAccessible,
+  expectPulled,
+  signInWithSession,
+  test,
+} from '../support/fixtures.ts';
 import { msg } from '../support/i18n.ts';
 import { plannedTrip } from '../support/seed.ts';
 
@@ -18,6 +24,7 @@ test.describe('screens', () => {
     await backend.seed(user.id, trip.rows);
     await signInWithSession(context, user);
     await page.goto('/');
+    await expectPulled(page, Object.keys(trip.rows));
     await expect(page.getByRole('link', { name: /Viagem de teste/ })).toBeVisible();
   });
 

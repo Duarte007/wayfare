@@ -21,7 +21,9 @@ export default defineConfig({
   workers: CI ? 3 : undefined,
   timeout: 45_000,
   expect: { timeout: 10_000 },
-  reporter: CI ? [['github'], ['list'], ['html', { open: 'never' }]] : [['list']],
+  reporter: CI
+    ? [['github'], ['list'], ['html', { open: 'never' }], ['json', { outputFile: 'results.json' }]]
+    : [['list']],
   use: {
     baseURL: APP_URL,
     trace: 'retain-on-failure',

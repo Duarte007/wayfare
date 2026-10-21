@@ -67,13 +67,10 @@ jobs:
         run: pnpm --filter @wayfare/e2e exec playwright install --with-deps chromium
       - name: End-to-end tests
         run: pnpm --filter @wayfare/e2e test:e2e
-      - name: Debug failure context
-        if: ${{ failure() }}
-        run: |
-          for f in e2e/test-results/*/error-context.md; do
-            body=$(head -c 6000 "$f" | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
-            echo "::warning title=ctx::$body"
-          done
+      - name: Summarise failures
+        if: ${{ failure() && hashFiles('e2e/results.json') != '' }}
+        working-directory: e2e
+        run: node --experimental-strip-types --no-warnings support/ci-summary.ts results.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload the report and traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -82,4 +79,5 @@ jobs:
           path: |
             e2e/playwright-report
             e2e/test-results
+            e2e/results.json
           retention-days: 14
