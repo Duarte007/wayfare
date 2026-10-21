@@ -55,3 +55,20 @@ describe.each([
     expect(contrast(theme[fg]!, theme[bg]!)).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+describe('browser chrome colors', () => {
+  const read = (path: string) =>
+    readFileSync(fileURLToPath(new URL(path, import.meta.url)), 'utf8');
+  const html = read('../../../index.html');
+  const vite = read('../../../vite.config.ts');
+
+  it('theme-color metas follow the bg token of each scheme', () => {
+    expect(html).toContain(`content="${light.bg}" media="(prefers-color-scheme: light)"`);
+    expect(html).toContain(`content="${dark.bg}" media="(prefers-color-scheme: dark)"`);
+  });
+
+  it('PWA manifest uses the light bg token', () => {
+    expect(vite).toContain(`theme_color: '${light.bg}'`);
+    expect(vite).toContain(`background_color: '${light.bg}'`);
+  });
+});

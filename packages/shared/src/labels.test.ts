@@ -37,6 +37,12 @@ describe('suggestLabel', () => {
     ['Canada eTA.pdf', 'visa'],
     ['India e-Visa.pdf', 'visa'],
     ['Estação de trem Porto.pdf', 'train'],
+    // Found in QA with the reference trip: a hostel booking without the word "hotel"
+    ['Book and Bed Shanghai reserva.pdf', 'stay'],
+    ['Ryokan Kyoto reservation.pdf', 'stay'],
+    ['Pousada Paraty check-in.pdf', 'stay'],
+    // "reserva" for a museum stays an activity ticket
+    ['Reserva ingresso Louvre.pdf', 'activity'],
   ];
   it.each(cases)('%s -> %s', (name, label) => {
     expect(suggestLabel(name).label).toBe(label);
@@ -65,5 +71,14 @@ describe('suggestTitle', () => {
     expect(suggestTitle('ETKT_CA1234_SMITH_JOHN.pdf', 'flight')).toBe('Flight CA1234');
     expect(suggestTitle('火车票_G1234.pdf', 'train')).toBe('Train G1234');
     expect(suggestTitle('reserva_hotel_xangai.pdf', 'stay')).toBe('Reserva hotel xangai');
+  });
+
+  it('drops folders and turns separators into spaces', () => {
+    expect(suggestTitle('vouchers/voucher-pequim-seeyou.pdf', 'stay')).toBe(
+      'Voucher pequim seeyou',
+    );
+    expect(suggestTitle('C:\\Downloads\\seguro_viagem-2026.pdf', 'insurance')).toBe(
+      'Seguro viagem 2026',
+    );
   });
 });
