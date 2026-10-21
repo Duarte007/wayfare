@@ -1,30 +1,14 @@
-import type { Locale } from 'date-fns';
-import { enUS, es, ja, ptBR, zhCN } from 'date-fns/locale';
 import { CalendarDays } from 'lucide-react';
 import { useId, useState, useSyncExternalStore } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
+import { calendarLocale, dateToDay as toIso, dayToDate as toDate } from '@/shared/lib/calendar-day';
 import { formatDateRange } from '@/shared/lib/dates';
 import { cn } from '@/shared/lib/utils';
 import { Button } from './button';
 import { Calendar } from './calendar';
 import { Label } from './label';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
-
-const LOCALES: Record<string, Locale> = { en: enUS, 'pt-BR': ptBR, es, ja, 'zh-CN': zhCN };
-
-/** "2027-03-01" ↔ a local Date at midnight; the app stores plain calendar days, no time zone. */
-function toDate(iso: string): Date | undefined {
-  if (!iso) return undefined;
-  const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
-  return new Date(y, m - 1, d);
-}
-
-function toIso(date: Date | undefined): string {
-  if (!date) return '';
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
 
 function subscribeWide(onChange: () => void) {
   const query = window.matchMedia('(min-width: 768px)');
@@ -92,7 +76,7 @@ export function DateRangeField({
         <PopoverContent className="w-auto p-0" align="start" aria-label={label}>
           <Calendar
             mode="range"
-            locale={LOCALES[i18n.language] ?? enUS}
+            locale={calendarLocale(i18n.language)}
             numberOfMonths={wide ? 2 : 1}
             defaultMonth={selected?.from ?? (bounds ? toDate(bounds.from) : undefined)}
             disabled={

@@ -47,7 +47,9 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/u
 import { IconTile } from '@/shared/ui/ui';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
 import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
+import { LegDialog } from '../../itinerary/ui/LegDialog';
 import { StayDialog } from '../../itinerary/ui/StayDialog';
+import { formatZonedTime } from '@/shared/lib/timezone';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useRemoveTrip, useTripDetails } from '../application/useTripDetails';
 import {
@@ -164,6 +166,7 @@ function TripOverview({ details }: { details: TripDetails }) {
                 <ItineraryItem
                   key={item.stop.id}
                   item={item}
+                  next={itinerary[index + 1]}
                   actions={
                     <CityActionsMenu
                       details={details}
@@ -359,7 +362,29 @@ const MODE_ICONS: Record<Leg['mode'], LucideIcon> = {
   other: Route,
 };
 
-function ItineraryItem({ item, actions }: { item: ItineraryStop; actions: ReactNode }) {
+function legSummary(leg: Leg, t: (key: string) => string, locale: string): string {
+  const times =
+    leg.depart_at && leg.depart_tz
+      ? `${formatZonedTime(leg.depart_at, leg.depart_tz, locale)}${
+          leg.arrive_at && leg.arrive_tz
+            ? ` → ${formatZonedTime(leg.arrive_at, leg.arrive_tz, locale)}`
+            : ''
+        }`
+      : null;
+  return [t(`mode_${leg.mode}`), [leg.carrier, leg.number].filter(Boolean).join(' '), times]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+function ItineraryItem({
+  item,
+  next,
+  actions,
+}: {
+  item: ItineraryStop;
+  next: ItineraryStop | undefined;
+  actions: ReactNode;
+}) {
   const { t, i18n } = useTranslation('trips');
   const { t: ti } = useTranslation('itinerary');
   const { stop, place, nights, stays, activities, legToNext, isLast } = item;
@@ -451,22 +476,28 @@ function ItineraryItem({ item, actions }: { item: ItineraryStop; actions: ReactN
             />
           </li>
         </ul>
-        {isLast ? null : (
-          <p
-            className={
-              legToNext
-                ? 'inline-flex w-fit items-center gap-2 rounded-full bg-sky-soft px-3 py-1 text-sm font-medium text-sky'
-                : 'inline-flex w-fit items-center gap-2 rounded-full border border-dashed px-3 py-1 text-sm text-muted-foreground'
+        {next ? (
+          <LegDialog
+            from={item}
+            to={next}
+            existing={legToNext}
+            trigger={
+              <button
+                type="button"
+                className={
+                  legToNext
+                    ? 'inline-flex w-fit max-w-full min-w-0 items-center gap-2 rounded-full bg-sky-soft px-3 py-1.5 text-left text-sm font-medium text-sky transition hover:brightness-95 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
+                    : 'inline-flex w-fit items-center gap-2 rounded-full border border-dashed px-3 py-1.5 text-sm text-muted-foreground transition hover:border-primary hover:text-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
+                }
+              >
+                <ModeIcon className="size-4 shrink-0" aria-hidden />
+                <span className="truncate">
+                  {legToNext ? legSummary(legToNext, t, i18n.language) : t('noLeg')}
+                </span>
+              </button>
             }
-          >
-            <ModeIcon className="size-4" aria-hidden />
-            {legToNext
-              ? [t(`mode_${legToNext.mode}`), legToNext.carrier, legToNext.number]
-                  .filter(Boolean)
-                  .join(' · ')
-              : t('noLeg')}
-          </p>
-        )}
+          />
+        ) : null}
       </div>
     </li>
   );

@@ -16,7 +16,8 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] Trip page: summary, what's missing, itinerary timeline, edit, delete — #9
 - [x] Click audit fixes; this roadmap — #10
 - [x] Cities in the itinerary (search, add, nights, reorder, remove) — #11
-- [x] Stays per city (add, edit, private/shared, remove) — item 3
+- [x] Stays per city (add, edit, private/shared, remove) — #12
+- [x] Transport between cities (mode, carrier, number, local times with time zones) — item 4
 
 ## Now — make the trip usable end to end
 
@@ -48,7 +49,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** stays have name, check-in/out (inside the city's dates), booking ref/URL and
   notes; "what's missing" updates live; private vs. group visibility can be chosen.
 
-### 4. Transport between cities (legs)
+### 4. Transport between cities (legs) ✅
 
 - **Goal:** say how you get from one city to the next.
 - **Done when:** a leg can be added from the "Transport not set" chip with mode, carrier,
