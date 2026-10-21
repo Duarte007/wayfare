@@ -1,4 +1,4 @@
-import { SYNCED_TABLES, type LocalSyncStore, type RemoteSyncStore } from '../domain/sync-ports';
+import { PULLED_TABLES, type LocalSyncStore, type RemoteSyncStore } from '../domain/sync-ports';
 
 export type SyncResult = 'synced' | 'offline';
 
@@ -54,7 +54,7 @@ export class SyncEngine {
   }
 
   private async pull(): Promise<boolean> {
-    for (const table of SYNCED_TABLES) {
+    for (const table of PULLED_TABLES) {
       let since = await this.local.cursor(table);
       for (;;) {
         const rows = await this.remote.pull(table, since, PULL_PAGE);

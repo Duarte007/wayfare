@@ -61,4 +61,16 @@ describe('DexieSyncStore', () => {
     await store.applyRemote('trips', [{ ...trip('t', 'Server'), version: 9 }], 9);
     expect((await db.trips.get('t'))?.name).toBe('Server');
   });
+
+  it('stores document links under a key built from their composite key', async () => {
+    const link = { document_id: 'd1', entity_type: 'stay', entity_id: 's1', trip_id: 't' };
+    await store.applyRemote('document_links', [{ ...link, version: 3 }], 3);
+    expect(await db.documentLinks.get('d1:stay:s1')).toMatchObject(link);
+    await store.applyRemote(
+      'document_links',
+      [{ ...link, version: 4, deleted_at: '2026-10-21T00:00:00Z' }],
+      4,
+    );
+    expect(await db.documentLinks.count()).toBe(0);
+  });
 });

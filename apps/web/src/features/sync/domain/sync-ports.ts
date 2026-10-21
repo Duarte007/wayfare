@@ -3,9 +3,9 @@
  * about Dexie or Supabase.
  */
 
-import type { SyncedTable } from '@wayfare/shared';
+import type { PulledTable, SyncedTable } from '@wayfare/shared';
 
-export { SYNCED_TABLES, type SyncedTable } from '@wayfare/shared';
+export { PULLED_TABLES, type PulledTable, type SyncedTable } from '@wayfare/shared';
 
 export interface PendingChange {
   id: string;
@@ -15,7 +15,8 @@ export interface PendingChange {
 }
 
 export interface RemoteRow {
-  id: string;
+  /** Absent on composite-key tables (document_links); the local store derives one. */
+  id?: string;
   version: number;
   deleted_at?: string | null;
   [column: string]: unknown;
@@ -30,17 +31,17 @@ export interface LocalSyncStore {
   markPushed(changeId: string): Promise<void>;
   markRejected(changeId: string, reason: string): Promise<void>;
   observePendingCount(listener: (count: number) => void): () => void;
-  cursor(table: SyncedTable): Promise<number>;
+  cursor(table: PulledTable): Promise<number>;
   /**
    * Stores pulled rows and advances the cursor atomically. Rows with unsent local changes are
    * skipped, checked in the same transaction, so an edit made during the pull is never lost.
    * Rejected changes don't count: the server's row wins.
    */
-  applyRemote(table: SyncedTable, rows: RemoteRow[], cursor: number): Promise<void>;
+  applyRemote(table: PulledTable, rows: RemoteRow[], cursor: number): Promise<void>;
 }
 
 export interface RemoteSyncStore {
   push(change: PendingChange): Promise<{ outcome: PushOutcome; reason?: string }>;
   /** Rows changed after `since`, by ascending version; null when the server can't be reached. */
-  pull(table: SyncedTable, since: number, limit: number): Promise<RemoteRow[] | null>;
+  pull(table: PulledTable, since: number, limit: number): Promise<RemoteRow[] | null>;
 }

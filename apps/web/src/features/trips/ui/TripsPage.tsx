@@ -96,31 +96,40 @@ function TripCard({ trip }: { trip: Trip }) {
   const { nights, daysToGo } = summarizeTrip(trip, localToday());
   return (
     <li>
-      <Card className="py-4">
-        <CardContent className="flex items-center gap-4 px-4">
-          <IconTile icon={MapPinned} tone="sky" />
-          <div className="grid min-w-0 flex-1 gap-1">
-            <h3 className="truncate text-lg font-bold">{trip.name}</h3>
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <CalendarDays className="size-4" aria-hidden />
-                {formatDateRange(trip.start_date, trip.end_date, i18n.language)}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Moon className="size-4" aria-hidden />
-                {t('nights', { count: nights })}
-              </span>
-            </p>
-            {daysToGo > 0 ? (
-              <Badge variant="soft">
-                <Hourglass aria-hidden />
-                {t('daysToGo', { count: daysToGo })}
-              </Badge>
-            ) : null}
-          </div>
-          <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
-        </CardContent>
-      </Card>
+      <Link
+        to="/trips/$tripId"
+        params={{ tripId: trip.id }}
+        className="group block rounded-xl focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+      >
+        <Card className="py-4 transition group-hover:border-primary/40 group-hover:shadow-md">
+          <CardContent className="flex items-center gap-4 px-4">
+            <IconTile icon={MapPinned} tone="sky" />
+            <div className="grid min-w-0 flex-1 gap-1">
+              <h3 className="truncate text-lg font-bold">{trip.name}</h3>
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <CalendarDays className="size-4" aria-hidden />
+                  {formatDateRange(trip.start_date, trip.end_date, i18n.language)}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Moon className="size-4" aria-hidden />
+                  {t('nights', { count: nights })}
+                </span>
+              </p>
+              {daysToGo > 0 ? (
+                <Badge variant="soft">
+                  <Hourglass aria-hidden />
+                  {t('daysToGo', { count: daysToGo })}
+                </Badge>
+              ) : null}
+            </div>
+            <ChevronRight
+              className="size-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+              aria-hidden
+            />
+          </CardContent>
+        </Card>
+      </Link>
     </li>
   );
 }

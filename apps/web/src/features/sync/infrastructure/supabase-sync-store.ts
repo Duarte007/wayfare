@@ -4,7 +4,7 @@ import type {
   PushOutcome,
   RemoteRow,
   RemoteSyncStore,
-  SyncedTable,
+  PulledTable,
 } from '../domain/sync-ports';
 
 /**
@@ -47,7 +47,7 @@ export class SupabaseSyncStore implements RemoteSyncStore {
     }
   }
 
-  async pull(table: SyncedTable, since: number, limit: number): Promise<RemoteRow[] | null> {
+  async pull(table: PulledTable, since: number, limit: number): Promise<RemoteRow[] | null> {
     try {
       const { data, error } = await this.client
         .from(table)
