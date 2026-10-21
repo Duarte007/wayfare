@@ -12,11 +12,13 @@ import {
   FileText,
   Hourglass,
   Loader2,
+  Lock,
   MapPin,
   MapPinned,
   Moon,
   Pencil,
   Plane,
+  Plus,
   Route,
   Ship,
   ShieldAlert,
@@ -45,6 +47,7 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/u
 import { IconTile } from '@/shared/ui/ui';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
 import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
+import { StayDialog } from '../../itinerary/ui/StayDialog';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useRemoveTrip, useTripDetails } from '../application/useTripDetails';
 import {
@@ -358,7 +361,9 @@ const MODE_ICONS: Record<Leg['mode'], LucideIcon> = {
 
 function ItineraryItem({ item, actions }: { item: ItineraryStop; actions: ReactNode }) {
   const { t, i18n } = useTranslation('trips');
+  const { t: ti } = useTranslation('itinerary');
   const { stop, place, nights, stays, activities, legToNext, isLast } = item;
+  const city = place?.name ?? '—';
   const ModeIcon = legToNext ? MODE_ICONS[legToNext.mode] : Route;
 
   return (
@@ -399,25 +404,53 @@ function ItineraryItem({ item, actions }: { item: ItineraryStop; actions: ReactN
             </span>
           ) : null}
         </p>
-        {stays.length > 0 ? (
-          <ul className="grid min-w-0 gap-1.5">
-            {stays.map((stay) => (
-              // Long hotel names truncate; on phones the dates go under the name.
-              <li
-                key={stay.id}
-                className="flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm"
-              >
-                <BedDouble className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                <span className="grid min-w-0 flex-1 gap-0.5 sm:flex sm:items-center sm:justify-between sm:gap-2">
-                  <span className="truncate font-medium">{stay.name}</span>
-                  <span className="text-xs text-muted-foreground sm:shrink-0 sm:text-sm">
-                    {formatDateRange(stay.check_in, stay.check_out, i18n.language)}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <ul className="grid min-w-0 gap-1.5">
+          {stays.map((stay) => (
+            // Long hotel names truncate; on phones the dates go under the name.
+            <li key={stay.id} className="min-w-0">
+              <StayDialog
+                stop={stop}
+                city={city}
+                existing={stay}
+                trigger={
+                  <button
+                    type="button"
+                    aria-label={ti('editStayNamed', { name: stay.name })}
+                    className="flex w-full min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+                  >
+                    <BedDouble className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <span className="grid min-w-0 flex-1 gap-0.5 sm:flex sm:items-center sm:justify-between sm:gap-2">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate font-medium">{stay.name}</span>
+                        {stay.visibility === 'private' ? (
+                          <Lock
+                            className="size-3.5 shrink-0 text-muted-foreground"
+                            aria-label={ti('private')}
+                          />
+                        ) : null}
+                      </span>
+                      <span className="text-xs text-muted-foreground sm:shrink-0 sm:text-sm">
+                        {formatDateRange(stay.check_in, stay.check_out, i18n.language)}
+                      </span>
+                    </span>
+                  </button>
+                }
+              />
+            </li>
+          ))}
+          <li>
+            <StayDialog
+              stop={stop}
+              city={city}
+              trigger={
+                <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground">
+                  <Plus aria-hidden />
+                  {ti('addStay')}
+                </Button>
+              }
+            />
+          </li>
+        </ul>
         {isLast ? null : (
           <p
             className={

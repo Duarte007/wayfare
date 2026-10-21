@@ -30,6 +30,7 @@ describe('translations', () => {
             email: 'e',
             name: 'n',
             date: 'd',
+            range: 'r',
             max: 120,
             leg: 'L',
             stay: 'S',
