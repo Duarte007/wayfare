@@ -89,7 +89,8 @@ export function TripMap({
 
   return (
     <div className="relative h-[55dvh] min-h-72 overflow-hidden rounded-xl border bg-muted">
-      <div ref={container} className="absolute inset-0" />
+      {/* Sized, not absolutely placed: MapLibre makes its container `position: relative`. */}
+      <div ref={container} className="size-full" />
       {state === 'loading' ? (
         <p
           role="status"
