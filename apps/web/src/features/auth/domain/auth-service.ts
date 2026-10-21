@@ -5,6 +5,9 @@ export type OAuthProvider = 'apple' | 'google';
 export interface AuthSession {
   userId: string;
   email: string | null;
+  /** From the profile or the identity provider (Google/Apple); null until the user sets one. */
+  displayName: string | null;
+  avatarUrl: string | null;
   accessToken: string;
 }
 
@@ -25,5 +28,7 @@ export interface AuthService {
   sendEmailCode(email: string): Promise<AuthResult>;
   verifyEmailCode(email: string, code: string): Promise<AuthResult>;
   signInWithProvider(provider: OAuthProvider, redirectTo: string): Promise<AuthResult>;
+  /** Name shown to trip mates. */
+  updateDisplayName(name: string): Promise<AuthResult>;
   signOut(): Promise<void>;
 }

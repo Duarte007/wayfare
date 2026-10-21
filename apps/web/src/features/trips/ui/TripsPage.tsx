@@ -4,7 +4,6 @@ import {
   ChevronRight,
   Hourglass,
   Loader2,
-  LogOut,
   Luggage,
   MapPinned,
   Moon,
@@ -12,8 +11,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDateRange, localToday } from '../../../shared/lib/dates';
-import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
-import { Button, IconButton, IconTile } from '../../../shared/ui/ui';
+import { Button, IconTile } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useTrips } from '../application/TripsProvider';
 import { summarizeTrip } from '../domain/trip-summary';
@@ -22,17 +20,17 @@ import { summarizeTrip } from '../domain/trip-summary';
 export function TripsPage() {
   const { t } = useTranslation('trips');
   const { t: tc } = useTranslation('common');
-  const { signOut } = useAuth();
+  const { session } = useAuth();
   const trips = useTrips();
+  const firstName = session?.displayName?.split(/\s+/)[0];
 
   return (
-    <main className="mx-auto grid max-w-2xl gap-6 px-4 py-6">
-      <header className="flex items-start justify-between gap-4">
-        <div className="grid gap-1">
-          <p className="text-sm font-medium text-muted">{t('welcome')}</p>
-          <h1 className="text-3xl font-extrabold tracking-tight">{t('greeting')}</h1>
-        </div>
-        <IconButton icon={LogOut} label={tc('signOut')} onClick={() => void signOut()} />
+    <>
+      <header className="grid gap-1">
+        <p className="text-sm font-medium text-muted">
+          {firstName ? t('welcomeName', { name: firstName }) : t('welcome')}
+        </p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t('greeting')}</h1>
       </header>
 
       {trips === undefined ? (
@@ -57,11 +55,7 @@ export function TripsPage() {
           </ul>
         </section>
       )}
-
-      <footer className="flex justify-center pt-4">
-        <LanguageSelect />
-      </footer>
-    </main>
+    </>
   );
 }
 
