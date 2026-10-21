@@ -28,6 +28,8 @@ export interface AuthService {
   sendEmailCode(email: string): Promise<AuthResult>;
   verifyEmailCode(email: string, code: string): Promise<AuthResult>;
   signInWithProvider(provider: OAuthProvider, redirectTo: string): Promise<AuthResult>;
+  /** Social providers switched on in the auth server; the last known list when offline. */
+  enabledProviders(): Promise<OAuthProvider[]>;
   /** Name shown to trip mates. */
   updateDisplayName(name: string): Promise<AuthResult>;
   signOut(): Promise<void>;

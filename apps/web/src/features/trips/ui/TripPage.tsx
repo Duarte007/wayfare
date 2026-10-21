@@ -147,7 +147,7 @@ function TripOverview({ details }: { details: TripDetails }) {
               <p className="max-w-sm text-sm text-muted-foreground">{t('itineraryEmpty')}</p>
             </div>
           ) : (
-            <ol className="grid">
+            <ol className="grid min-w-0">
               {itinerary.map((item) => (
                 <ItineraryItem key={item.stop.id} item={item} />
               ))}
@@ -342,7 +342,7 @@ function ItineraryItem({ item }: { item: ItineraryStop }) {
   const ModeIcon = legToNext ? MODE_ICONS[legToNext.mode] : Route;
 
   return (
-    <li className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3">
+    <li className="grid min-w-0 grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3">
       {/* Timeline rail: a dot per city, a line down to the next one. */}
       <div className="flex flex-col items-center">
         <span
@@ -351,7 +351,7 @@ function ItineraryItem({ item }: { item: ItineraryStop }) {
         />
         {isLast ? null : <span className="w-px flex-1 bg-border" aria-hidden />}
       </div>
-      <div className={isLast ? 'grid gap-2' : 'grid gap-2 pb-6'}>
+      <div className={isLast ? 'grid min-w-0 gap-2' : 'grid min-w-0 gap-2 pb-6'}>
         <div className="flex flex-wrap items-baseline gap-x-2">
           <h3 className="text-lg font-bold">{place?.name ?? '—'}</h3>
           {place?.name_local ? (
@@ -377,16 +377,19 @@ function ItineraryItem({ item }: { item: ItineraryStop }) {
           ) : null}
         </p>
         {stays.length > 0 ? (
-          <ul className="grid gap-1.5">
+          <ul className="grid min-w-0 gap-1.5">
             {stays.map((stay) => (
+              // Long hotel names truncate; on phones the dates go under the name.
               <li
                 key={stay.id}
-                className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                className="flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm"
               >
                 <BedDouble className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                <span className="min-w-0 flex-1 truncate font-medium">{stay.name}</span>
-                <span className="shrink-0 text-muted-foreground">
-                  {formatDateRange(stay.check_in, stay.check_out, i18n.language)}
+                <span className="grid min-w-0 flex-1 gap-0.5 sm:flex sm:items-center sm:justify-between sm:gap-2">
+                  <span className="truncate font-medium">{stay.name}</span>
+                  <span className="text-xs text-muted-foreground sm:shrink-0 sm:text-sm">
+                    {formatDateRange(stay.check_in, stay.check_out, i18n.language)}
+                  </span>
                 </span>
               </li>
             ))}

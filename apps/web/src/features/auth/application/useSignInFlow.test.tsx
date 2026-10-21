@@ -18,6 +18,7 @@ function fakeAuth(overrides: Partial<AuthService> = {}): AuthService {
     verifyEmailCode: ok,
     signInWithProvider: ok,
     updateDisplayName: ok,
+    enabledProviders: async () => [],
     signOut: async () => {},
     ...overrides,
   };
