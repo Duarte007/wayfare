@@ -47,7 +47,7 @@ pnpm lint                              # includes layer-boundary rules
 pnpm turbo run build typecheck test
 ```
 
-CI also applies the migrations to Postgres 16 and runs `supabase/tests/rls_groups.sql`.
+CI also applies the migrations to Postgres 17 and runs `supabase/tests/rls_groups.sql`.
 
 ## Sign-in
 
