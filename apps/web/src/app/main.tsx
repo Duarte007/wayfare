@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
+import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
 import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
 import { MembersProvider } from '../features/members/application/MembersProvider';
 import { SyncProvider } from '../features/sync/application/SyncProvider';
@@ -35,7 +36,9 @@ createRoot(document.getElementById('root')!).render(
             placeSearch={dependencies.placeSearch}
           >
             <MembersProvider directory={dependencies.members}>
-              <RouterProvider router={router} />
+              <DocumentsProvider {...dependencies.documents}>
+                <RouterProvider router={router} />
+              </DocumentsProvider>
             </MembersProvider>
           </ItineraryProvider>
         </TripsProvider>

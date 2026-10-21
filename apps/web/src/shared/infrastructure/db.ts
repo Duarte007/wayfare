@@ -23,6 +23,17 @@ export interface OutboxEntry {
   rejected?: string;
 }
 
+/** A document's file kept on the device, so it opens offline. */
+export interface StoredFile {
+  documentId: string;
+  blob: Blob;
+  mime: string;
+  storagePath: string;
+  state: 'pending_upload' | 'synced' | 'pending_delete';
+  /** Set when the server refused the upload for good; never retried. */
+  refused?: string;
+}
+
 export interface Meta {
   key: string;
   value: string;
@@ -40,6 +51,7 @@ export class WayfareDB extends Dexie {
   documentLinks!: EntityTable<DocumentLink & { id: string }, 'id'>;
   outbox!: EntityTable<OutboxEntry, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
+  files!: EntityTable<StoredFile, 'documentId'>;
 
   constructor() {
     super('wayfare');
@@ -57,6 +69,8 @@ export class WayfareDB extends Dexie {
     });
     // v2: sync looks up pending changes by table.
     this.version(2).stores({ outbox: 'id, createdAt, table' });
+    // v3: document files on the device, by sync state.
+    this.version(3).stores({ files: 'documentId, state' });
   }
 }
 
