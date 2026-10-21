@@ -18,6 +18,7 @@ import { AppleLogo, GoogleLogo } from '@/shared/ui/BrandIcons';
 import { Button } from '@/shared/ui/button';
 import { LanguageSelect } from '@/shared/ui/LanguageSelect';
 import { Divider, Field, IconTile, PasswordField } from '@/shared/ui/ui';
+import { useOAuthProviders } from '../application/useOAuthProviders';
 import { useSignInFlow, type FlowMessage, type SignInMode } from '../application/useSignInFlow';
 
 type SubmitKey = 'signIn' | 'createAccount' | 'sendReset' | 'emailCode' | 'verifyCode';
@@ -33,6 +34,7 @@ const SUBMIT: Record<SignInMode, { label: SubmitKey; icon: LucideIcon }> = {
 export function SignInPage() {
   const { t } = useTranslation('auth');
   const flow = useSignInFlow();
+  const providers = useOAuthProviders();
   const submit = SUBMIT[flow.mode];
   const SubmitIcon = submit.icon;
 
@@ -102,24 +104,28 @@ export function SignInPage() {
       <Divider label={t('or')} />
 
       <div className="grid gap-3">
-        <Button
-          variant="contrast"
-          size="lg"
-          disabled={flow.busy}
-          onClick={() => void flow.signInWith('apple')}
-        >
-          <AppleLogo />
-          {t('continueApple')}
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          disabled={flow.busy}
-          onClick={() => void flow.signInWith('google')}
-        >
-          <GoogleLogo />
-          {t('continueGoogle')}
-        </Button>
+        {providers.includes('apple') ? (
+          <Button
+            variant="contrast"
+            size="lg"
+            disabled={flow.busy}
+            onClick={() => void flow.signInWith('apple')}
+          >
+            <AppleLogo />
+            {t('continueApple')}
+          </Button>
+        ) : null}
+        {providers.includes('google') ? (
+          <Button
+            variant="outline"
+            size="lg"
+            disabled={flow.busy}
+            onClick={() => void flow.signInWith('google')}
+          >
+            <GoogleLogo />
+            {t('continueGoogle')}
+          </Button>
+        ) : null}
         {flow.mode !== 'code' && flow.mode !== 'verify' ? (
           <Button
             variant="outline"

@@ -1,5 +1,15 @@
 import type { AuthError, Session, SupabaseClient } from '@supabase/supabase-js';
-import type { AuthFailure, AuthResult, AuthService, AuthSession } from '../domain/auth-service';
+import { readPref, writePref } from '../../../shared/lib/storage';
+import type {
+  AuthFailure,
+  AuthResult,
+  AuthService,
+  AuthSession,
+  OAuthProvider,
+} from '../domain/auth-service';
+
+const PROVIDERS_KEY = 'wayfare.authProviders';
+const KNOWN_PROVIDERS: readonly OAuthProvider[] = ['apple', 'google'];
 
 function metadataString(session: Session, ...keys: string[]): string | null {
   const metadata = session.user.user_metadata as Record<string, unknown>;
@@ -38,7 +48,33 @@ function result(
 
 /** Adapter from the AuthService port to Supabase Auth. */
 export class SupabaseAuthService implements AuthService {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(
+    private readonly client: SupabaseClient,
+    /** Public auth settings (`GET /auth/v1/settings`) say which social providers are on. */
+    private readonly settings: { url: string; apiKey: string; fetch?: typeof fetch },
+  ) {}
+
+  async enabledProviders(): Promise<OAuthProvider[]> {
+    const doFetch = this.settings.fetch ?? fetch;
+    try {
+      const res = await doFetch(`${this.settings.url}/auth/v1/settings`, {
+        headers: { apikey: this.settings.apiKey },
+      });
+      if (!res.ok) throw new Error(`settings ${res.status}`);
+      const body = (await res.json()) as { external?: Record<string, boolean> };
+      const enabled = KNOWN_PROVIDERS.filter((p) => body.external?.[p] === true);
+      writePref(PROVIDERS_KEY, enabled.join(','));
+      return enabled;
+    } catch {
+      // Offline: the last answer; never seen one → none (they need the network anyway).
+      const saved = readPref(PROVIDERS_KEY);
+      return saved
+        ? (saved
+            .split(',')
+            .filter((p) => KNOWN_PROVIDERS.includes(p as OAuthProvider)) as OAuthProvider[])
+        : [];
+    }
+  }
 
   async currentSession() {
     const { data } = await this.client.auth.getSession();

@@ -11,7 +11,10 @@ const db = new WayfareDB();
 const syncLocal = new DexieSyncStore(db);
 
 export const dependencies = {
-  auth: new SupabaseAuthService(supabase),
+  auth: new SupabaseAuthService(supabase, {
+    url: import.meta.env.VITE_SUPABASE_URL,
+    apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  }),
   trips: new DexieTripRepository(db),
   syncLocal,
   sync: new SyncEngine(syncLocal, new SupabaseSyncStore(supabase)),
