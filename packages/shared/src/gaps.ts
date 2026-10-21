@@ -1,5 +1,5 @@
 import { eachNight } from './dates.js';
-import type { DocumentLink, DocumentLabel, Leg, Stay, Stop } from './schemas.js';
+import type { Activity, DocumentLink, DocumentLabel, Leg, Stay, Stop } from './schemas.js';
 
 /**
  * "Still missing" items, computed on the device from the itinerary so they work offline and
@@ -10,12 +10,15 @@ export type Gap =
   | { kind: 'missing_leg'; fromStopId: string; toStopId: string }
   | { kind: 'leg_without_ticket'; legId: string }
   | { kind: 'stay_without_voucher'; stayId: string }
+  | { kind: 'activity_to_book'; activityId: string }
   | { kind: 'missing_document'; label: Extract<DocumentLabel, 'passport' | 'insurance'> };
 
 export interface GapInput {
   stops: readonly Pick<Stop, 'id' | 'start_date' | 'end_date' | 'position'>[];
   stays: readonly Pick<Stay, 'id' | 'stop_id' | 'check_in' | 'check_out'>[];
   legs: readonly Pick<Leg, 'id' | 'from_stop_id' | 'to_stop_id'>[];
+  /** Optional so callers that don't track activities keep working. */
+  activities?: readonly Pick<Activity, 'id' | 'needs_booking' | 'booked'>[];
   documents: readonly { id: string; label: DocumentLabel }[];
   links: readonly DocumentLink[];
 }
@@ -49,6 +52,12 @@ export function computeGaps(input: GapInput): Gap[] {
   }
   for (const stay of input.stays) {
     if (!linked('stay', stay.id)) gaps.push({ kind: 'stay_without_voucher', stayId: stay.id });
+  }
+
+  for (const activity of input.activities ?? []) {
+    if (activity.needs_booking && !activity.booked) {
+      gaps.push({ kind: 'activity_to_book', activityId: activity.id });
+    }
   }
 
   for (const label of ['passport', 'insurance'] as const) {

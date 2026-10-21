@@ -17,7 +17,8 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] Click audit fixes; this roadmap — #10
 - [x] Cities in the itinerary (search, add, nights, reorder, remove) — #11
 - [x] Stays per city (add, edit, private/shared, remove) — #12
-- [x] Transport between cities (mode, carrier, number, local times with time zones) — item 4
+- [x] Transport between cities (mode, carrier, number, local times with time zones) — #13
+- [x] Activities per city (date/time, booking tick-off, link, who is going) — item 5
 
 ## Now — make the trip usable end to end
 
@@ -55,7 +56,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** a leg can be added from the "Transport not set" chip with mode, carrier,
   number, departure/arrival with time zones and booking ref; shown on the timeline.
 
-### 5. Activities per city
+### 5. Activities per city ✅
 
 - **Goal:** plan things to do (tickets, tours) per city and day.
 - **Done when:** activities with title, date, needs-booking/booked and URL can be added, ticked

@@ -15,6 +15,7 @@ export function DateField({
   value,
   onChange,
   bounds,
+  clearLabel,
 }: {
   label: string;
   placeholder: string;
@@ -22,6 +23,8 @@ export function DateField({
   value: string;
   onChange: (day: string) => void;
   bounds?: { from: string; to: string };
+  /** When set, the day is optional and the calendar offers this button to unset it. */
+  clearLabel?: string;
 }) {
   const { i18n } = useTranslation();
   const id = useId();
@@ -67,6 +70,20 @@ export function DateField({
               setOpen(false);
             }}
           />
+          {clearLabel && value ? (
+            <div className="border-t p-2">
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  onChange('');
+                  setOpen(false);
+                }}
+              >
+                {clearLabel}
+              </Button>
+            </div>
+          ) : null}
         </PopoverContent>
       </Popover>
     </div>

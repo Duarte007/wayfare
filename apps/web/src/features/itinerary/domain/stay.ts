@@ -1,4 +1,5 @@
 import type { Stay, Stop, Visibility } from '@wayfare/shared';
+import { isHttpUrl } from './url';
 
 export interface StayInput {
   name: string;
@@ -39,15 +40,6 @@ export function stayToInput(stay: Stay): StayInput {
     notes: stay.notes ?? '',
     shared: stay.visibility !== 'private',
   };
-}
-
-function isHttpUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:';
-  } catch {
-    return false;
-  }
 }
 
 export function validateStay(

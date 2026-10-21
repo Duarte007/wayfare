@@ -45,12 +45,16 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
+import { activityCounts } from '../../itinerary/domain/activity';
+import { ActivityList } from '../../itinerary/ui/ActivityList';
 import { AddCityDialog } from '../../itinerary/ui/AddCityDialog';
 import { CityActionsMenu } from '../../itinerary/ui/CityActionsMenu';
 import { LegDialog } from '../../itinerary/ui/LegDialog';
 import { StayDialog } from '../../itinerary/ui/StayDialog';
 import { formatZonedTime } from '@/shared/lib/timezone';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { useTripMembers } from '../../members/application/MembersProvider';
+import type { TripMember } from '../../members/domain/members';
 import { useRemoveTrip, useTripDetails } from '../application/useTripDetails';
 import {
   buildItinerary,
@@ -106,6 +110,8 @@ function TripOverview({ details }: { details: TripDetails }) {
   const { t, i18n } = useTranslation('trips');
   const { t: tn } = useTranslation('nav');
   const { trip } = details;
+  const { session } = useAuth();
+  const members = useTripMembers(trip.id);
   const itinerary = buildItinerary(details);
   const nightsTotal = itinerary.length ? itinerary.reduce((sum, s) => sum + s.nights, 0) : null;
 
@@ -167,6 +173,8 @@ function TripOverview({ details }: { details: TripDetails }) {
                   key={item.stop.id}
                   item={item}
                   next={itinerary[index + 1]}
+                  members={members}
+                  currentUserId={session?.userId}
                   actions={
                     <CityActionsMenu
                       details={details}
@@ -283,6 +291,7 @@ const GAP_ICONS: Record<Gap['kind'], LucideIcon> = {
   missing_leg: Route,
   leg_without_ticket: Ticket,
   stay_without_voucher: FileText,
+  activity_to_book: Ticket,
   missing_document: BookUser,
 };
 
@@ -310,6 +319,11 @@ function MissingCard({ details, itinerary }: { details: TripDetails; itinerary: 
       case 'stay_without_voucher':
         return tg('stay_without_voucher', {
           stay: details.stays.find((s) => s.id === gap.stayId)?.name ?? tl('stay'),
+        });
+      case 'activity_to_book':
+        return tg('activity_to_book', {
+          activity:
+            details.activities.find((a) => a.id === gap.activityId)?.title ?? tl('activity'),
         });
       case 'missing_document':
         return tg(`missing_document_${gap.label}`);
@@ -379,10 +393,14 @@ function legSummary(leg: Leg, t: (key: string) => string, locale: string): strin
 function ItineraryItem({
   item,
   next,
+  members,
+  currentUserId,
   actions,
 }: {
   item: ItineraryStop;
   next: ItineraryStop | undefined;
+  members: TripMember[];
+  currentUserId: string | undefined;
   actions: ReactNode;
 }) {
   const { t, i18n } = useTranslation('trips');
@@ -390,6 +408,7 @@ function ItineraryItem({
   const { stop, place, nights, stays, activities, legToNext, isLast } = item;
   const city = place?.name ?? '—';
   const ModeIcon = legToNext ? MODE_ICONS[legToNext.mode] : Route;
+  const counts = activityCounts(activities);
 
   return (
     <li className="grid min-w-0 grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3">
@@ -422,10 +441,15 @@ function ItineraryItem({
             <Moon className="size-4" aria-hidden />
             {t('nights', { count: nights })}
           </span>
-          {activities.length > 0 ? (
+          {counts.total > 0 ? (
             <span className="inline-flex items-center gap-1">
               <Sparkles className="size-4" aria-hidden />
-              {t('activities', { count: activities.length })}
+              {t('activities', { count: counts.total })}
+              {counts.toBook > 0 ? (
+                <span className="font-medium text-primary">
+                  · {t('toBook', { count: counts.toBook })}
+                </span>
+              ) : null}
             </span>
           ) : null}
         </p>
@@ -476,6 +500,13 @@ function ItineraryItem({
             />
           </li>
         </ul>
+        <ActivityList
+          stop={stop}
+          city={city}
+          activities={activities}
+          members={members}
+          currentUserId={currentUserId}
+        />
         {next ? (
           <LegDialog
             from={item}
