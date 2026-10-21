@@ -4,3 +4,4 @@ export * from './gaps.js';
 export * from './labels.js';
 export * from './ai.js';
 export * from './sharing.js';
+export * from './sync.js';

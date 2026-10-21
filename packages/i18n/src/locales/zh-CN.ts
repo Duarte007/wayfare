@@ -90,6 +90,7 @@ export const zhCN = {
     themeLight: '浅色',
     themeDark: '深色',
     signOutHint: '退出登录会删除保存在这台设备上的旅行副本。',
+    signOutPending: '还有 {count} 项更改尚未上传。退出登录前请先连接网络，否则这些更改会丢失。',
   },
   labels: {
     passport: '护照',

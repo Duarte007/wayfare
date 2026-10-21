@@ -92,6 +92,8 @@ export const ptBR = {
     themeLight: 'Claro',
     themeDark: 'Escuro',
     signOutHint: 'Ao sair, a cópia das suas viagens salva neste aparelho é apagada.',
+    signOutPending:
+      '{count, plural, one {# alteração ainda não foi enviada.} other {# alterações ainda não foram enviadas.}} Conecte-se à internet antes de sair, ou elas serão perdidas.',
   },
   labels: {
     passport: 'Passaporte',

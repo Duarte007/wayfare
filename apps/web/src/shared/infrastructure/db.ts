@@ -8,6 +8,7 @@ import type {
   TravelDocument,
   Trip,
 } from '@wayfare/shared';
+import type { SyncedTable } from '@wayfare/shared';
 import Dexie, { type EntityTable } from 'dexie';
 
 /** A local change waiting to be pushed to `POST /sync/push`, in order. */
@@ -18,15 +19,14 @@ export interface OutboxEntry {
   op: 'upsert' | 'delete';
   row: Record<string, unknown>;
   createdAt: number;
+  /** Set when the server refused the change for good (permissions, validation); never retried. */
+  rejected?: string;
 }
 
 export interface Meta {
   key: string;
   value: string;
 }
-
-export type SyncedTable =
-  'trips' | 'places' | 'stops' | 'stays' | 'legs' | 'activities' | 'documents';
 
 /** Offline-first store: every screen reads from here; the network only syncs. */
 export class WayfareDB extends Dexie {
@@ -55,6 +55,8 @@ export class WayfareDB extends Dexie {
       outbox: 'id, createdAt',
       meta: 'key',
     });
+    // v2: sync looks up pending changes by table.
+    this.version(2).stores({ outbox: 'id, createdAt, table' });
   }
 }
 

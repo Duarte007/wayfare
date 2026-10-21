@@ -7,6 +7,7 @@ import { Avatar } from '../../../shared/ui/Avatar';
 import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
 import { Button, Field } from '../../../shared/ui/ui';
 import { useAuth } from '../../auth/application/AuthProvider';
+import { useSync } from '../../sync/application/SyncProvider';
 import { useDisplayNameForm } from '../application/useDisplayNameForm';
 
 export function ProfilePage() {
@@ -140,9 +141,16 @@ function SignOutCard() {
   const { t } = useTranslation('profile');
   const { t: tc } = useTranslation();
   const { signOut } = useAuth();
+  const { pending } = useSync();
   return (
     <section className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-5">
-      <p className="max-w-sm text-sm text-muted">{t('signOutHint')}</p>
+      {pending > 0 ? (
+        <p role="alert" className="max-w-sm text-sm font-medium text-danger">
+          {t('signOutPending', { count: pending })}
+        </p>
+      ) : (
+        <p className="max-w-sm text-sm text-muted">{t('signOutHint')}</p>
+      )}
       <Button
         variant="secondary"
         icon={<LogOut className="size-5" />}
