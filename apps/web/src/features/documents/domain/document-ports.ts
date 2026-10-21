@@ -1,5 +1,6 @@
 import type { TravelDocument } from '@wayfare/shared';
 import type { LabelBoosts } from './document';
+import type { NewDocumentLink } from './document-link';
 
 /** Where a document's file is, from this device's point of view. */
 export type FileStatus =
@@ -21,11 +22,19 @@ export interface DocumentEntry {
 export interface DocumentRepository {
   /** The trip's documents with where each file is; emits again on every change. */
   observeTrip(tripId: string, listener: (entries: DocumentEntry[]) => void): () => void;
-  /** Saves the row (queued for sync) and keeps the file on the device until it is uploaded. */
-  add(document: TravelDocument, file: Blob): Promise<void>;
+  /**
+   * Saves the row (queued for sync) and keeps the file on the device until it is uploaded.
+   * `links` are queued after the row, so the server has the document before they point at it.
+   */
+  add(document: TravelDocument, file: Blob, links?: readonly NewDocumentLink[]): Promise<void>;
   save(document: TravelDocument): Promise<void>;
-  /** Soft-deletes the row through sync and marks its file for removal from storage. */
+  /**
+   * Soft-deletes the row and its links through sync and marks its file for removal from storage.
+   */
   remove(document: TravelDocument): Promise<void>;
+  /** Attaches a document to a stay, leg or activity (again, if it was removed before). */
+  link(link: NewDocumentLink): Promise<void>;
+  unlink(link: NewDocumentLink): Promise<void>;
   /** The file from the device, or null when it isn't here yet. */
   readFile(documentId: string): Promise<Blob | null>;
   /** Keeps a file fetched on demand so it opens offline next time. */

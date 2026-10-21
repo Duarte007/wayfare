@@ -3,6 +3,7 @@ import { ExternalLink, Lock, Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
+import { AttachedCount } from '../../documents/ui/AttachedCount';
 import type { TripMember } from '../../members/domain/members';
 import { useToggleBooked } from '../application/useActivityForm';
 import { sortActivities } from '../domain/activity';
@@ -15,12 +16,15 @@ export function ActivityList({
   activities,
   members,
   currentUserId,
+  documentCount,
 }: {
   stop: Stop;
   city: string;
   activities: Activity[];
   members: TripMember[];
   currentUserId: string | undefined;
+  /** Documents attached to an activity, for the paperclip. */
+  documentCount?: (activityId: string) => number;
 }) {
   const { t, i18n } = useTranslation('itinerary');
   const toggleBooked = useToggleBooked();
@@ -85,6 +89,10 @@ export function ActivityList({
                         aria-label={t('private')}
                       />
                     ) : null}
+                    <AttachedCount
+                      count={documentCount?.(a.id) ?? 0}
+                      className="text-muted-foreground"
+                    />
                   </span>
                   {meta || a.needs_booking ? (
                     <span className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">

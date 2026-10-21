@@ -5,6 +5,7 @@ import type {
   RemoteRow,
   RemoteSyncStore,
   PulledTable,
+  SyncedTable,
 } from '../domain/sync-ports';
 
 /**
@@ -19,6 +20,15 @@ function outcomeOf(error: PostgrestError | null): { outcome: PushOutcome; reason
     : { outcome: 'transient', reason: error.message };
 }
 
+/** Tables whose server key isn't `id`; their device-made `id` is never sent. */
+const COMPOSITE_KEYS: Partial<Record<SyncedTable, readonly string[]>> = {
+  document_links: ['document_id', 'entity_type', 'entity_id'],
+};
+
+interface Filterable<Q> {
+  eq(column: string, value: unknown): Q;
+}
+
 /** Writes go through the user's own session, so RLS decides what they may change. */
 export class SupabaseSyncStore implements RemoteSyncStore {
   constructor(private readonly client: SupabaseClient) {}
@@ -26,18 +36,22 @@ export class SupabaseSyncStore implements RemoteSyncStore {
   async push(change: PendingChange) {
     try {
       // The server owns version and updated_at (trigger).
-      const { version: _v, updated_at: _u, ...row } = change.row;
+      const { version: _v, updated_at: _u, id, ...rest } = change.row;
+      const composite = COMPOSITE_KEYS[change.table];
+      const row: Record<string, unknown> = composite ? rest : { id, ...rest };
+      const keys = composite ?? ['id'];
+      const byKey = <Q extends Filterable<Q>>(query: Q): Q =>
+        keys.reduce((q, column) => q.eq(column, row[column]), query);
       const table = this.client.from(change.table);
       if (change.op === 'delete') {
-        const { error } = await table
-          .update({ deleted_at: new Date().toISOString() })
-          .eq('id', row.id);
+        const { error } = await byKey(table.update({ deleted_at: new Date().toISOString() }));
         return outcomeOf(error);
       }
       // Update first: an upsert would also check the insert policy, which only the owner passes,
       // so a trip mate's edit would be refused. Ownership columns never change on update.
+      // A link sends deleted_at: null, so linking again revives one that was removed.
       const { owner_id: _o, created_by: _c, ...changes } = row;
-      const updated = await table.update(changes).eq('id', row.id).select('id');
+      const updated = await byKey(table.update(changes)).select(keys.join(','));
       if (updated.error) return outcomeOf(updated.error);
       if (updated.data.length > 0) return { outcome: 'pushed' as const };
       const inserted = await table.insert(row);
@@ -56,6 +70,24 @@ export class SupabaseSyncStore implements RemoteSyncStore {
         .order('version')
         .limit(limit);
       return error ? null : (data as RemoteRow[]);
+    } catch {
+      return null;
+    }
+  }
+
+  async memberTripIds(): Promise<string[] | null> {
+    try {
+      // Without a session the query would run as anon and see nothing, which would look like
+      // "left every trip"; never answer for a signed-out client.
+      const { data: auth } = await this.client.auth.getSession();
+      const userId = auth.session?.user.id;
+      if (!userId) return null;
+      const { data, error } = await this.client
+        .from('trip_members')
+        .select('trip_id, trips!inner(deleted_at)')
+        .eq('user_id', userId)
+        .is('trips.deleted_at', null);
+      return error ? null : data.map((m) => m.trip_id as string);
     } catch {
       return null;
     }

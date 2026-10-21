@@ -41,7 +41,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
       <Sidebar />
       <MobileTopBar />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-        <div className="mx-auto grid max-w-3xl gap-6 px-4 pt-4 pb-28 lg:px-10 lg:py-10">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 px-4 pt-4 pb-28 lg:px-10 lg:py-10">
           <ScreenErrorBoundary resetKey={pathname}>{children ?? <Outlet />}</ScreenErrorBoundary>
         </div>
       </main>
@@ -74,15 +74,26 @@ function OfflineBadge() {
   );
 }
 
-/** Changes saved on the device that the server hasn't accepted yet. */
-function PendingBadge() {
+/**
+ * Changes saved on the device that the server hasn't accepted yet. `compact` (phone top bar) shows
+ * just the count; screen readers still hear the full sentence.
+ */
+function PendingBadge({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
   const { pending } = useSync();
   if (pending === 0) return null;
+  const label = t('pendingChanges', { count: pending });
   return (
-    <Badge variant="soft" role="status">
+    <Badge variant="soft" role="status" title={compact ? label : undefined}>
       <CloudUpload aria-hidden />
-      {t('pendingChanges', { count: pending })}
+      {compact ? (
+        <>
+          <span aria-hidden>{pending}</span>
+          <span className="sr-only">{label}</span>
+        </>
+      ) : (
+        label
+      )}
     </Badge>
   );
 }
@@ -152,6 +163,7 @@ function MobileTopBar() {
       <Brand />
       <div className="flex items-center gap-2">
         <OfflineBadge />
+        <PendingBadge compact />
         {session ? (
           <Link
             to="/profile"

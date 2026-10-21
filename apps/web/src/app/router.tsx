@@ -18,6 +18,7 @@ import { CalendarPage } from '../features/calendar/ui/CalendarPage';
 import { DocumentsPage } from '../features/documents/ui/DocumentsPage';
 import { MapPage } from '../features/maps/ui/MapPage';
 import { AppShell } from '../features/shell/ui/AppShell';
+import { InvitePage, PendingInviteRedirect } from '../features/group/ui/InvitePage';
 import { EditTripPage } from '../features/trips/ui/EditTripPage';
 import { NewTripPage } from '../features/trips/ui/NewTripPage';
 import { TripPage } from '../features/trips/ui/TripPage';
@@ -69,7 +70,9 @@ const appRoute = createRoute({
   id: 'app',
   component: () => (
     <RequireSession>
-      <AppShell />
+      <PendingInviteRedirect>
+        <AppShell />
+      </PendingInviteRedirect>
     </RequireSession>
   ),
 });
@@ -112,6 +115,7 @@ const routeTree = rootRoute.addChildren([
     ),
   }),
   createRoute({ getParentRoute: () => rootRoute, path: '/reset', component: ResetPasswordPage }),
+  createRoute({ getParentRoute: () => rootRoute, path: '/invite/$token', component: InvitePage }),
 ]);
 
 export const router = createRouter({

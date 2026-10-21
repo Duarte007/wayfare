@@ -32,15 +32,25 @@ export interface DocumentDraft extends DocumentInput {
 
 export type DocumentError = 'title_required';
 
-export function draftFromFileName(fileName: string, boosts: LabelBoosts = {}): DocumentDraft {
+/**
+ * `preset` is the type the context already tells (a file attached to a stay is a voucher): it
+ * wins over the file name, and no quick choices are offered.
+ */
+export function draftFromFileName(
+  fileName: string,
+  boosts: LabelBoosts = {},
+  preset?: DocumentLabel,
+): DocumentDraft {
   const suggestion = suggestLabel(fileName, { boosts });
+  const label = preset ?? suggestion.label;
   return {
-    title: suggestTitle(fileName, suggestion.label).slice(0, DOCUMENT_TITLE_MAX),
-    label: suggestion.label,
+    title: suggestTitle(fileName, label).slice(0, DOCUMENT_TITLE_MAX),
+    label,
     shared: false,
     suggestedLabel: suggestion.label,
     confidence: suggestion.confidence,
-    alternatives: suggestion.confidence < CONFIDENCE_THRESHOLD ? suggestion.alternatives : [],
+    alternatives:
+      !preset && suggestion.confidence < CONFIDENCE_THRESHOLD ? suggestion.alternatives : [],
   };
 }
 

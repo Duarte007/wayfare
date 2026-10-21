@@ -11,14 +11,16 @@ export const SYNCED_TABLES = [
   'activities',
   'documents',
   'checklist_items',
+  // After documents: a link points at one. Its key is (document_id, entity_type, entity_id).
+  'document_links',
 ] as const;
 
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 
 /**
- * Tables pulled to the device. `document_links` is read-only for now (nothing on the device
- * writes links yet) and has a composite key, which the device turns into one id.
+ * Tables pulled to the device: every synced table. `document_links` has a composite key, which
+ * the device turns into one id.
  */
-export const PULLED_TABLES = [...SYNCED_TABLES, 'document_links'] as const;
+export const PULLED_TABLES = SYNCED_TABLES;
 
 export type PulledTable = (typeof PULLED_TABLES)[number];

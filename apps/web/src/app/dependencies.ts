@@ -7,6 +7,8 @@ import {
   DexieLabelBoostStore,
 } from '../features/documents/infrastructure/dexie-document-repository';
 import { SupabaseFileStore } from '../features/documents/infrastructure/supabase-file-store';
+import { SessionPendingInviteStore } from '../features/group/infrastructure/session-pending-invite';
+import { SupabaseInviteService } from '../features/group/infrastructure/supabase-invite-service';
 import { ApiPlaceSearch } from '../features/itinerary/infrastructure/api-place-search';
 import { DexieItineraryRepository } from '../features/itinerary/infrastructure/dexie-itinerary-repository';
 import type { MapRenderer } from '../features/maps/domain/map-ports';
@@ -33,6 +35,10 @@ const db = new WayfareDB();
 const syncLocal = new DexieSyncStore(db);
 const remoteFiles = new SupabaseFileStore(supabase);
 const fileSync = new FileSync(new DexieFileStore(db), remoteFiles);
+const sync = new SyncEngine(syncLocal, new SupabaseSyncStore(supabase), {
+  afterPush: [fileSync.sendChanges],
+  afterPull: [fileSync.fetchMissing],
+});
 
 const mapConfig = readMapConfig(import.meta.env);
 const mapTiles = new CacheTileStore(mapConfig.assetsUrl);
@@ -75,10 +81,15 @@ export const dependencies = {
     boosts: new DexieLabelBoostStore(db),
     remoteFiles,
   },
-  sync: new SyncEngine(syncLocal, new SupabaseSyncStore(supabase), {
-    afterPush: [fileSync.sendChanges],
-    afterPull: [fileSync.fetchMissing],
-  }),
+  sync,
+  group: {
+    invites: new SupabaseInviteService(supabase),
+    pendingInvite: new SessionPendingInviteStore(),
+    access: {
+      sync: () => sync.run().then(() => undefined),
+      forgetTrip: (tripId: string) => syncLocal.forgetTrip(tripId),
+    },
+  },
   maps: {
     areas: new DexieOfflineAreaRepository(db),
     tiles: mapTiles,

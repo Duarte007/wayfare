@@ -38,6 +38,8 @@ function setup(
     remove: vi.fn(),
     readFile: vi.fn(async () => options.local ?? null),
     cacheFile: vi.fn(async () => {}),
+    link: vi.fn(),
+    unlink: vi.fn(),
   };
   const download = vi.fn(async () => options.remote ?? ({ outcome: 'transient' } as const));
   const wrapper = ({ children }: { children: ReactNode }) => (

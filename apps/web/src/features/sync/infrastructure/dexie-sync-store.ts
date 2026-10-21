@@ -1,18 +1,25 @@
-import { liveQuery, type Table } from 'dexie';
-import type { WayfareDB } from '../../../shared/infrastructure/db';
-import type { LocalSyncStore, PendingChange, PulledTable, RemoteRow } from '../domain/sync-ports';
+import { SYNCED_TABLES } from '@wayfare/shared';
+import { liveQuery } from 'dexie';
+import {
+  documentLinkId,
+  localTable,
+  type StoredDocumentLink,
+  type WayfareDB,
+} from '../../../shared/infrastructure/db';
+import {
+  PULLED_TABLES,
+  type LocalSyncStore,
+  type PendingChange,
+  type PulledTable,
+  type RemoteRow,
+} from '../domain/sync-ports';
 
 const cursorKey = (table: PulledTable) => `sync.cursor.${table}`;
 
-/** Server table → device table, and the row's key on the device. */
-function localTable(db: WayfareDB, table: PulledTable): Table<Record<string, unknown>, string> {
-  // Server rows are stored as they come; the screens read them through the typed tables.
-  return table === 'document_links' ? (db.documentLinks as unknown as Table) : db.table(table);
-}
-
+/** The row's key on the device; document links have a composite key on the server. */
 function localId(table: PulledTable, row: RemoteRow): string {
   return table === 'document_links'
-    ? `${String(row.document_id)}:${String(row.entity_type)}:${String(row.entity_id)}`
+    ? documentLinkId(row as unknown as StoredDocumentLink)
     : row.id!;
 }
 
@@ -73,4 +80,49 @@ export class DexieSyncStore implements LocalSyncStore {
       await this.db.meta.put({ key: cursorKey(table), value: String(cursor) });
     });
   }
+
+  async keepTrips(memberTripIds: readonly string[]) {
+    const members = new Set(memberTripIds);
+    const local = (await this.db.trips.toCollection().primaryKeys()) as string[];
+    const unsent = await this.tripsWithUnsentChanges();
+    for (const id of local) {
+      if (!members.has(id) && !unsent.has(id)) await this.forgetTrip(id);
+    }
+    const here = new Set(local);
+    return { missing: memberTripIds.filter((id) => !here.has(id)) };
+  }
+
+  async resetCursors() {
+    await this.db.meta.bulkDelete(PULLED_TABLES.map(cursorKey));
+  }
+
+  /** Deletes a trip, its rows in every synced table, its cached members and its unsent changes. */
+  async forgetTrip(tripId: string) {
+    // document_links lives in the device's `documentLinks` table.
+    const tables = SYNCED_TABLES.map((t) => localTable(this.db, t));
+    await this.db.transaction('rw', [...tables, this.db.outbox, this.db.meta], async () => {
+      await this.db.trips.delete(tripId);
+      for (const table of tables) {
+        await table.filter((row: { trip_id?: string }) => row.trip_id === tripId).delete();
+      }
+      await this.db.outbox.filter((e) => belongsTo(e.table, e.row, tripId)).delete();
+      // Same key as SupabaseMemberDirectory's cache.
+      await this.db.meta.delete(`members.${tripId}`);
+    });
+  }
+
+  private async tripsWithUnsentChanges(): Promise<Set<string>> {
+    const entries = await this.db.outbox.filter((e) => !e.rejected).toArray();
+    return new Set(
+      entries.map((e) => (e.table === 'trips' ? e.row.id : e.row.trip_id)).filter(isString),
+    );
+  }
+}
+
+function belongsTo(table: string, row: Record<string, unknown>, tripId: string): boolean {
+  return table === 'trips' ? row.id === tripId : row.trip_id === tripId;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
 }

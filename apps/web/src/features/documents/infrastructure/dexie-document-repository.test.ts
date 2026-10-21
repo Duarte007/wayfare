@@ -113,6 +113,66 @@ describe('DexieDocumentRepository', () => {
   });
 });
 
+describe('document links', () => {
+  const stay = { type: 'stay' as const, id: 'stay-1' };
+  const linkTo = (documentId: string, entity: { type: 'stay' | 'leg'; id: string } = stay) => ({
+    document_id: documentId,
+    entity_type: entity.type,
+    entity_id: entity.id,
+    trip_id: 'trip',
+  });
+  const queued = async () =>
+    (await db.outbox.orderBy('createdAt').toArray()).map((e) => `${e.op} ${e.table}`);
+
+  beforeEach(async () => {
+    await db.documentLinks.clear();
+  });
+
+  it('queues a new document before the links that point at it', async () => {
+    await repository.add(doc('a'), pdf(), [linkTo('a')]);
+    expect(await queued()).toEqual(['upsert documents', 'upsert document_links']);
+    expect(await db.documentLinks.get('a:stay:stay-1')).toEqual({
+      id: 'a:stay:stay-1',
+      ...linkTo('a'),
+      deleted_at: null,
+    });
+  });
+
+  it('links and unlinks through the outbox, by the composite key', async () => {
+    await repository.add(doc('a'), pdf());
+    await repository.link(linkTo('a'));
+    await repository.unlink(linkTo('a'));
+    // Unlinking what isn't linked queues nothing.
+    await repository.unlink(linkTo('a', { type: 'stay', id: 'other' }));
+    expect(await db.documentLinks.count()).toBe(0);
+    const outbox = await db.outbox.orderBy('createdAt').toArray();
+    expect(outbox.map((e) => `${e.op} ${e.table}`)).toEqual([
+      'upsert documents',
+      'upsert document_links',
+      'delete document_links',
+    ]);
+    expect(outbox[2]!.row).toEqual({
+      id: 'a:stay:stay-1',
+      document_id: 'a',
+      entity_type: 'stay',
+      entity_id: 'stay-1',
+    });
+  });
+
+  it('removes a document together with its links', async () => {
+    await repository.add(doc('a'), pdf(), [linkTo('a'), linkTo('a', { type: 'leg', id: 'leg-1' })]);
+    await repository.add(doc('b'), pdf(), [linkTo('b')]);
+    await db.outbox.clear();
+    await repository.remove(doc('a'));
+    expect(await queued()).toEqual([
+      'delete document_links',
+      'delete document_links',
+      'delete documents',
+    ]);
+    expect((await db.documentLinks.toArray()).map((l) => l.id)).toEqual(['b:stay:stay-1']);
+  });
+});
+
 describe('DexieLabelBoostStore', () => {
   it('keeps boosts per user', async () => {
     const boosts = new DexieLabelBoostStore(db);
