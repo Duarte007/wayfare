@@ -39,6 +39,7 @@ describe('translations', () => {
             total: 2,
             time: 't',
             done: 1,
+            days: 7,
           }),
         key,
       ).not.toThrow();

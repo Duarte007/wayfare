@@ -23,7 +23,18 @@ const restrict = (patterns, message) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', '**/.vercel/**', '**/dev-dist/**', '**/.turbo/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/dist-e2e/**',
+      '**/coverage/**',
+      '**/.vercel/**',
+      '**/dev-dist/**',
+      '**/.turbo/**',
+      'e2e/playwright-report/**',
+      'e2e/test-results/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -41,7 +52,7 @@ export default tseslint.config(
     rules: reactHooks.configs.recommended.rules,
   },
   {
-    files: ['apps/api/**/*.ts', 'packages/**/*.ts'],
+    files: ['apps/api/**/*.ts', 'packages/**/*.ts', 'e2e/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
 

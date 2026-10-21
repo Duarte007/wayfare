@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { ChecklistProvider } from '../features/checklist/application/ChecklistProvider';
 import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
+import { GroupProvider } from '../features/group/application/GroupProvider';
 import { ItineraryProvider } from '../features/itinerary/application/ItineraryProvider';
 import { PwaProvider } from '../features/pwa/application/PwaProvider';
 import { MembersProvider } from '../features/members/application/MembersProvider';
@@ -45,7 +46,9 @@ createRoot(document.getElementById('root')!).render(
               >
                 <DocumentsProvider {...dependencies.documents}>
                   <ChecklistProvider repository={dependencies.checklist}>
-                    <RouterProvider router={router} />
+                    <GroupProvider {...dependencies.group}>
+                      <RouterProvider router={router} />
+                    </GroupProvider>
                   </ChecklistProvider>
                 </DocumentsProvider>
               </PwaProvider>

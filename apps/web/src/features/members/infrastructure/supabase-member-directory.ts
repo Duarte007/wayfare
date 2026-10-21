@@ -1,7 +1,12 @@
 import type { MemberRole } from '@wayfare/shared';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { WayfareDB } from '../../../shared/infrastructure/db';
-import { sortMembers, type MemberDirectory, type TripMember } from '../domain/members';
+import {
+  sortMembers,
+  type MemberDirectory,
+  type MemberRemoval,
+  type TripMember,
+} from '../domain/members';
 
 const cacheKey = (tripId: string) => `members.${tripId}`;
 
@@ -54,4 +59,29 @@ export class SupabaseMemberDirectory implements MemberDirectory {
       return null;
     }
   }
+
+  async remove(tripId: string, userId: string): Promise<MemberRemoval> {
+    try {
+      // RLS ("members: owner manages") lets the owner remove anyone and anyone leave.
+      const { error } = await this.client
+        .from('trip_members')
+        .delete()
+        .eq('trip_id', tripId)
+        .eq('user_id', userId);
+      if (error) return isNetworkError(error.message) ? 'offline' : 'failed';
+      const cached = await this.cached(tripId);
+      await this.db.meta.put({
+        key: cacheKey(tripId),
+        value: JSON.stringify(cached.filter((m) => m.userId !== userId)),
+      });
+      return 'removed';
+    } catch {
+      return 'offline';
+    }
+  }
+}
+
+/** supabase-js reports a fetch that never reached the server as an error with this message. */
+function isNetworkError(message: string): boolean {
+  return /fetch|network|load failed/i.test(message) || !navigator.onLine;
 }
