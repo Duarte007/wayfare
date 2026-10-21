@@ -1,7 +1,8 @@
 # Wayfare
 
 Offline-first travel app: itinerary with a city calendar, offline maps and documents, group trips,
-and AI tips per city. Works anywhere, including mainland China. Planned in
+and AI tips per city. Built for any destination, including places with restricted or no
+connectivity. Planned in
 [the product and technical plan](https://claude.ai/artifact/TiniG51XcUrrkQ5zL2okut).
 
 ## Stack
@@ -51,8 +52,9 @@ CI also applies the migrations to Postgres 17 and runs `supabase/tests/rls_group
 
 ## Sign-in
 
-Supabase Auth handles every method: email + password (works everywhere, including China), Apple,
-Google (blocked on Chinese networks) and a 6-digit email code.
+Supabase Auth handles every method: email + password and a 6-digit email code (work on any
+network), Apple and Google (Google is unreachable on some restricted networks, so users are told
+to sign in before they travel).
 
 ## Group trips
 

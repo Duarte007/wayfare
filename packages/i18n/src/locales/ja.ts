@@ -37,14 +37,19 @@ export const ja = {
     verifyCode: 'コードを確認',
     codeSent: '{email} にコードを送信しました。',
     confirmEmail: '{email} に届いたメールでアカウントを確認してから、ログインしてください。',
-    chinaNotice:
-      '中国本土へ行きますか？出発前にログインしてください。中国のネットワークでは Google ログインは使えません。メールと Apple は使えます。',
+    offlineTip:
+      '出発前に一度ログインしてください。その後は、旅程・地図・書類がどこでもオフラインで使えます。',
+    showPassword: 'パスワードを表示',
+    hidePassword: 'パスワードを隠す',
     errorGeneric: '問題が発生しました。接続を確認してもう一度お試しください。',
     errorInvalid: 'メールアドレスまたはパスワードが正しくありません。',
   },
   trips: {
     title: 'あなたの旅',
-    empty: 'まだ旅がありません。作成して計画を始めましょう。',
+    greeting: '次はどこへ行きますか？',
+    welcome: 'おかえりなさい',
+    emptyTitle: 'まだ旅がありません',
+    empty: '最初の旅を計画しましょう：都市、日程、書類をひとつの場所に。',
     newTrip: '新しい旅',
     nights: '{count, plural, other {# 泊}}',
     cities: '{count, plural, other {# 都市}}',

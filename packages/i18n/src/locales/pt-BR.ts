@@ -38,14 +38,19 @@ export const ptBR = {
     verifyCode: 'Verificar código',
     codeSent: 'Enviamos um código para {email}.',
     confirmEmail: 'Confira {email} para confirmar sua conta e depois entre.',
-    chinaNotice:
-      'Vai para a China continental? Entre antes de viajar. O login com Google não funciona nas redes chinesas; e-mail e Apple funcionam.',
+    offlineTip:
+      'Entre uma vez antes de viajar. Depois disso, suas viagens, mapas e documentos funcionam offline, em qualquer lugar.',
+    showPassword: 'Mostrar senha',
+    hidePassword: 'Ocultar senha',
     errorGeneric: 'Algo deu errado. Verifique sua conexão e tente de novo.',
     errorInvalid: 'E-mail ou senha incorretos.',
   },
   trips: {
     title: 'Suas viagens',
-    empty: 'Nenhuma viagem ainda. Crie uma para começar a planejar.',
+    greeting: 'Qual é o próximo destino?',
+    welcome: 'Que bom te ver',
+    emptyTitle: 'Nenhuma viagem ainda',
+    empty: 'Planeje sua primeira aventura: cidades, datas e documentos, tudo num só lugar.',
     newTrip: 'Nova viagem',
     nights: '{count, plural, one {# noite} other {# noites}}',
     cities: '{count, plural, one {# cidade} other {# cidades}}',
