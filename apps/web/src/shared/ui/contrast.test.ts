@@ -11,11 +11,11 @@ const css = readFileSync(fileURLToPath(new URL('../../styles.css', import.meta.u
 
 function tokens(block: string): Record<string, string> {
   return Object.fromEntries(
-    [...block.matchAll(/--color-([\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1]!, m[2]!]),
+    [...block.matchAll(/--([\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1]!, m[2]!]),
   );
 }
 
-const light = tokens(css.match(/@theme\s*{([^}]*)}/)![1]!);
+const light = tokens(css.match(/^:root\s*{([^}]*)}/m)![1]!);
 const dark = tokens(css.match(/:root\[data-theme='dark'\]\s*{([^}]*)}/)![1]!);
 
 function luminance(hex: string): number {
@@ -33,16 +33,20 @@ function contrast(a: string, b: string): number {
 
 /** [text token, background token] pairs used by components. */
 const PAIRS: [string, string][] = [
-  ['ink', 'bg'],
-  ['ink', 'surface'],
-  ['muted', 'bg'],
-  ['muted', 'surface'],
-  ['on-accent', 'accent'],
-  ['accent', 'accent-soft'],
+  ['foreground', 'background'],
+  ['card-foreground', 'card'],
+  ['popover-foreground', 'popover'],
+  ['muted-foreground', 'background'],
+  ['muted-foreground', 'card'],
+  ['muted-foreground', 'muted'],
+  ['secondary-foreground', 'secondary'],
+  ['primary-foreground', 'primary'],
+  ['accent-foreground', 'accent'],
+  ['primary', 'card'],
   ['sky', 'sky-soft'],
-  ['ink', 'sky-soft'],
-  ['danger', 'surface'],
-  ['bg', 'ink'],
+  ['foreground', 'sky-soft'],
+  ['destructive', 'card'],
+  ['background', 'foreground'],
 ];
 
 describe.each([
@@ -63,13 +67,13 @@ describe('browser chrome colors', () => {
   const vite = read('../../../vite.config.ts');
 
   it('theme-color metas follow the bg token of each scheme', () => {
-    expect(html).toContain(`content="${light.bg}" media="(prefers-color-scheme: light)"`);
-    expect(html).toContain(`content="${dark.bg}" media="(prefers-color-scheme: dark)"`);
+    expect(html).toContain(`content="${light.background}" media="(prefers-color-scheme: light)"`);
+    expect(html).toContain(`content="${dark.background}" media="(prefers-color-scheme: dark)"`);
   });
 
   it('PWA manifest uses the light bg token', () => {
-    expect(vite).toContain(`theme_color: '${light.bg}'`);
-    expect(vite).toContain(`background_color: '${light.bg}'`);
+    expect(vite).toContain(`theme_color: '${light.background}'`);
+    expect(vite).toContain(`background_color: '${light.background}'`);
   });
 });
 

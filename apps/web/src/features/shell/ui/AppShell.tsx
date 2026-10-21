@@ -2,9 +2,10 @@ import { Link, Outlet } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import { CloudOff, CloudUpload, Luggage, Plane, Plus, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useOnline } from '../../../shared/lib/online';
-import { Avatar } from '../../../shared/ui/Avatar';
-import { buttonClass } from '../../../shared/ui/ui';
+import { useOnline } from '@/shared/lib/online';
+import { Badge } from '@/shared/ui/badge';
+import { Button } from '@/shared/ui/button';
+import { UserAvatar } from '@/shared/ui/UserAvatar';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useSync } from '../../sync/application/SyncProvider';
 
@@ -29,7 +30,7 @@ export function AppShell() {
     <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
       <a
         href="#main"
-        className="sr-only z-50 rounded-xl bg-ink px-4 py-3 font-semibold text-bg focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="sr-only z-50 rounded-xl bg-foreground px-4 py-3 font-semibold text-background focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         {t('skipToContent')}
       </a>
@@ -49,7 +50,7 @@ function Brand() {
   const { t } = useTranslation();
   return (
     <Link to="/" className="inline-flex items-center gap-2.5 rounded-xl text-lg font-extrabold">
-      <span className="inline-flex size-9 items-center justify-center rounded-xl bg-accent text-on-accent">
+      <span className="inline-flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <Plane className="size-5" aria-hidden />
       </span>
       {t('appName')}
@@ -62,13 +63,10 @@ function OfflineBadge() {
   const online = useOnline();
   if (online) return null;
   return (
-    <span
-      role="status"
-      className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sky-soft px-3 py-1 text-xs font-semibold text-sky"
-    >
-      <CloudOff className="size-3.5" aria-hidden />
+    <Badge variant="info" role="status">
+      <CloudOff aria-hidden />
       {t('offline')}
-    </span>
+    </Badge>
   );
 }
 
@@ -78,13 +76,10 @@ function PendingBadge() {
   const { pending } = useSync();
   if (pending === 0) return null;
   return (
-    <span
-      role="status"
-      className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent"
-    >
-      <CloudUpload className="size-3.5" aria-hidden />
+    <Badge variant="soft" role="status">
+      <CloudUpload aria-hidden />
       {t('pendingChanges', { count: pending })}
-    </span>
+    </Badge>
   );
 }
 
@@ -93,14 +88,16 @@ function Sidebar() {
   const { t: tt } = useTranslation('trips');
   const { session } = useAuth();
   return (
-    <aside className="sticky top-0 hidden h-dvh flex-col gap-8 border-r border-line bg-surface px-4 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh flex-col gap-8 border-r bg-card px-4 py-6 lg:flex">
       <div className="px-2">
         <Brand />
       </div>
-      <Link to="/trips/new" className={buttonClass('primary', 'w-full')}>
-        <Plus className="size-5" aria-hidden />
-        {tt('newTrip')}
-      </Link>
+      <Button asChild size="lg" className="w-full">
+        <Link to="/trips/new">
+          <Plus aria-hidden />
+          {tt('newTrip')}
+        </Link>
+      </Button>
       <nav aria-label={t('mainMenu')} className="-mt-4">
         <ul className="grid gap-1">
           {NAV.map(({ to, icon: Icon, labelKey }) => (
@@ -108,7 +105,7 @@ function Sidebar() {
               <Link
                 to={to}
                 activeOptions={{ exact: true }}
-                className="flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted transition hover:bg-bg hover:text-ink aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent"
+                className="flex min-h-11 items-center gap-3 rounded-md px-3 font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:text-accent-foreground"
               >
                 <Icon className="size-5" aria-hidden />
                 {t(labelKey)}
@@ -123,13 +120,17 @@ function Sidebar() {
         {session ? (
           <Link
             to="/profile"
-            className="flex items-center gap-3 rounded-2xl border border-line p-2.5 transition hover:border-ink"
+            className="flex items-center gap-3 rounded-lg border p-2.5 transition hover:bg-muted"
           >
-            <Avatar name={session.displayName} email={session.email} imageUrl={session.avatarUrl} />
+            <UserAvatar
+              name={session.displayName}
+              email={session.email}
+              imageUrl={session.avatarUrl}
+            />
             <span className="grid min-w-0">
               <span className="truncate font-semibold">{session.displayName ?? session.email}</span>
               {session.displayName ? (
-                <span className="truncate text-sm text-muted">{session.email}</span>
+                <span className="truncate text-sm text-muted-foreground">{session.email}</span>
               ) : null}
             </span>
           </Link>
@@ -143,7 +144,7 @@ function MobileTopBar() {
   const { t } = useTranslation('nav');
   const { session } = useAuth();
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/90 px-4 py-2 backdrop-blur pt-[max(0.5rem,env(safe-area-inset-top))] lg:hidden">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b bg-background/90 px-4 py-2 backdrop-blur pt-[max(0.5rem,env(safe-area-inset-top))] lg:hidden">
       <Brand />
       <div className="flex items-center gap-2">
         <OfflineBadge />
@@ -153,7 +154,7 @@ function MobileTopBar() {
             aria-label={t('profile')}
             className="inline-flex size-11 items-center justify-center rounded-full"
           >
-            <Avatar
+            <UserAvatar
               name={session.displayName}
               email={session.email}
               imageUrl={session.avatarUrl}
@@ -173,7 +174,7 @@ function MobileTabBar() {
   return (
     <nav
       aria-label={t('mainMenu')}
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-3">
         <TabItem item={trips} label={t(trips.labelKey)} />
@@ -181,9 +182,9 @@ function MobileTabBar() {
           {/* The main action sits in the middle, raised, where the thumb rests. */}
           <Link
             to="/trips/new"
-            className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-accent"
+            className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-primary"
           >
-            <span className="-mt-5 inline-flex size-12 items-center justify-center rounded-2xl bg-accent text-on-accent shadow-md">
+            <span className="-mt-5 inline-flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
               <Plus className="size-6" aria-hidden />
             </span>
             {tt('newTrip')}
@@ -201,7 +202,7 @@ function TabItem({ item: { to, icon: Icon }, label }: { item: NavItem; label: st
       <Link
         to={to}
         activeOptions={{ exact: true }}
-        className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted aria-[current=page]:text-accent"
+        className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-muted-foreground aria-[current=page]:text-primary"
       >
         <Icon className="size-6" aria-hidden />
         {label}

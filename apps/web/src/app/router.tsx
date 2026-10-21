@@ -18,7 +18,7 @@ import { TripsPage } from '../features/trips/ui/TripsPage';
 function Root() {
   const { loading } = useAuth();
   const { t } = useTranslation();
-  if (loading) return <p className="p-6 text-muted">{t('loading')}</p>;
+  if (loading) return <p className="p-6 text-muted-foreground">{t('loading')}</p>;
   return <Outlet />;
 }
 

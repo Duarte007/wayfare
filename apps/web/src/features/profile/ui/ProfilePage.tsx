@@ -1,11 +1,16 @@
 import type { LucideIcon } from 'lucide-react';
-import { Check, LogOut, Monitor, Moon, Sun, UserRound } from 'lucide-react';
-import type { FormEvent, ReactNode } from 'react';
+import { Check, LogOut, Monitor, Moon, Sun, TriangleAlert, UserRound } from 'lucide-react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { THEME_PREFERENCES, useTheme, type ThemePreference } from '../../../shared/lib/theme';
-import { Avatar } from '../../../shared/ui/Avatar';
-import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
-import { Button, Field } from '../../../shared/ui/ui';
+import { THEME_PREFERENCES, useTheme, type ThemePreference } from '@/shared/lib/theme';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { LanguageSelect } from '@/shared/ui/LanguageSelect';
+import { Label } from '@/shared/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group';
+import { Field } from '@/shared/ui/ui';
+import { UserAvatar } from '@/shared/ui/UserAvatar';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useSync } from '../../sync/application/SyncProvider';
 import { useDisplayNameForm } from '../application/useDisplayNameForm';
@@ -18,41 +23,48 @@ export function ProfilePage() {
   return (
     <>
       <header className="flex items-center gap-4">
-        <Avatar
+        <UserAvatar
           name={session.displayName}
           email={session.email}
           imageUrl={session.avatarUrl}
           size="lg"
         />
         <div className="grid min-w-0 gap-0.5">
-          <p className="text-sm font-medium text-muted">{t('title')}</p>
+          <p className="text-sm font-medium text-muted-foreground">{t('title')}</p>
           <h1 className="truncate text-2xl font-extrabold tracking-tight sm:text-3xl">
             {session.displayName ?? session.email}
           </h1>
-          {session.displayName ? <p className="truncate text-muted">{session.email}</p> : null}
+          {session.displayName ? (
+            <p className="truncate text-muted-foreground">{session.email}</p>
+          ) : null}
         </div>
       </header>
 
-      <Card title={t('account')}>
-        <DisplayNameForm />
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2>{t('account')}</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DisplayNameForm />
+        </CardContent>
       </Card>
 
-      <Card title={t('preferences')}>
-        <LanguageSelect variant="field" />
-        <ThemePicker />
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2>{t('preferences')}</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-5">
+          <LanguageSelect variant="field" />
+          <ThemePicker />
+        </CardContent>
       </Card>
 
       <SignOutCard />
     </>
-  );
-}
-
-function Card({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="grid gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-5 shadow-sm">
-      <h2 className="text-lg font-bold">{title}</h2>
-      {children}
-    </section>
   );
 }
 
@@ -86,7 +98,7 @@ function DisplayNameForm() {
               {t('saved')}
             </span>
           ) : status === 'error' ? (
-            <span className="text-danger">{t('saveError')}</span>
+            <span className="text-destructive">{t('saveError')}</span>
           ) : null}
         </span>
       </div>
@@ -109,31 +121,29 @@ function ThemePicker() {
   const { t } = useTranslation('profile');
   const [theme, setTheme] = useTheme();
   return (
-    <fieldset className="grid gap-1.5">
-      <legend className="mb-1.5 text-sm font-semibold">{t('theme')}</legend>
-      <div className="grid grid-cols-3 gap-2">
+    <div className="grid gap-2">
+      <Label id="theme-label">{t('theme')}</Label>
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="lg"
+        aria-labelledby="theme-label"
+        value={theme}
+        // Radix sends '' when the active item is pressed again; keep a theme selected.
+        onValueChange={(value) => value && setTheme(value as ThemePreference)}
+        className="grid w-full grid-cols-3"
+      >
         {THEME_PREFERENCES.map((option) => {
           const Icon = THEME_ICONS[option];
           return (
-            <label
-              key={option}
-              className="flex min-h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border border-line px-2 py-2 text-sm font-semibold text-muted transition has-checked:border-accent has-checked:bg-accent-soft has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
-            >
-              <input
-                type="radio"
-                name="theme"
-                value={option}
-                checked={theme === option}
-                onChange={() => setTheme(option)}
-                className="sr-only"
-              />
-              <Icon className="size-5" aria-hidden />
+            <ToggleGroupItem key={option} value={option} className="flex-col gap-1 py-2 text-sm">
+              <Icon aria-hidden />
               {t(THEME_LABELS[option])}
-            </label>
+            </ToggleGroupItem>
           );
         })}
-      </div>
-    </fieldset>
+      </ToggleGroup>
+    </div>
   );
 }
 
@@ -143,22 +153,21 @@ function SignOutCard() {
   const { signOut } = useAuth();
   const { pending } = useSync();
   return (
-    <section className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-5">
-      {pending > 0 ? (
-        <p role="alert" className="max-w-sm text-sm font-medium text-danger">
-          {t('signOutPending', { count: pending })}
-        </p>
-      ) : (
-        <p className="max-w-sm text-sm text-muted">{t('signOutHint')}</p>
-      )}
-      <Button
-        variant="secondary"
-        icon={<LogOut className="size-5" />}
-        onClick={() => void signOut()}
-        className="text-danger"
-      >
-        {tc('signOut')}
-      </Button>
-    </section>
+    <Card className="py-5">
+      <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5">
+        {pending > 0 ? (
+          <Alert variant="destructive" role="alert" className="max-w-md">
+            <TriangleAlert aria-hidden />
+            <AlertDescription>{t('signOutPending', { count: pending })}</AlertDescription>
+          </Alert>
+        ) : (
+          <p className="max-w-sm text-sm text-muted-foreground">{t('signOutHint')}</p>
+        )}
+        <Button variant="outline" onClick={() => void signOut()} className="text-destructive">
+          <LogOut aria-hidden />
+          {tc('signOut')}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
