@@ -1,78 +1,138 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 /*
- * Design tokens: light by default, dark from the system or a forced data-theme.
- * Text on `accent` uses `on-accent`; both pairs meet WCAG AA (4.5:1) for normal text.
+ * Design tokens, named the shadcn/ui way so its components theme themselves. Light by default,
+ * dark from the system or a forced data-theme. Every text/background pair the UI uses meets
+ * WCAG AA (4.5:1); contrast.test.ts reads these values.
+ * `accent` is shadcn's soft highlight (hover, selected); the brand colour is `primary`.
  * Fonts are system fonts only: nothing is downloaded, so text renders offline and on any network.
  */
-@theme {
-  --color-bg: #f6f4ef;
-  --color-surface: #ffffff;
-  --color-ink: #1d2730;
-  --color-muted: #5b6770;
-  --color-line: #e2ddd3;
-  --color-accent: #a84e17;
-  --color-on-accent: #ffffff;
-  --color-accent-soft: #fbe9dc;
-  --color-sky-soft: #e3f0f7;
-  --color-sky: #2f6f8f;
-  --color-success: #2e7d4f;
-  --color-danger: #b23a2b;
-  --font-sans:
-    ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', 'Noto Sans',
-    'Noto Sans SC', 'Noto Sans JP', sans-serif;
-  --radius-card: 1.25rem;
+:root {
+  --background: #f6f4ef;
+  --foreground: #1d2730;
+  --card: #ffffff;
+  --card-foreground: #1d2730;
+  --popover: #ffffff;
+  --popover-foreground: #1d2730;
+  --primary: #a84e17;
+  --primary-foreground: #ffffff;
+  --secondary: #efebe4;
+  --secondary-foreground: #1d2730;
+  --muted: #efebe4;
+  --muted-foreground: #5b6770;
+  --accent: #fbe9dc;
+  --accent-foreground: #a84e17;
+  --destructive: #b23a2b;
+  --success: #2e7d4f;
+  --sky: #2f6f8f;
+  --sky-soft: #e3f0f7;
+  --border: #e2ddd3;
+  --input: #e2ddd3;
+  --ring: #a84e17;
+  --radius: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg: #11181d;
-    --color-surface: #1a242b;
-    --color-ink: #eef2f0;
-    --color-muted: #a3b0b6;
-    --color-line: #2c3a42;
-    --color-accent: #f2a066;
-    --color-on-accent: #1d1206;
-    --color-accent-soft: #3a2616;
-    --color-sky-soft: #15303d;
-    --color-sky: #8cc6e0;
-    --color-success: #6cbf82;
-    --color-danger: #f08a77;
+    --background: #11181d;
+    --foreground: #eef2f0;
+    --card: #1a242b;
+    --card-foreground: #eef2f0;
+    --popover: #1a242b;
+    --popover-foreground: #eef2f0;
+    --primary: #f2a066;
+    --primary-foreground: #1d1206;
+    --secondary: #22303a;
+    --secondary-foreground: #eef2f0;
+    --muted: #22303a;
+    --muted-foreground: #a3b0b6;
+    --accent: #3a2616;
+    --accent-foreground: #f2a066;
+    --destructive: #f08a77;
+    --success: #6cbf82;
+    --sky: #8cc6e0;
+    --sky-soft: #15303d;
+    --border: #2c3a42;
+    --input: #2c3a42;
+    --ring: #f2a066;
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --color-bg: #11181d;
-  --color-surface: #1a242b;
-  --color-ink: #eef2f0;
-  --color-muted: #a3b0b6;
-  --color-line: #2c3a42;
-  --color-accent: #f2a066;
-  --color-on-accent: #1d1206;
-  --color-accent-soft: #3a2616;
-  --color-sky-soft: #15303d;
-  --color-sky: #8cc6e0;
-  --color-success: #6cbf82;
-  --color-danger: #f08a77;
+  --background: #11181d;
+  --foreground: #eef2f0;
+  --card: #1a242b;
+  --card-foreground: #eef2f0;
+  --popover: #1a242b;
+  --popover-foreground: #eef2f0;
+  --primary: #f2a066;
+  --primary-foreground: #1d1206;
+  --secondary: #22303a;
+  --secondary-foreground: #eef2f0;
+  --muted: #22303a;
+  --muted-foreground: #a3b0b6;
+  --accent: #3a2616;
+  --accent-foreground: #f2a066;
+  --destructive: #f08a77;
+  --success: #6cbf82;
+  --sky: #8cc6e0;
+  --sky-soft: #15303d;
+  --border: #2c3a42;
+  --input: #2c3a42;
+  --ring: #f2a066;
   color-scheme: dark;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans:
+    ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', 'Noto Sans',
+    'Noto Sans SC', 'Noto Sans JP', sans-serif;
 }
 
 /*
- * One visible focus style for keyboard users, everywhere. It lives in the base layer so components
- * can replace it: a text field shows the ring on its rounded wrapper (focus-within), not a square
- * outline on the bare <input> inside it.
+ * Base layer, so components can replace it: shadcn controls draw their own focus ring and turn
+ * the outline off; anything else still gets one visible focus style for keyboard users.
  */
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
 
@@ -80,9 +140,9 @@ body {
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--color-ink);
-    caret-color: var(--color-ink);
-    box-shadow: 0 0 0 1000px var(--color-surface) inset;
+    -webkit-text-fill-color: var(--foreground);
+    caret-color: var(--foreground);
+    box-shadow: 0 0 0 1000px var(--card) inset;
     transition: background-color 9999s ease-out;
   }
 }

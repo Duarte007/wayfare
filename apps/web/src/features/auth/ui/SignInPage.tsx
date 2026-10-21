@@ -1,4 +1,6 @@
 import {
+  CircleAlert,
+  CircleCheck,
   CloudOff,
   KeyRound,
   LogIn,
@@ -11,9 +13,11 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppleLogo, GoogleLogo } from '../../../shared/ui/BrandIcons';
-import { LanguageSelect } from '../../../shared/ui/LanguageSelect';
-import { Button, Divider, Field, IconTile, PasswordField } from '../../../shared/ui/ui';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { AppleLogo, GoogleLogo } from '@/shared/ui/BrandIcons';
+import { Button } from '@/shared/ui/button';
+import { LanguageSelect } from '@/shared/ui/LanguageSelect';
+import { Divider, Field, IconTile, PasswordField } from '@/shared/ui/ui';
 import { useSignInFlow, type FlowMessage, type SignInMode } from '../application/useSignInFlow';
 
 type SubmitKey = 'signIn' | 'createAccount' | 'sendReset' | 'emailCode' | 'verifyCode';
@@ -46,7 +50,7 @@ export function SignInPage() {
       <header className="grid justify-items-start gap-3">
         <IconTile icon={Plane} />
         <h1 className="text-3xl font-extrabold tracking-tight">{t('title')}</h1>
-        <p className="text-muted">{t('subtitle')}</p>
+        <p className="text-muted-foreground">{t('subtitle')}</p>
       </header>
 
       <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={flow.busy}>
@@ -87,7 +91,8 @@ export function SignInPage() {
 
         {flow.message ? <FlowMessageText message={flow.message} /> : null}
 
-        <Button type="submit" disabled={!flow.canSubmit} icon={<SubmitIcon className="size-5" />}>
+        <Button type="submit" size="lg" disabled={!flow.canSubmit}>
+          <SubmitIcon aria-hidden />
           {t(submit.label)}
         </Button>
 
@@ -98,37 +103,40 @@ export function SignInPage() {
 
       <div className="grid gap-3">
         <Button
-          variant="dark"
+          variant="contrast"
+          size="lg"
           disabled={flow.busy}
-          icon={<AppleLogo />}
           onClick={() => void flow.signInWith('apple')}
         >
+          <AppleLogo />
           {t('continueApple')}
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
+          size="lg"
           disabled={flow.busy}
-          icon={<GoogleLogo />}
           onClick={() => void flow.signInWith('google')}
         >
+          <GoogleLogo />
           {t('continueGoogle')}
         </Button>
         {flow.mode !== 'code' && flow.mode !== 'verify' ? (
           <Button
-            variant="secondary"
+            variant="outline"
+            size="lg"
             disabled={flow.busy}
-            icon={<Mail className="size-5" />}
             onClick={() => flow.switchMode('code')}
           >
+            <Mail aria-hidden />
             {t('emailCode')}
           </Button>
         ) : null}
       </div>
 
-      <aside className="flex gap-3 rounded-[var(--radius-card)] bg-sky-soft p-4 text-sm">
-        <CloudOff className="mt-0.5 size-5 shrink-0 text-sky" aria-hidden />
-        <p>{t('offlineTip')}</p>
-      </aside>
+      <Alert variant="info" role="note">
+        <CloudOff aria-hidden />
+        <AlertDescription>{t('offlineTip')}</AlertDescription>
+      </Alert>
     </main>
   );
 }
@@ -137,15 +145,17 @@ function FlowMessageText({ message }: { message: FlowMessage }) {
   const { t } = useTranslation('auth');
   if (message.kind === 'error') {
     return (
-      <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">
-        {t(message.key)}
-      </p>
+      <Alert variant="destructive" role="alert">
+        <CircleAlert aria-hidden />
+        <AlertDescription>{t(message.key)}</AlertDescription>
+      </Alert>
     );
   }
   return (
-    <p className="rounded-xl bg-success/10 px-3 py-2 text-sm" role="status">
-      {t(message.key, { email: message.email })}
-    </p>
+    <Alert variant="success" role="status">
+      <CircleCheck aria-hidden />
+      <AlertDescription>{t(message.key, { email: message.email })}</AlertDescription>
+    </Alert>
   );
 }
 
@@ -155,7 +165,8 @@ function ModeLinks({ mode, onSwitch }: { mode: SignInMode; onSwitch: (mode: Sign
     return (
       <Button
         variant="link"
-        className="justify-self-start text-sm"
+        size="link"
+        className="justify-self-start"
         onClick={() => onSwitch('signIn')}
       >
         {t('haveAccount')}
@@ -164,10 +175,10 @@ function ModeLinks({ mode, onSwitch }: { mode: SignInMode; onSwitch: (mode: Sign
   }
   return (
     <div className="flex flex-wrap justify-between gap-2 text-sm">
-      <Button variant="link" onClick={() => onSwitch('signUp')}>
+      <Button variant="link" size="link" onClick={() => onSwitch('signUp')}>
         {t('noAccount')}
       </Button>
-      <Button variant="link" onClick={() => onSwitch('forgot')}>
+      <Button variant="link" size="link" onClick={() => onSwitch('forgot')}>
         {t('forgotPassword')}
       </Button>
     </div>

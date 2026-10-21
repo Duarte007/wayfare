@@ -1,8 +1,10 @@
 import { useNavigate } from '@tanstack/react-router';
-import { Check, KeyRound, LockKeyhole } from 'lucide-react';
+import { Check, CircleAlert, KeyRound, LockKeyhole } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, IconTile, PasswordField } from '../../../shared/ui/ui';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
+import { IconTile, PasswordField } from '@/shared/ui/ui';
 import { useAuth } from '../application/AuthProvider';
 import { isStrongEnough } from '../domain/credentials';
 
@@ -42,15 +44,13 @@ export function ResetPasswordPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {failed ? (
-          <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">
-            {t('errorGeneric')}
-          </p>
+          <Alert variant="destructive" role="alert">
+            <CircleAlert aria-hidden />
+            <AlertDescription>{t('errorGeneric')}</AlertDescription>
+          </Alert>
         ) : null}
-        <Button
-          type="submit"
-          disabled={busy || !isStrongEnough(password)}
-          icon={<Check className="size-5" />}
-        >
+        <Button type="submit" size="lg" disabled={busy || !isStrongEnough(password)}>
+          <Check aria-hidden />
           {t('updatePassword')}
         </Button>
       </form>

@@ -1,89 +1,18 @@
 import type { LucideIcon } from 'lucide-react';
 import { Eye, EyeOff } from 'lucide-react';
-import {
-  useId,
-  useState,
-  type ButtonHTMLAttributes,
-  type InputHTMLAttributes,
-  type ReactNode,
-} from 'react';
+import { useId, useState, type ComponentProps, type ReactNode } from 'react';
+import { cn } from '@/shared/lib/utils';
+import { Button } from './button';
+import { Input } from './input';
+import { Label } from './label';
+import { Separator } from './separator';
 
-type ButtonVariant = 'primary' | 'secondary' | 'dark' | 'ghost' | 'link';
+/**
+ * App-level form pieces composed from shadcn/ui primitives (Label, Input, Button), so every
+ * screen gets the same label, icon, hint and error wiring.
+ */
 
-const SOLID = 'min-h-12 justify-center rounded-2xl px-5';
-
-// Each variant owns its sizing so classes never conflict (e.g. a link must not get button padding).
-const BUTTON_STYLES: Record<ButtonVariant, string> = {
-  primary: `${SOLID} bg-accent text-on-accent shadow-sm hover:brightness-110`,
-  secondary: `${SOLID} border border-line bg-surface text-ink hover:border-ink`,
-  dark: `${SOLID} bg-ink text-bg hover:opacity-90`,
-  ghost: `${SOLID} text-ink hover:bg-line/50`,
-  // Text link: still a 44px-tall touch target, but no padding or background.
-  link: 'min-h-11 rounded-md text-ink underline underline-offset-4 hover:text-accent',
-};
-
-/** Button look for elements that navigate (router links), so a link never pretends to be a button. */
-export function buttonClass(variant: ButtonVariant = 'primary', className = ''): string {
-  return `inline-flex items-center gap-2 font-semibold transition ${BUTTON_STYLES[variant]} ${className}`;
-}
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  /** Leading icon; decorative, so it is hidden from screen readers. */
-  icon?: ReactNode;
-}
-
-export function Button({
-  variant = 'primary',
-  icon,
-  className = '',
-  type = 'button',
-  children,
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      type={type}
-      className={buttonClass(
-        variant,
-        `disabled:cursor-not-allowed disabled:opacity-50 ${className}`,
-      )}
-      {...props}
-    >
-      {icon ? (
-        <span aria-hidden="true" className="inline-flex shrink-0">
-          {icon}
-        </span>
-      ) : null}
-      {children}
-    </button>
-  );
-}
-
-/** Square icon-only button; `label` is required so screen readers announce it. */
-export function IconButton({
-  icon: Icon,
-  label,
-  className = '',
-  ...props
-}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
-  icon: LucideIcon;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      className={`inline-flex size-12 items-center justify-center rounded-2xl border border-line bg-surface text-ink transition hover:border-ink ${className}`}
-      {...props}
-    >
-      <Icon className="size-5" aria-hidden />
-    </button>
-  );
-}
-
-interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface FieldProps extends ComponentProps<'input'> {
   label: string;
   icon?: LucideIcon;
   hint?: ReactNode;
@@ -93,40 +22,50 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   trailing?: ReactNode;
 }
 
-export function Field({ label, icon: Icon, hint, error, trailing, id, ...props }: FieldProps) {
+export function Field({
+  label,
+  icon: Icon,
+  hint,
+  error,
+  trailing,
+  id,
+  className,
+  ...props
+}: FieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
   const message = error ?? hint;
-  const hintId = message ? `${inputId}-hint` : undefined;
+  const messageId = message ? `${inputId}-hint` : undefined;
   return (
-    <div className="grid gap-1.5">
-      <label htmlFor={inputId} className="text-sm font-semibold">
-        {label}
-      </label>
-      <div
-        className={`flex min-h-12 items-center gap-2 rounded-2xl border bg-surface px-4 focus-within:ring-2 ${
-          error
-            ? 'border-danger focus-within:ring-danger/25'
-            : 'border-line focus-within:border-accent focus-within:ring-accent/25'
-        }`}
-      >
-        {Icon ? <Icon className="size-5 shrink-0 text-muted" aria-hidden /> : null}
-        <input
+    <div className="grid gap-2">
+      <Label htmlFor={inputId}>{label}</Label>
+      <div className="relative">
+        {Icon ? (
+          <Icon
+            className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+        ) : null}
+        <Input
           id={inputId}
-          aria-describedby={hintId}
-          aria-invalid={error ? true : undefined}
-          className="min-w-0 flex-1 bg-transparent py-3 text-base text-ink outline-none placeholder:text-muted"
+          aria-describedby={messageId}
+          aria-invalid={error ? true : props['aria-invalid']}
+          className={cn(Icon && 'pl-11', trailing && 'pr-12', className)}
           {...props}
         />
-        {trailing}
+        {trailing ? (
+          <div className="absolute inset-y-0 right-0 flex items-center">{trailing}</div>
+        ) : null}
       </div>
       {message ? (
-        <span
-          id={hintId}
-          className={error ? 'text-sm font-medium text-danger' : 'text-xs text-muted'}
+        <p
+          id={messageId}
+          className={
+            error ? 'text-sm font-medium text-destructive' : 'text-xs text-muted-foreground'
+          }
         >
           {message}
-        </span>
+        </p>
       ) : null}
     </div>
   );
@@ -145,15 +84,16 @@ export function PasswordField({
       {...props}
       type={visible ? 'text' : 'password'}
       trailing={
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? hideLabel : showLabel}
           aria-pressed={visible}
-          className="-mr-2 inline-flex size-10 items-center justify-center rounded-xl text-muted hover:text-ink"
+          className="text-muted-foreground"
         >
-          <Toggle className="size-5" aria-hidden />
-        </button>
+          <Toggle aria-hidden />
+        </Button>
       }
     />
   );
@@ -169,7 +109,7 @@ export function IconTile({
   tone?: 'accent' | 'sky';
   size?: 'md' | 'lg';
 }) {
-  const tones = { accent: 'bg-accent-soft text-accent', sky: 'bg-sky-soft text-sky' };
+  const tones = { accent: 'bg-accent text-accent-foreground', sky: 'bg-sky-soft text-sky' };
   const sizes = {
     md: 'size-12 rounded-2xl [&>svg]:size-6',
     lg: 'size-20 rounded-3xl [&>svg]:size-10',
@@ -177,7 +117,7 @@ export function IconTile({
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex shrink-0 items-center justify-center ${tones[tone]} ${sizes[size]}`}
+      className={cn('inline-flex shrink-0 items-center justify-center', tones[tone], sizes[size])}
     >
       <Icon />
     </span>
@@ -186,10 +126,10 @@ export function IconTile({
 
 export function Divider({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 text-sm text-muted" aria-hidden="true">
-      <span className="h-px flex-1 bg-line" />
+    <div className="flex items-center gap-3 text-sm text-muted-foreground" aria-hidden="true">
+      <Separator className="flex-1" />
       {label}
-      <span className="h-px flex-1 bg-line" />
+      <Separator className="flex-1" />
     </div>
   );
 }
