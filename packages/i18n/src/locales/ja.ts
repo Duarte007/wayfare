@@ -238,4 +238,23 @@ export const ja = {
     missing_document_passport: 'パスポートの写しが保存されていません',
     missing_document_insurance: '旅行保険が保存されていません',
   },
+  app: {
+    updateAvailable: '新しいバージョンがあります',
+    reload: '再読み込み',
+    reloading: '再読み込み中…',
+    dismissUpdate: 'アップデートのお知らせを閉じる',
+    installTitle: 'Wayfare をインストール',
+    installBody: 'ホーム画面から開いて、ほかのアプリと同じようにオフラインでも使えます。',
+    installAction: 'アプリをインストール',
+    installIos: '「共有」をタップし、「ホーム画面に追加」を選んでください。',
+    dismissInstall: 'インストールのヒントを閉じる',
+    notFoundTitle: 'ページが見つかりません',
+    notFoundBody:
+      'このリンクは Wayfare のどのページにもつながっていません。入力ミスか、古いリンクかもしれません。',
+    goToTrips: '旅行一覧へ',
+    goToSignIn: 'ログインへ',
+    errorTitle: '問題が発生しました',
+    errorBody: 'この画面で問題が起きました。旅行と変更内容はこの端末に安全に保存されています。',
+    tryAgain: 'もう一度試す',
+  },
 } satisfies Messages;

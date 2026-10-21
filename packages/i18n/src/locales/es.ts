@@ -242,4 +242,25 @@ export const es = {
     missing_document_passport: 'No hay copia del pasaporte',
     missing_document_insurance: 'No hay seguro de viaje guardado',
   },
+  app: {
+    updateAvailable: 'Nueva versión disponible',
+    reload: 'Recargar',
+    reloading: 'Recargando…',
+    dismissUpdate: 'Cerrar el aviso de actualización',
+    installTitle: 'Instala Wayfare',
+    installBody:
+      'Ábrelo desde la pantalla de inicio y úsalo sin conexión, como cualquier otra app.',
+    installAction: 'Instalar app',
+    installIos: 'Toca Compartir y luego “Añadir a pantalla de inicio”.',
+    dismissInstall: 'Cerrar el consejo de instalación',
+    notFoundTitle: 'Página no encontrada',
+    notFoundBody:
+      'Este enlace no lleva a ninguna parte en Wayfare. Puede estar mal escrito o desactualizado.',
+    goToTrips: 'Ir a mis viajes',
+    goToSignIn: 'Ir a iniciar sesión',
+    errorTitle: 'Algo salió mal',
+    errorBody:
+      'Esta pantalla tuvo un problema. Tus viajes y cambios están a salvo en este dispositivo.',
+    tryAgain: 'Intentar de nuevo',
+  },
 } satisfies Messages;
