@@ -8,6 +8,7 @@ export class DexieItineraryRepository implements ItineraryRepository {
     const upserts: LocalChange['upserts'] = [
       ...(change.places ?? []).map((row) => ({ table: 'places' as const, row })),
       ...(change.stops ?? []).map((row) => ({ table: 'stops' as const, row })),
+      ...(change.stays ?? []).map((row) => ({ table: 'stays' as const, row })),
       ...(change.trip ? [{ table: 'trips' as const, row: change.trip }] : []),
     ];
     const r = change.removed ?? {};

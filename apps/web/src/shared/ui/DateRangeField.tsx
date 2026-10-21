@@ -49,6 +49,8 @@ interface DateRangeFieldProps {
   to: string;
   onChange: (range: { from: string; to: string }) => void;
   error?: string;
+  /** Only days inside this range can be picked (e.g. a stay inside its city's dates). */
+  bounds?: { from: string; to: string };
 }
 
 /** First and last day of something (a trip, a stay) picked on one calendar, in the app language. */
@@ -59,6 +61,7 @@ export function DateRangeField({
   to,
   onChange,
   error,
+  bounds,
 }: DateRangeFieldProps) {
   const { i18n } = useTranslation();
   const id = useId();
@@ -91,7 +94,10 @@ export function DateRangeField({
             mode="range"
             locale={LOCALES[i18n.language] ?? enUS}
             numberOfMonths={wide ? 2 : 1}
-            defaultMonth={selected?.from}
+            defaultMonth={selected?.from ?? (bounds ? toDate(bounds.from) : undefined)}
+            disabled={
+              bounds ? [{ before: toDate(bounds.from)! }, { after: toDate(bounds.to)! }] : undefined
+            }
             selected={selected}
             onSelect={(range) => {
               onChange({ from: toIso(range?.from), to: toIso(range?.to) });

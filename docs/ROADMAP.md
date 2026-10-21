@@ -15,7 +15,8 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] Create trip — #6 · Offline-first sync with the server — #7 · shadcn/ui — #8
 - [x] Trip page: summary, what's missing, itinerary timeline, edit, delete — #9
 - [x] Click audit fixes; this roadmap — #10
-- [x] Cities in the itinerary (search, add, nights, reorder, remove) — item 2
+- [x] Cities in the itinerary (search, add, nights, reorder, remove) — #11
+- [x] Stays per city (add, edit, private/shared, remove) — item 3
 
 ## Now — make the trip usable end to end
 
@@ -41,7 +42,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
   to our API. Follow-ups: cache recent results on the device; consider a second geocoder if
   Nominatim's fair-use limit is ever hit.
 
-### 3. Stays (hotels) per city
+### 3. Stays (hotels) per city ✅
 
 - **Goal:** add/edit/remove where you sleep in each city.
 - **Done when:** stays have name, check-in/out (inside the city's dates), booking ref/URL and
