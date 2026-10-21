@@ -70,7 +70,9 @@ jobs:
       - name: Summarise failures
         if: ${{ failure() && hashFiles('e2e/results.json') != '' }}
         working-directory: e2e
-        run: node --experimental-strip-types --no-warnings support/ci-summary.ts results.json >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          node --experimental-strip-types --no-warnings support/ci-summary.ts results.json >> "$GITHUB_STEP_SUMMARY"
+          node --experimental-strip-types --no-warnings support/ci-summary.ts results.json --annotate
       - name: Upload the report and traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
