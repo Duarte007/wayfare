@@ -11,7 +11,7 @@ import { PwaProvider } from '../features/pwa/application/PwaProvider';
 import { MembersProvider } from '../features/members/application/MembersProvider';
 import { SyncProvider } from '../features/sync/application/SyncProvider';
 import { TripsProvider } from '../features/trips/application/TripsProvider';
-import '../shared/lib/i18n';
+import { i18nReady } from '../shared/lib/i18n';
 import { applyTheme, readTheme } from '../shared/lib/theme';
 import '../styles.css';
 import { dependencies } from './dependencies';
@@ -25,40 +25,44 @@ dependencies.appUpdates.register();
 // Ask the browser not to evict offline data (maps, documents) under storage pressure.
 void navigator.storage?.persist?.();
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AuthProvider
-      service={dependencies.auth}
-      beforeSignOut={() => dependencies.sync.run().then(() => undefined)}
-      onSignedOut={dependencies.wipeDevice}
-    >
-      <SyncProvider engine={dependencies.sync} local={dependencies.syncLocal}>
-        <TripsProvider repository={dependencies.trips}>
-          <ItineraryProvider
-            repository={dependencies.itinerary}
-            placeSearch={dependencies.placeSearch}
-          >
-            <MembersProvider directory={dependencies.members}>
-              <PwaProvider
-                updates={dependencies.appUpdates}
-                installs={dependencies.installPrompts}
-                environment={dependencies.installEnvironment}
-                flushChanges={() => dependencies.sync.run()}
-              >
-                <DocumentsProvider {...dependencies.documents}>
-                  <ChecklistProvider repository={dependencies.checklist}>
-                    <GroupProvider {...dependencies.group}>
-                      <MapsProvider {...dependencies.maps}>
-                        <RouterProvider router={router} />
-                      </MapsProvider>
-                    </GroupProvider>
-                  </ChecklistProvider>
-                </DocumentsProvider>
-              </PwaProvider>
-            </MembersProvider>
-          </ItineraryProvider>
-        </TripsProvider>
-      </SyncProvider>
-    </AuthProvider>
-  </StrictMode>,
+// Render once the active language's messages (a small chunk) are in, so no raw keys flash. The
+// current screen's chunk loads at the same time instead of after the first render.
+void Promise.all([i18nReady, router.load().catch(() => undefined)]).then(() =>
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <AuthProvider
+        service={dependencies.auth}
+        beforeSignOut={() => dependencies.sync.run().then(() => undefined)}
+        onSignedOut={dependencies.wipeDevice}
+      >
+        <SyncProvider engine={dependencies.sync} local={dependencies.syncLocal}>
+          <TripsProvider repository={dependencies.trips}>
+            <ItineraryProvider
+              repository={dependencies.itinerary}
+              placeSearch={dependencies.placeSearch}
+            >
+              <MembersProvider directory={dependencies.members}>
+                <PwaProvider
+                  updates={dependencies.appUpdates}
+                  installs={dependencies.installPrompts}
+                  environment={dependencies.installEnvironment}
+                  flushChanges={() => dependencies.sync.run()}
+                >
+                  <DocumentsProvider {...dependencies.documents}>
+                    <ChecklistProvider repository={dependencies.checklist}>
+                      <GroupProvider {...dependencies.group}>
+                        <MapsProvider {...dependencies.maps}>
+                          <RouterProvider router={router} />
+                        </MapsProvider>
+                      </GroupProvider>
+                    </ChecklistProvider>
+                  </DocumentsProvider>
+                </PwaProvider>
+              </MembersProvider>
+            </ItineraryProvider>
+          </TripsProvider>
+        </SyncProvider>
+      </AuthProvider>
+    </StrictMode>,
+  ),
 );

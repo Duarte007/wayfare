@@ -1,5 +1,6 @@
 import { eachNight } from './dates.js';
-import type { Activity, DocumentLink, DocumentLabel, Leg, Stay, Stop } from './schemas.js';
+import type { DocumentLabel } from './constants.js';
+import type { Activity, DocumentLink, Leg, Stay, Stop } from './schemas.js';
 
 /**
  * "Still missing" items, computed on the device from the itinerary so they work offline and

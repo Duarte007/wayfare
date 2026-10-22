@@ -1,4 +1,4 @@
-import type { Visibility } from './schemas.js';
+import type { Visibility } from './constants.js';
 
 export interface Shareable {
   created_by?: string | undefined;

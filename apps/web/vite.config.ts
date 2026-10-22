@@ -8,6 +8,33 @@ export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   // MapLibre's worker is an ES module (it imports the code it shares with the main thread).
   worker: { format: 'es' },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Shared chunks are named after every screen using them; a hash is enough.
+        chunkFileNames: (chunk) =>
+          chunk.name.startsWith('shared') ? 'assets/shared-[hash].js' : 'assets/[name]-[hash].js',
+        // Lazy routes alone split the app into dozens of tiny shared chunks (one per icon or
+        // Radix part), and every extra request costs a round trip, even from the service worker.
+        codeSplitting: {
+          groups: [
+            // Everything the first screen needs, in the entry chunk instead of a dozen preloads.
+            { name: 'index', tags: ['$initial'] },
+            // Code shared by several screens, in a few chunks keyed by which screens use it.
+            // Heavy, rarely used libraries keep their own chunk.
+            {
+              name: 'shared',
+              test: (id) =>
+                !/[\\/](maplibre-gl|pmtiles|@protomaps|zod|react-day-picker|date-fns)/.test(id),
+              minShareCount: 2,
+              entriesAware: true,
+              entriesAwareMergeThreshold: 30_000,
+            },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -30,7 +57,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // App shell and all translations are precached so the app opens in airplane mode.
+        // Every chunk is precached (app shell, lazy routes, the date picker, all five locales), so
+        // each screen and language opens in airplane mode after the first visit.
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         navigateFallback: '/index.html',
       },

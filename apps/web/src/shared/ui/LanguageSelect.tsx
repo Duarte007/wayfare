@@ -2,6 +2,7 @@ import { LOCALE_NAMES, SUPPORTED_LOCALES } from '@wayfare/i18n';
 import { Globe } from 'lucide-react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { changeLocale } from '@/shared/lib/i18n';
 import { cn } from '@/shared/lib/utils';
 import { Label } from './label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
@@ -16,7 +17,7 @@ export function LanguageSelect({ variant = 'compact' }: { variant?: 'compact' | 
       <Label htmlFor={id} className={field ? undefined : 'sr-only'}>
         {t('language')}
       </Label>
-      <Select value={i18n.language} onValueChange={(lng) => void i18n.changeLanguage(lng)}>
+      <Select value={i18n.language} onValueChange={(lng) => void changeLocale(lng)}>
         <SelectTrigger id={id} className={cn(field ? 'w-full text-base' : 'bg-card/80')}>
           <Globe className="text-muted-foreground" aria-hidden />
           <SelectValue />

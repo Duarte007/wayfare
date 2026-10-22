@@ -1,37 +1,19 @@
 import { z } from 'zod';
+import {
+  DOCUMENT_LABELS,
+  ENTITY_TYPES,
+  LOCALES,
+  MEMBER_ROLES,
+  TRANSPORT_MODES,
+  VISIBILITIES,
+} from './constants.js';
 
 /** Calendar date without time zone, e.g. "2026-10-23". */
 export const isoDate = z.iso.date();
 
-export const LOCALES = ['en', 'pt-BR', 'zh-CN', 'es', 'ja'] as const;
-export type Locale = (typeof LOCALES)[number];
 export const localeSchema = z.enum(LOCALES);
 
-export const TRANSPORT_MODES = ['flight', 'train', 'bus', 'ferry', 'car', 'other'] as const;
-export type TransportMode = (typeof TRANSPORT_MODES)[number];
-
-export const DOCUMENT_LABELS = [
-  'passport',
-  'visa',
-  'flight',
-  'train',
-  'bus_ferry',
-  'stay',
-  'insurance',
-  'activity',
-  'health',
-  'money',
-  'other',
-] as const;
-export type DocumentLabel = (typeof DOCUMENT_LABELS)[number];
 export const documentLabelSchema = z.enum(DOCUMENT_LABELS);
-
-/** Group trips: 'group' items are seen by every member, 'private' ones only by their creator. */
-export const VISIBILITIES = ['group', 'private'] as const;
-export type Visibility = (typeof VISIBILITIES)[number];
-
-export const MEMBER_ROLES = ['owner', 'editor', 'viewer'] as const;
-export type MemberRole = (typeof MEMBER_ROLES)[number];
 
 /** Columns that let one trip hold both the shared plan and each member's own items. */
 const sharingColumns = {
@@ -143,9 +125,6 @@ export const activitySchema = z.object({
 });
 export type Activity = z.infer<typeof activitySchema>;
 
-export const ENTITY_TYPES = ['stop', 'stay', 'leg', 'activity'] as const;
-export type EntityType = (typeof ENTITY_TYPES)[number];
-
 export const documentSchema = z.object({
   ...syncColumns,
   ...sharingColumns,
@@ -182,17 +161,6 @@ export const tripMemberSchema = z.object({
   role: z.enum(MEMBER_ROLES),
 });
 export type TripMember = z.infer<typeof tripMemberSchema>;
-
-/** Checklist sections, in the order they are shown. Unknown keys from the server show as 'other'. */
-export const CHECKLIST_GROUPS = [
-  'documents',
-  'money',
-  'health',
-  'tech',
-  'packing',
-  'other',
-] as const;
-export type ChecklistGroup = (typeof CHECKLIST_GROUPS)[number];
 
 export const checklistItemSchema = z.object({
   ...syncColumns,
