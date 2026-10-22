@@ -27,6 +27,8 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - [x] End-to-end tests (Playwright, fake backend) on every PR — #22 · pending changes on phones — #23
 - [x] Documents linked to stays, legs and activities — #24
 - [x] Trip map with per-city offline download (tiles: owner action in docs/MAPS.md) — #25
+- [x] Sync hardening: daily full refresh, sync issues with retry/discard — #27
+- [x] Performance: lazy routes, on-demand locales, CI bundle budget (first load ~264 kB gz) — #28
 
 ## Now — make the trip usable end to end
 
@@ -140,7 +142,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** a toast says "New version available — reload" when the service worker has an
   update; an "Install app" hint shows on supported browsers; icons and splash for iOS/Android.
 
-### 17. Performance
+### 17. Performance ✅
 
 - **Done when:** routes are code-split (date picker, maps and documents load on demand) and the
   first load stays under ~200 KB gzipped.
@@ -150,7 +152,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done (link the PR).
 - **Done when:** unknown URLs show a friendly 404 with a way back, and a crash in one screen
   shows a recoverable error instead of a blank page.
 
-### 19. Sync hardening
+### 19. Sync hardening ✅
 
 - **Done when:** a periodic full refresh catches rows a version cursor could miss; sync errors
   that were set aside are visible (and retryable) from the profile.
