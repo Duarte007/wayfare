@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { IconTile } from '@/shared/ui/ui';
-import { usePendingInvite } from '../application/GroupProvider';
 import { useInviteAcceptance } from '../application/useInviteAcceptance';
 
 /** `/invite/<token>`: works signed out (sign in first) and signed in (joins, then opens the trip). */
@@ -122,10 +121,4 @@ function InviteScreen({
       </Card>
     </main>
   );
-}
-
-/** After sign-in (password or OAuth), sends someone who opened an invite back to it. */
-export function PendingInviteRedirect({ children }: { children: ReactNode }) {
-  const token = usePendingInvite();
-  return token ? <Navigate to="/invite/$token" params={{ token }} replace /> : children;
 }

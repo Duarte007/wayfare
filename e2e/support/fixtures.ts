@@ -55,10 +55,15 @@ export function outboxCount(page: Page): Promise<number> {
     () =>
       new Promise<number>((resolve, reject) => {
         const open = indexedDB.open('wayfare');
-        open.onerror = () => reject(open.error);
+        // Before the app has created its database: report empty instead of creating one.
+        open.onupgradeneeded = () => open.transaction?.abort();
+        open.onerror = () => (open.error?.name === 'AbortError' ? resolve(0) : reject(open.error));
         open.onsuccess = () => {
           const db = open.result;
-          if (!db.objectStoreNames.contains('outbox')) return resolve(0);
+          if (!db.objectStoreNames.contains('outbox')) {
+            db.close();
+            return resolve(0);
+          }
           const count = db.transaction('outbox').objectStore('outbox').count();
           count.onsuccess = () => {
             resolve(count.result);
@@ -79,9 +84,16 @@ export async function expectPulled(page: Page, tables: string[]): Promise<void> 
       (names) =>
         new Promise<string[]>((resolve) => {
           const open = indexedDB.open('wayfare');
+          // Never create the database (or hold it open) before the app does: an empty one left
+          // open blocks the app's own upgrade, and the app hangs on its loading screen.
+          open.onupgradeneeded = () => open.transaction?.abort();
+          open.onerror = () => resolve(names);
           open.onsuccess = () => {
             const db = open.result;
-            if (!db.objectStoreNames.contains('meta')) return resolve(names);
+            if (!db.objectStoreNames.contains('meta')) {
+              db.close();
+              return resolve(names);
+            }
             const store = db.transaction('meta').objectStore('meta');
             const left: string[] = [];
             let pending = names.length;

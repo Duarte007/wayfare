@@ -1,6 +1,7 @@
 import { IntlMessageFormat } from 'intl-messageformat';
 import { describe, expect, it } from 'vitest';
-import { matchLocale, resources, SUPPORTED_LOCALES } from './index.js';
+import { matchLocale, SUPPORTED_LOCALES } from './index.js';
+import { resources } from './resources.js';
 
 function flatten(obj: object, prefix = ''): [string, string][] {
   return Object.entries(obj).flatMap(([k, v]) =>

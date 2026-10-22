@@ -11,15 +11,19 @@ import {
   UserPlus,
   type LucideIcon,
 } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { lazy, Suspense, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { AppleLogo, GoogleLogo } from '@/shared/ui/BrandIcons';
 import { Button } from '@/shared/ui/button';
-import { LanguageSelect } from '@/shared/ui/LanguageSelect';
 import { Divider, Field, IconTile, PasswordField } from '@/shared/ui/ui';
 import { useOAuthProviders } from '../application/useOAuthProviders';
 import { useSignInFlow, type FlowMessage, type SignInMode } from '../application/useSignInFlow';
+
+// The picker (Radix Select and its positioning code) is not needed to sign in, so it loads after.
+const LanguageSelect = lazy(() =>
+  import('@/shared/ui/LanguageSelect').then((m) => ({ default: m.LanguageSelect })),
+);
 
 type SubmitKey = 'signIn' | 'createAccount' | 'sendReset' | 'emailCode' | 'verifyCode';
 
@@ -47,7 +51,9 @@ export function SignInPage() {
     <main className="relative mx-auto grid min-h-dvh max-w-sm content-center gap-6 px-4 py-16">
       {/* Before sign-in there is no profile yet, so the language picker sits in the corner. */}
       <div className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4">
-        <LanguageSelect />
+        <Suspense fallback={null}>
+          <LanguageSelect />
+        </Suspense>
       </div>
       <header className="grid justify-items-start gap-3">
         <IconTile icon={Plane} />

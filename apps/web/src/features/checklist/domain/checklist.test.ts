@@ -4,7 +4,8 @@ import {
   checklistSuggestions,
   type ChecklistItem,
 } from '@wayfare/shared';
-import { resources, SUPPORTED_LOCALES } from '@wayfare/i18n';
+import { SUPPORTED_LOCALES } from '@wayfare/i18n';
+import { resources } from '@wayfare/i18n/resources';
 import { describe, expect, it } from 'vitest';
 import {
   buildChecklistItem,

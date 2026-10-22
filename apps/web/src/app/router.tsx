@@ -2,6 +2,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   Navigate,
   Outlet,
 } from '@tanstack/react-router';
@@ -10,26 +11,59 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../features/auth/application/AuthProvider';
 import { NotFoundScreen, RouteError } from '../features/errors/ui/ErrorScreen';
 import { UpdateBanner } from '../features/pwa/ui/UpdateBanner';
-import { ResetPasswordPage } from '../features/auth/ui/ResetPasswordPage';
 import { SignInPage } from '../features/auth/ui/SignInPage';
-import { ChecklistPage } from '../features/checklist/ui/ChecklistPage';
-import { ProfilePage } from '../features/profile/ui/ProfilePage';
-import { CalendarPage } from '../features/calendar/ui/CalendarPage';
-import { DocumentsPage } from '../features/documents/ui/DocumentsPage';
-import { MapPage } from '../features/maps/ui/MapPage';
+import { PendingInviteRedirect } from '../features/group/ui/PendingInviteRedirect';
 import { AppShell } from '../features/shell/ui/AppShell';
-import { InvitePage, PendingInviteRedirect } from '../features/group/ui/InvitePage';
-import { EditTripPage } from '../features/trips/ui/EditTripPage';
-import { NewTripPage } from '../features/trips/ui/NewTripPage';
-import { TripPage } from '../features/trips/ui/TripPage';
 import { TripsPage } from '../features/trips/ui/TripsPage';
+
+// First load: the shell, sign-in and the trips list. Every other screen is its own chunk, fetched
+// on demand (and precached by the service worker, so it still opens offline).
+const ResetPasswordPage = lazyRouteComponent(
+  () => import('../features/auth/ui/ResetPasswordPage'),
+  'ResetPasswordPage',
+);
+const ChecklistPage = lazyRouteComponent(
+  () => import('../features/checklist/ui/ChecklistPage'),
+  'ChecklistPage',
+);
+const ProfilePage = lazyRouteComponent(
+  () => import('../features/profile/ui/ProfilePage'),
+  'ProfilePage',
+);
+const CalendarPage = lazyRouteComponent(
+  () => import('../features/calendar/ui/CalendarPage'),
+  'CalendarPage',
+);
+const DocumentsPage = lazyRouteComponent(
+  () => import('../features/documents/ui/DocumentsPage'),
+  'DocumentsPage',
+);
+const MapPage = lazyRouteComponent(() => import('../features/maps/ui/MapPage'), 'MapPage');
+const InvitePage = lazyRouteComponent(
+  () => import('../features/group/ui/InvitePage'),
+  'InvitePage',
+);
+const EditTripPage = lazyRouteComponent(
+  () => import('../features/trips/ui/EditTripPage'),
+  'EditTripPage',
+);
+const NewTripPage = lazyRouteComponent(
+  () => import('../features/trips/ui/NewTripPage'),
+  'NewTripPage',
+);
+const TripPage = lazyRouteComponent(() => import('../features/trips/ui/TripPage'), 'TripPage');
+
+/** Shown while a screen's chunk loads (only noticeable on a slow first visit). */
+function RouteLoading() {
+  const { t } = useTranslation();
+  return <p className="p-6 text-muted-foreground">{t('loading')}</p>;
+}
 
 function Root() {
   const { loading } = useAuth();
-  const { t } = useTranslation();
   return (
     <>
-      {loading ? <p className="p-6 text-muted-foreground">{t('loading')}</p> : <Outlet />}
+      {loading ? <RouteLoading /> : <Outlet />}
       <UpdateBanner />
     </>
   );
@@ -121,6 +155,9 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultErrorComponent: RouteError,
+  defaultPendingComponent: RouteLoading,
+  // Fetch a screen's chunk as soon as a link to it is hovered or touched.
+  defaultPreload: 'intent',
   defaultNotFoundComponent: NotFound,
 });
 

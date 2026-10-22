@@ -1,4 +1,4 @@
-import type { DocumentLabel } from './schemas.js';
+import type { DocumentLabel } from './constants.js';
 
 /**
  * Suggests a document label from its file name (and optionally its first-page text), on the

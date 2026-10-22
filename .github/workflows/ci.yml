@@ -28,6 +28,8 @@ jobs:
           if grep -rEq "sk-ant-|service_role|QWEN_API_KEY" apps/web/dist; then
             echo "Secret-like string found in apps/web/dist" && exit 1
           fi
+      - name: Bundle-size budget (first load, gzipped)
+        run: pnpm --filter @wayfare/web size
 
   database:
     runs-on: ubuntu-latest

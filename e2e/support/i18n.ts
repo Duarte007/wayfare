@@ -1,4 +1,5 @@
-import { resources, type SupportedLocale } from '@wayfare/i18n';
+import type { SupportedLocale } from '@wayfare/i18n';
+import { resources } from '@wayfare/i18n/resources';
 
 /**
  * A plain (no ICU parameters) app string in the project's locale, e.g. `msg('en', 'app.goToTrips')`.

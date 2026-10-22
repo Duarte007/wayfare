@@ -1,4 +1,4 @@
-import type { ChecklistGroup } from './schemas.js';
+import type { ChecklistGroup } from './constants.js';
 
 /**
  * Starter checklists. Country-specific advice lives here, as data, never in the UI: adding a

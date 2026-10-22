@@ -7,8 +7,8 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import '@/shared/lib/i18n';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { i18nReady } from '@/shared/lib/i18n';
 import { NotFoundScreen, RouteError, ScreenErrorBoundary } from './ErrorScreen';
 
 let broken = true;
@@ -16,6 +16,8 @@ function Flaky() {
   if (broken) throw new Error('boom');
   return <p>Trip details</p>;
 }
+
+beforeAll(() => i18nReady);
 
 // React logs caught render errors; keep the test output readable.
 beforeEach(() => {

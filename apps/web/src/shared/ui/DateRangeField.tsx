@@ -2,11 +2,11 @@ import { CalendarDays } from 'lucide-react';
 import { useId, useState, useSyncExternalStore } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
-import { calendarLocale, dateToDay as toIso, dayToDate as toDate } from '@/shared/lib/calendar-day';
+import { dateToDay as toIso, dayToDate as toDate } from '@/shared/lib/calendar-day';
 import { formatDateRange } from '@/shared/lib/dates';
 import { cn } from '@/shared/lib/utils';
 import { Button } from './button';
-import { Calendar } from './calendar';
+import { LazyCalendar } from './LazyCalendar';
 import { Label } from './label';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
@@ -74,9 +74,9 @@ export function DateRangeField({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start" aria-label={label}>
-          <Calendar
+          <LazyCalendar
             mode="range"
-            locale={calendarLocale(i18n.language)}
+            language={i18n.language}
             numberOfMonths={wide ? 2 : 1}
             defaultMonth={selected?.from ?? (bounds ? toDate(bounds.from) : undefined)}
             disabled={

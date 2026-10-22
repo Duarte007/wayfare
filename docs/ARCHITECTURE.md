@@ -54,3 +54,14 @@ Offline maps use Protomaps vector tiles from a PMTiles archive we host. Tiles go
 `wayfare-map://` protocol, so a downloaded city never touches the network. MapLibre is
 lazy-loaded behind the `MapRenderer` port. Decision, trade-offs (China, GCJ-02) and owner
 setup: see [`docs/MAPS.md`](MAPS.md).
+
+## Bundle size
+
+The first load is the app shell, sign-in and the trips list. Every other screen is a lazy route
+(`lazyRouteComponent` in `app/router.tsx`), and heavy pieces load on demand: the date picker
+(`LazyCalendar`), the language picker on sign-in, zod (with the first city search), MapLibre and
+every locale but the active one (`loadMessages` in `@wayfare/i18n`). The service worker precaches
+every chunk, so each screen and language still opens offline after the first visit. CI runs
+`pnpm --filter @wayfare/web size` after the build: it fails when the first load (entry,
+modulepreloads, CSS and one locale, gzipped) passes the budget in
+`apps/web/scripts/check-bundle-size.mjs`. Keep new heavy code behind a dynamic import.

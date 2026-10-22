@@ -1,10 +1,10 @@
 import { CalendarDays } from 'lucide-react';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { calendarLocale, dateToDay, dayToDate } from '@/shared/lib/calendar-day';
+import { dateToDay, dayToDate } from '@/shared/lib/calendar-day';
 import { cn } from '@/shared/lib/utils';
 import { Button } from './button';
-import { Calendar } from './calendar';
+import { LazyCalendar } from './LazyCalendar';
 import { Label } from './label';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
@@ -54,9 +54,9 @@ export function DateField({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start" aria-label={label}>
-          <Calendar
+          <LazyCalendar
             mode="single"
-            locale={calendarLocale(i18n.language)}
+            language={i18n.language}
             defaultMonth={selected ?? (bounds ? dayToDate(bounds.from) : undefined)}
             disabled={
               bounds

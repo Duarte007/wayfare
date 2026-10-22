@@ -1,4 +1,3 @@
-import { placeSearchResponseSchema } from '@wayfare/shared';
 import type { PlaceSearchClient, PlaceSearchResult } from '../domain/itinerary-ports';
 
 /** Calls our API (never a third-party host), so search works wherever the app does. */
@@ -20,6 +19,8 @@ export class ApiPlaceSearch implements PlaceSearchClient {
         signal,
       });
       if (!res.ok) return { status: 'error' };
+      // The schema brings zod (~40 KB gzipped), so it loads with the first search, not the app.
+      const { placeSearchResponseSchema } = await import('@wayfare/shared/geo');
       return { status: 'ok', places: placeSearchResponseSchema.parse(await res.json()).places };
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') throw error;

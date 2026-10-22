@@ -56,7 +56,7 @@ export default tseslint.config(
     rules: reactHooks.configs.recommended.rules,
   },
   {
-    files: ['apps/api/**/*.ts', 'packages/**/*.ts', 'e2e/**/*.ts'],
+    files: ['apps/api/**/*.ts', 'packages/**/*.ts', 'e2e/**/*.ts', 'apps/web/scripts/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
 

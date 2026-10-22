@@ -5,7 +5,8 @@ import {
   checklistSuggestions,
   checklistTemplateOf,
 } from './checklist-templates.js';
-import { CHECKLIST_GROUPS, checklistItemSchema } from './schemas.js';
+import { CHECKLIST_GROUPS } from './constants.js';
+import { checklistItemSchema } from './schemas.js';
 
 describe('checklist templates', () => {
   it('has unique keys that are valid i18n keys and known groups', () => {

@@ -34,7 +34,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // App shell and all translations are precached so the app opens in airplane mode.
+        // Every chunk is precached (app shell, lazy routes, the date picker, all five locales), so
+        // each screen and language opens in airplane mode after the first visit.
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         navigateFallback: '/index.html',
       },
