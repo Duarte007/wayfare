@@ -5,36 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // Sync runs a full refresh the first time a new build starts.
+  define: {
+    __APP_BUILD__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? new Date().toISOString()),
+  },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   // MapLibre's worker is an ES module (it imports the code it shares with the main thread).
   worker: { format: 'es' },
-  build: {
-    rolldownOptions: {
-      output: {
-        // Shared chunks are named after every screen using them; a hash is enough.
-        chunkFileNames: (chunk) =>
-          chunk.name.startsWith('shared') ? 'assets/shared-[hash].js' : 'assets/[name]-[hash].js',
-        // Lazy routes alone split the app into dozens of tiny shared chunks (one per icon or
-        // Radix part), and every extra request costs a round trip, even from the service worker.
-        codeSplitting: {
-          groups: [
-            // Everything the first screen needs, in the entry chunk instead of a dozen preloads.
-            { name: 'index', tags: ['$initial'] },
-            // Code shared by several screens, in a few chunks keyed by which screens use it.
-            // Heavy, rarely used libraries keep their own chunk.
-            {
-              name: 'shared',
-              test: (id) =>
-                !/[\\/](maplibre-gl|pmtiles|@protomaps|zod|react-day-picker|date-fns)/.test(id),
-              minShareCount: 2,
-              entriesAware: true,
-              entriesAwareMergeThreshold: 30_000,
-            },
-          ],
-        },
-      },
-    },
-  },
   plugins: [
     react(),
     tailwindcss(),

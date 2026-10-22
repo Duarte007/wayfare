@@ -319,6 +319,13 @@ export class FakeBackend {
         return json(res, 400, { message: String(error) });
       }
     }
+    if (path === '/__admin/forget') {
+      // Gone without a tombstone, as when access is lost: incremental pulls never hear of it.
+      const removed = this.tableOf(String(input.userId), String(input.table)).delete(
+        String(input.id),
+      );
+      return json(res, removed ? 200 : 404, { removed });
+    }
     if (path === '/__admin/rows') {
       const user = String(url.searchParams.get('user'));
       const table = String(url.searchParams.get('table'));

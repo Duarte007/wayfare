@@ -9,3 +9,6 @@ interface ImportMetaEnv {
   /** Base URL of the map's fonts and icons; defaults to `/map` on our own origin. */
   readonly VITE_MAP_ASSETS_URL?: string;
 }
+
+/** Identifies the build (commit or build time); set in vite.config.ts. */
+declare const __APP_BUILD__: string;

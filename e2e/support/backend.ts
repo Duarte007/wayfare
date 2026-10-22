@@ -37,6 +37,14 @@ export const backend = {
     return call('seed', { body: { userId, rows } });
   },
 
+  /**
+   * Drops a row without leaving a deleted copy, as when the user loses access to it: only a full
+   * refresh on the device notices.
+   */
+  forget(userId: string, table: string, id: string): Promise<unknown> {
+    return call('forget', { body: { userId, table, id } });
+  },
+
   /** Rows the server holds for a user (deleted ones included). */
   rows(userId: string, table: string): Promise<Row[]> {
     return call(`rows?user=${userId}&table=${table}`);
