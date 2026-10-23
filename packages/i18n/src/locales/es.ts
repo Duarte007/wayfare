@@ -614,5 +614,20 @@ export const es = {
     exportedOffline:
       'Se descargó la copia guardada en este dispositivo. Conéctate a internet para tener la versión más reciente.',
     exportError: 'No se pudo crear el archivo. Inténtalo de nuevo.',
+    deleteHint: 'Eliminar tu cuenta la borra de Wayfare para siempre, junto con tus datos.',
+    delete: 'Eliminar mi cuenta',
+    deleteTitle: '¿Eliminar tu cuenta?',
+    deleteOwned:
+      'Los viajes que creaste se eliminan para todos sus participantes, con sus planes, documentos y listas.',
+    deleteShared:
+      'En los viajes a los que te uniste, se eliminan tus elementos y documentos privados; los planes compartidos que agregaste se quedan para el grupo.',
+    deleteFinal: 'No se puede deshacer. Descarga tus datos antes si quieres una copia.',
+    deleteWord: 'eliminar',
+    deleteConfirmLabel: 'Escribe “{word}” para confirmar',
+    deleteConfirm: 'Eliminar para siempre',
+    deleting: 'Eliminando…',
+    deleteOffline: 'Conéctate a internet para eliminar tu cuenta.',
+    deleteError: 'No se pudo eliminar tu cuenta. Inténtalo de nuevo.',
+    deleted: 'Tu cuenta y tus datos se eliminaron.',
   },
 } satisfies Messages;

@@ -11,12 +11,13 @@ import {
   UserPlus,
   type LucideIcon,
 } from 'lucide-react';
-import { lazy, Suspense, type FormEvent } from 'react';
+import { lazy, Suspense, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { AppleLogo, GoogleLogo } from '@/shared/ui/BrandIcons';
 import { Button } from '@/shared/ui/button';
 import { Divider, Field, IconTile, PasswordField } from '@/shared/ui/ui';
+import { takeAccountDeletedNotice } from '../../account/application/account-deleted-notice';
 import { useOAuthProviders } from '../application/useOAuthProviders';
 import { useSignInFlow, type FlowMessage, type SignInMode } from '../application/useSignInFlow';
 
@@ -37,6 +38,9 @@ const SUBMIT: Record<SignInMode, { label: SubmitKey; icon: LucideIcon }> = {
 
 export function SignInPage() {
   const { t } = useTranslation('auth');
+  const { t: ta } = useTranslation('account');
+  // Read once: the notice shows on the first sign-in screen after the account is deleted.
+  const [accountDeleted] = useState(takeAccountDeletedNotice);
   const flow = useSignInFlow();
   const providers = useOAuthProviders();
   const submit = SUBMIT[flow.mode];
@@ -97,6 +101,12 @@ export function SignInPage() {
           />
         ) : null}
 
+        {accountDeleted && !flow.message ? (
+          <Alert variant="success" role="status">
+            <CircleCheck aria-hidden />
+            <AlertDescription>{ta('deleted')}</AlertDescription>
+          </Alert>
+        ) : null}
         {flow.message ? <FlowMessageText message={flow.message} /> : null}
 
         <Button type="submit" size="lg" disabled={!flow.canSubmit}>

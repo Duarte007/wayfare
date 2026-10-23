@@ -44,6 +44,7 @@ describe('translations', () => {
             number: 3,
             size: '5 MB',
             kind: 'k',
+            word: 'w',
           }),
         key,
       ).not.toThrow();

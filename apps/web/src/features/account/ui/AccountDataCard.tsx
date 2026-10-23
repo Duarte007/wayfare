@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { useDataExport } from '../application/useDataExport';
+import { DeleteAccountDialog } from './DeleteAccountDialog';
 
-/** "Your data": download a copy now; deleting the account comes next to it. */
+/** "Your data": download a copy, or delete the account and everything in it. */
 export function AccountDataCard() {
   const { t } = useTranslation('account');
   const { status, offlineCopy, download } = useDataExport();
@@ -31,6 +32,12 @@ export function AccountDataCard() {
             <span className="text-destructive">{t('exportError')}</span>
           ) : null}
         </span>
+      </CardContent>
+      <CardContent className="grid gap-3 border-t pt-5">
+        <p className="max-w-prose text-sm text-muted-foreground">{t('deleteHint')}</p>
+        <div>
+          <DeleteAccountDialog />
+        </div>
       </CardContent>
     </Card>
   );

@@ -205,4 +205,71 @@ select pg_temp.check(
     = array['00000000-0000-0000-0000-00000000000a']::uuid[],
   'the owner removes members and stays');
 
+-- Delete my account: Eva owns a trip and is a member of Dani's.
+reset role;
+insert into auth.users (id, email) values
+  ('00000000-0000-0000-0000-00000000000d', 'dani@example.com'),
+  ('00000000-0000-0000-0000-00000000000e', 'eva@example.com');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000d');
+insert into public.trips (id, name, start_date, end_date)
+  values ('10000000-0000-0000-0000-00000000000d', 'Dani trip', '2027-01-01', '2027-01-10');
+insert into public.places (id, trip_id, name, lat, lng, country_code)
+  values ('20000000-0000-0000-0000-00000000000d', '10000000-0000-0000-0000-00000000000d', 'Rome', 41.9, 12.5, 'IT');
+insert into public.stops (id, trip_id, place_id, start_date, end_date, position)
+  values ('30000000-0000-0000-0000-00000000000d', '10000000-0000-0000-0000-00000000000d',
+          '20000000-0000-0000-0000-00000000000d', '2027-01-01', '2027-01-05', 0);
+create temp table dani_invite as select public.create_trip_invite('10000000-0000-0000-0000-00000000000d') as token;
+grant select on dani_invite to authenticated;
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000e');
+select public.accept_trip_invite((select token from dani_invite));
+insert into public.activities (id, trip_id, stop_id, title, assignees)
+  values ('40000000-0000-0000-0000-0000000000e1', '10000000-0000-0000-0000-00000000000d',
+          '30000000-0000-0000-0000-00000000000d', 'Colosseum',
+          array['00000000-0000-0000-0000-00000000000d', '00000000-0000-0000-0000-00000000000e']::uuid[]);
+insert into public.activities (id, trip_id, stop_id, title, visibility)
+  values ('40000000-0000-0000-0000-0000000000e2', '10000000-0000-0000-0000-00000000000d',
+          '30000000-0000-0000-0000-00000000000d', 'Eva secret', 'private');
+insert into public.trips (id, name, start_date, end_date)
+  values ('10000000-0000-0000-0000-00000000000e', 'Eva trip', '2027-02-01', '2027-02-10');
+
+select pg_temp.act_as('');
+do $$
+begin
+  perform public.delete_my_account();
+  raise exception 'FAILED: deleted an account without signing in';
+exception when insufficient_privilege then
+  raise notice 'ok - deleting an account needs a signed-in user';
+end;
+$$;
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000e');
+select public.delete_my_account();
+
+reset role;
+select pg_temp.check(
+  not exists (select 1 from auth.users where id = '00000000-0000-0000-0000-00000000000e'),
+  'delete_my_account removes the caller');
+select pg_temp.check(
+  exists (select 1 from auth.users where id = '00000000-0000-0000-0000-00000000000d'),
+  'delete_my_account leaves everyone else');
+select pg_temp.check(
+  not exists (select 1 from public.trips where id = '10000000-0000-0000-0000-00000000000e'),
+  'trips the caller owned are deleted');
+select pg_temp.check(
+  exists (select 1 from public.trips where id = '10000000-0000-0000-0000-00000000000d'),
+  'trips the caller joined stay');
+select pg_temp.check(
+  not exists (select 1 from public.activities where id = '40000000-0000-0000-0000-0000000000e2'),
+  'the caller''s private items in other trips are deleted');
+select pg_temp.check(
+  (select created_by = '00000000-0000-0000-0000-00000000000d'
+          and assignees = array['00000000-0000-0000-0000-00000000000d']::uuid[]
+     from public.activities where id = '40000000-0000-0000-0000-0000000000e1'),
+  'the caller''s shared items stay, handed to the trip owner, without the caller');
+select pg_temp.check(
+  not exists (select 1 from public.trip_members where user_id = '00000000-0000-0000-0000-00000000000e'),
+  'the caller''s memberships are gone');
+
 rollback;

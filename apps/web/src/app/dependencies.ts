@@ -1,5 +1,6 @@
 import { browserFileSaver } from '../features/account/infrastructure/browser-file-saver';
 import { DexieAccountData } from '../features/account/infrastructure/dexie-account-data';
+import { SupabaseAccountDeletion } from '../features/account/infrastructure/supabase-account-deletion';
 import { SupabaseAuthService } from '../features/auth/infrastructure/supabase-auth-service';
 import { DexieChecklistRepository } from '../features/checklist/infrastructure/dexie-checklist-repository';
 import { FileSync } from '../features/documents/application/file-sync';
@@ -73,7 +74,11 @@ const auth = new SupabaseAuthService(supabase, {
 
 export const dependencies = {
   auth,
-  account: { data: new DexieAccountData(db), files: browserFileSaver },
+  account: {
+    data: new DexieAccountData(db),
+    files: browserFileSaver,
+    deletion: new SupabaseAccountDeletion(supabase),
+  },
   checklist: new DexieChecklistRepository(db),
   itinerary: new DexieItineraryRepository(db),
   placeSearch: new ApiPlaceSearch(import.meta.env.VITE_API_URL, async () => {
