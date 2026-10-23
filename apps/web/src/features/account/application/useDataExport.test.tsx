@@ -16,7 +16,7 @@ const tables = { trips: [{ id: 't1', name: 'Trip' }] } as unknown as ExportTable
 function setup(readTables = vi.fn(async () => tables)) {
   const save = vi.fn<(name: string, file: Blob) => void>();
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <AccountProvider data={{ readTables }} files={{ save }}>
+    <AccountProvider data={{ readTables }} files={{ save }} deletion={{ deleteAccount: vi.fn() }}>
       {children}
     </AccountProvider>
   );
