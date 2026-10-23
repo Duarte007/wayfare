@@ -1,6 +1,7 @@
 import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { AccountProvider } from '../features/account/application/AccountProvider';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { ChecklistProvider } from '../features/checklist/application/ChecklistProvider';
 import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
@@ -56,7 +57,9 @@ void Promise.all([i18nReady, router.load().catch(() => undefined)]).then(() =>
                     <ChecklistProvider repository={dependencies.checklist}>
                       <GroupProvider {...dependencies.group}>
                         <MapsProvider {...dependencies.maps}>
-                          <RouterProvider router={router} />
+                          <AccountProvider {...dependencies.account}>
+                            <RouterProvider router={router} />
+                          </AccountProvider>
                         </MapsProvider>
                       </GroupProvider>
                     </ChecklistProvider>
