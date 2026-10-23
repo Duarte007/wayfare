@@ -400,6 +400,14 @@ export class FakeBackend {
     const wantsRows = prefer.includes('return=representation');
     const select = url.searchParams.get('select');
 
+    if (table === 'rpc/delete_my_account' && req.method === 'POST') {
+      // Each fake user has their own data, so deleting the account drops all of it.
+      this.users.delete(user.email.toLowerCase());
+      this.data.delete(user.id);
+      this.files.delete(user.id);
+      return void res.writeHead(204).end();
+    }
+
     if (req.method === 'GET' || req.method === 'HEAD') {
       let rows = this.visibleRows(user, table).filter((r) => filters.every((f) => f(r)));
       const order = url.searchParams.get('order');
@@ -524,7 +532,10 @@ function pick(row: Row, select: string | null): Row {
 
 const PARAMS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns']);
 
-/** PostgREST horizontal filters: `col=eq.v`, `gt`, `gte`, `lt`, `lte`, `neq`, `in.(a,b)`, `is.null`. */
+/**
+ * PostgREST horizontal filters: `col=eq.v`, `gt`, `gte`, `lt`, `lte`, `neq`, `in.(a,b)`, `is.null`,
+ * `not.is.null`.
+ */
 function parseFilters(params: URLSearchParams): ((row: Row) => boolean)[] {
   const filters: ((row: Row) => boolean)[] = [];
   for (const [col, expr] of params) {
@@ -554,6 +565,10 @@ function parseFilters(params: URLSearchParams): ((row: Row) => boolean)[] {
         break;
       case 'is':
         filters.push((r) => (value === 'null' ? r[col] == null : String(r[col]) === value));
+        break;
+      case 'not':
+        if (value !== 'is.null') throw new Error(`fake rest: unsupported filter ${col}=${expr}`);
+        filters.push((r) => r[col] != null);
         break;
       case 'in': {
         const set = new Set(
