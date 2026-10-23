@@ -11,6 +11,7 @@ import { Label } from '@/shared/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group';
 import { Field } from '@/shared/ui/ui';
 import { UserAvatar } from '@/shared/ui/UserAvatar';
+import { AccountDataCard } from '../../account/ui/AccountDataCard';
 import { useAuth } from '../../auth/application/AuthProvider';
 import { useSync } from '../../sync/application/SyncProvider';
 import { SyncCard, SyncIssuesCard } from '../../sync/ui/SyncSection';
@@ -67,6 +68,8 @@ export function ProfilePage() {
       </Card>
 
       <SyncCard />
+
+      <AccountDataCard />
 
       <SignOutCard />
     </>

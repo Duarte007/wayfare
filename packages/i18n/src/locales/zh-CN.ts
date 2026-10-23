@@ -573,4 +573,13 @@ export const zhCN = {
     discardTitle: '放弃对 {name} 的更改？',
     discardBody: '它不会被发送，此设备将恢复为服务器上的版本。',
   },
+  account: {
+    title: "你的数据",
+    exportHint: "将你的行程、计划和清单下载为一个文件（JSON）。",
+    export: "下载我的数据",
+    exporting: "正在准备…",
+    exported: "已下载。",
+    exportedOffline: "已下载此设备上保存的副本。连接网络可获取最新版本。",
+    exportError: "无法创建文件，请重试。",
+  },
 } satisfies Messages;

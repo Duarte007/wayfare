@@ -589,4 +589,13 @@ export const ja = {
     discardTitle: '{name} への変更を破棄しますか？',
     discardBody: '送信されず、この端末はサーバーの内容に戻ります。',
   },
+  account: {
+    title: "あなたのデータ",
+    exportHint: "旅行・予定・チェックリストのコピーをファイル（JSON）でダウンロードします。",
+    export: "データをダウンロード",
+    exporting: "準備中…",
+    exported: "ダウンロードしました。",
+    exportedOffline: "この端末に保存されたコピーをダウンロードしました。最新版にはインターネットに接続してください。",
+    exportError: "ファイルを作成できませんでした。もう一度お試しください。",
+  },
 } satisfies Messages;

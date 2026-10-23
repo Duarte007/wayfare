@@ -597,4 +597,13 @@ export const ptBR = {
     discardTitle: 'Descartar a alteração em {name}?',
     discardBody: 'Ela não será enviada, e este aparelho volta à versão do servidor.',
   },
+  account: {
+    title: "Seus dados",
+    exportHint: "Baixe uma cópia das suas viagens, planos e checklist em um arquivo (JSON).",
+    export: "Baixar meus dados",
+    exporting: "Preparando…",
+    exported: "Baixado.",
+    exportedOffline: "Baixamos a cópia salva neste aparelho. Conecte-se à internet para ter a versão mais recente.",
+    exportError: "Não foi possível criar o arquivo. Tente de novo.",
+  },
 } satisfies Messages;

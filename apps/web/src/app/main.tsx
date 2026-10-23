@@ -16,6 +16,7 @@ import { applyTheme, readTheme } from '../shared/lib/theme';
 import '../styles.css';
 import { dependencies } from './dependencies';
 import { router } from './router';
+import { AccountProvider } from '../features/account/application/AccountProvider';
 
 applyTheme(readTheme());
 
@@ -56,7 +57,9 @@ void Promise.all([i18nReady, router.load().catch(() => undefined)]).then(() =>
                     <ChecklistProvider repository={dependencies.checklist}>
                       <GroupProvider {...dependencies.group}>
                         <MapsProvider {...dependencies.maps}>
-                          <RouterProvider router={router} />
+                          <AccountProvider {...dependencies.account}>
+                            <RouterProvider router={router} />
+                          </AccountProvider>
                         </MapsProvider>
                       </GroupProvider>
                     </ChecklistProvider>
