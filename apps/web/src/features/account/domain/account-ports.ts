@@ -9,3 +9,10 @@ export interface AccountDataSource {
 export interface FileSaver {
   save(name: string, file: Blob): void;
 }
+
+export type DeleteAccountResult = { ok: true } | { ok: false; reason: 'offline' | 'failed' };
+
+/** Removes the signed-in account on the server: its files first, then the account and its data. */
+export interface AccountDeletion {
+  deleteAccount(): Promise<DeleteAccountResult>;
+}

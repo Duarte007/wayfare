@@ -1,9 +1,10 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import type { AccountDataSource, FileSaver } from '../domain/account-ports';
+import type { AccountDataSource, AccountDeletion, FileSaver } from '../domain/account-ports';
 
 export interface AccountServices {
   data: AccountDataSource;
   files: FileSaver;
+  deletion: AccountDeletion;
 }
 
 const AccountContext = createContext<AccountServices | null>(null);
