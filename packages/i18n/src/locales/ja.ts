@@ -598,5 +598,20 @@ export const ja = {
     exportedOffline:
       'この端末に保存されたコピーをダウンロードしました。最新版にはインターネットに接続してください。',
     exportError: 'ファイルを作成できませんでした。もう一度お試しください。',
+    deleteHint: 'アカウントを削除すると、アカウントとデータが Wayfare から完全に削除されます。',
+    delete: 'アカウントを削除',
+    deleteTitle: 'アカウントを削除しますか？',
+    deleteOwned:
+      'あなたが作成した旅行は、予定・書類・チェックリストごと、参加者全員から削除されます。',
+    deleteShared:
+      '参加した旅行では、あなたの非公開の項目と書類が削除されます。あなたが追加した共有の予定はグループに残ります。',
+    deleteFinal: '元に戻せません。コピーが必要なら先にデータをダウンロードしてください。',
+    deleteWord: '削除',
+    deleteConfirmLabel: '確認のため「{word}」と入力してください',
+    deleteConfirm: '完全に削除',
+    deleting: '削除中…',
+    deleteOffline: 'アカウントを削除するにはインターネットに接続してください。',
+    deleteError: 'アカウントを削除できませんでした。もう一度お試しください。',
+    deleted: 'アカウントとデータを削除しました。',
   },
 } satisfies Messages;

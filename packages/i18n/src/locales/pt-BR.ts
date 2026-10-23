@@ -606,5 +606,20 @@ export const ptBR = {
     exportedOffline:
       'Baixamos a cópia salva neste aparelho. Conecte-se à internet para ter a versão mais recente.',
     exportError: 'Não foi possível criar o arquivo. Tente de novo.',
+    deleteHint: 'Excluir sua conta a remove do Wayfare para sempre, junto com seus dados.',
+    delete: 'Excluir minha conta',
+    deleteTitle: 'Excluir sua conta?',
+    deleteOwned:
+      'As viagens que você criou são excluídas para todos que participam delas, com seus planos, documentos e checklists.',
+    deleteShared:
+      'Nas viagens em que você entrou, seus itens e documentos privados são excluídos; os planos compartilhados que você adicionou continuam para o grupo.',
+    deleteFinal: 'Isso não pode ser desfeito. Baixe seus dados antes se quiser uma cópia.',
+    deleteWord: 'excluir',
+    deleteConfirmLabel: 'Digite “{word}” para confirmar',
+    deleteConfirm: 'Excluir para sempre',
+    deleting: 'Excluindo…',
+    deleteOffline: 'Conecte-se à internet para excluir sua conta.',
+    deleteError: 'Não foi possível excluir sua conta. Tente de novo.',
+    deleted: 'Sua conta e seus dados foram excluídos.',
   },
 } satisfies Messages;

@@ -595,5 +595,20 @@ export const en = {
     exportedOffline:
       'Downloaded the copy saved on this device. Connect to the internet for the latest version.',
     exportError: 'Couldn’t create the file. Try again.',
+    deleteHint: 'Deleting your account removes it and your data from Wayfare for good.',
+    delete: 'Delete my account',
+    deleteTitle: 'Delete your account?',
+    deleteOwned:
+      'Trips you created are deleted for everyone in them, with their plans, documents and checklists.',
+    deleteShared:
+      'In trips you joined, your private items and documents are deleted; shared plans you added stay for the group.',
+    deleteFinal: 'This can’t be undone. Download your data first if you want a copy.',
+    deleteWord: 'delete',
+    deleteConfirmLabel: 'Type “{word}” to confirm',
+    deleteConfirm: 'Delete forever',
+    deleting: 'Deleting…',
+    deleteOffline: 'Connect to the internet to delete your account.',
+    deleteError: 'Couldn’t delete your account. Try again.',
+    deleted: 'Your account and data were deleted.',
   },
 } as const;
