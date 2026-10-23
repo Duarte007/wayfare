@@ -587,12 +587,13 @@ export const en = {
     discardBody: 'It won’t be sent, and this device goes back to the server’s version.',
   },
   account: {
-    title: "Your data",
-    exportHint: "Download a copy of your trips, plans and checklist as a file (JSON).",
-    export: "Download my data",
-    exporting: "Preparing…",
-    exported: "Downloaded.",
-    exportedOffline: "Downloaded the copy saved on this device. Connect to the internet for the latest version.",
-    exportError: "Couldn’t create the file. Try again.",
+    title: 'Your data',
+    exportHint: 'Download a copy of your trips, plans and checklist as a file (JSON).',
+    export: 'Download my data',
+    exporting: 'Preparing…',
+    exported: 'Downloaded.',
+    exportedOffline:
+      'Downloaded the copy saved on this device. Connect to the internet for the latest version.',
+    exportError: 'Couldn’t create the file. Try again.',
   },
 } as const;

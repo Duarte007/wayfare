@@ -1,6 +1,7 @@
 import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { AccountProvider } from '../features/account/application/AccountProvider';
 import { AuthProvider } from '../features/auth/application/AuthProvider';
 import { ChecklistProvider } from '../features/checklist/application/ChecklistProvider';
 import { DocumentsProvider } from '../features/documents/application/DocumentsProvider';
@@ -16,7 +17,6 @@ import { applyTheme, readTheme } from '../shared/lib/theme';
 import '../styles.css';
 import { dependencies } from './dependencies';
 import { router } from './router';
-import { AccountProvider } from '../features/account/application/AccountProvider';
 
 applyTheme(readTheme());
 

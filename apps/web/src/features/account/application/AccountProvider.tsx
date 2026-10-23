@@ -8,7 +8,10 @@ export interface AccountServices {
 
 const AccountContext = createContext<AccountServices | null>(null);
 
-export function AccountProvider({ children, ...services }: AccountServices & { children: ReactNode }) {
+export function AccountProvider({
+  children,
+  ...services
+}: AccountServices & { children: ReactNode }) {
   return <AccountContext.Provider value={services}>{children}</AccountContext.Provider>;
 }
 

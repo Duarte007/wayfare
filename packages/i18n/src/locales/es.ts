@@ -606,12 +606,13 @@ export const es = {
     discardBody: 'No se enviará, y este dispositivo vuelve a la versión del servidor.',
   },
   account: {
-    title: "Tus datos",
-    exportHint: "Descarga una copia de tus viajes, planes y lista de tareas en un archivo (JSON).",
-    export: "Descargar mis datos",
-    exporting: "Preparando…",
-    exported: "Descargado.",
-    exportedOffline: "Se descargó la copia guardada en este dispositivo. Conéctate a internet para tener la versión más reciente.",
-    exportError: "No se pudo crear el archivo. Inténtalo de nuevo.",
+    title: 'Tus datos',
+    exportHint: 'Descarga una copia de tus viajes, planes y lista de tareas en un archivo (JSON).',
+    export: 'Descargar mis datos',
+    exporting: 'Preparando…',
+    exported: 'Descargado.',
+    exportedOffline:
+      'Se descargó la copia guardada en este dispositivo. Conéctate a internet para tener la versión más reciente.',
+    exportError: 'No se pudo crear el archivo. Inténtalo de nuevo.',
   },
 } satisfies Messages;

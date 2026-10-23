@@ -12,6 +12,8 @@ export class DexieAccountData implements AccountDataSource {
       SYNCED_TABLES.map((table) => localTable(this.db, table)),
       () => Promise.all(SYNCED_TABLES.map((table) => localTable(this.db, table).toArray())),
     );
-    return Object.fromEntries(SYNCED_TABLES.map((table, i) => [table, rows[i] ?? []])) as ExportTables;
+    return Object.fromEntries(
+      SYNCED_TABLES.map((table, i) => [table, rows[i] ?? []]),
+    ) as ExportTables;
   }
 }
